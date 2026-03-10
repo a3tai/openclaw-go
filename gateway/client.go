@@ -36,13 +36,15 @@ type Client struct {
 	seq atomic.Int64
 
 	// done is closed when the client is shut down.
-	done chan struct{}
+	done     chan struct{}
+	doneOnce sync.Once
 
 	// readLoopDone is closed when the read loop exits.
 	readLoopDone chan struct{}
 
 	// tickStop stops the keepalive ticker.
-	tickStop chan struct{}
+	tickStop     chan struct{}
+	tickStopOnce sync.Once
 }
 
 // NewClient creates a new Gateway client but does not connect.
@@ -170,8 +172,8 @@ func (c *Client) Close() error {
 		return nil // already closed
 	default:
 	}
-	close(c.done)
-	close(c.tickStop)
+	c.doneOnce.Do(func() { close(c.done) })
+	c.tickStopOnce.Do(func() { close(c.tickStop) })
 
 	c.connMu.Lock()
 	conn := c.conn
@@ -324,11 +326,7 @@ func (c *Client) readLoop() {
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			// Connection closed or error — shut down.
-			select {
-			case <-c.done:
-			default:
-				close(c.done)
-			}
+			c.doneOnce.Do(func() { close(c.done) })
 			return
 		}
 

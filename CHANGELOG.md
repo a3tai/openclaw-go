@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `SessionsGet(ctx, SessionsGetParams)` — retrieve session messages by key (`sessions.get` RPC, openclaw v2026.3.7)
+- `SessionsGetParams` protocol type with `Key`, `SessionKey`, and `Limit` fields
+
 ## [1.0.0] - 2026-02-20
 
 Initial public release of `openclaw-go`, a Go client library for the

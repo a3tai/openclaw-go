@@ -7,6 +7,12 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// SessionsGet retrieves messages for a session by key.
+// Added in openclaw v2026.3.7.
+func (c *Client) SessionsGet(ctx context.Context, params protocol.SessionsGetParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, "sessions.get", params)
+}
+
 // SessionsList lists sessions matching the given criteria.
 func (c *Client) SessionsList(ctx context.Context, params protocol.SessionsListParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, "sessions.list", params)

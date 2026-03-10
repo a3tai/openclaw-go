@@ -684,6 +684,13 @@ type SessionsCompactParams struct {
 	MaxLines *int   `json:"maxLines,omitempty"`
 }
 
+// SessionsGetParams are the params for "sessions.get".
+type SessionsGetParams struct {
+	Key        string `json:"key,omitempty"`
+	SessionKey string `json:"sessionKey,omitempty"`
+	Limit      *int   `json:"limit,omitempty"` // max messages to return (default 200, server-clamped)
+}
+
 // SessionsUsageParams are the params for "sessions.usage".
 type SessionsUsageParams struct {
 	Key                  string `json:"key,omitempty"`

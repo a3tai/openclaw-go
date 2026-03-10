@@ -1,0 +1,115 @@
+name: Check Upstream Releases
+
+on:
+  schedule:
+    # Run every 6 hours: midnight, 6am, noon, 6pm UTC
+    - cron: '0 0,6,12,18 * * *'
+  workflow_dispatch: # Allow manual triggers
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-releases:
+    name: Check for new openclaw releases
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get latest upstream release
+        id: upstream
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch latest non-prerelease from openclaw/openclaw
+          LATEST=$(gh api repos/openclaw/openclaw/releases/latest --jq '.tag_name')
+          echo "version=${LATEST}" >> "$GITHUB_OUTPUT"
+          echo "Latest upstream release: ${LATEST}"
+
+      - name: Check if we already track this release
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.upstream.outputs.version }}"
+
+          # Check if an issue already exists for this version
+          EXISTING=$(gh issue list \
+            --repo "${{ github.repository }}" \
+            --label "upstream-release" \
+            --search "in:title ${VERSION}" \
+            --state all \
+            --json number \
+            --jq 'length')
+
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "Issue already exists for ${VERSION}, skipping."
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "No existing issue for ${VERSION}, will create one."
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch release details
+        if: steps.check.outputs.needed == 'true'
+        id: details
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.upstream.outputs.version }}"
+
+          # Get the release body (changelog)
+          BODY=$(gh api "repos/openclaw/openclaw/releases/tags/${VERSION}" --jq '.body' | head -100)
+
+          # Save to file to avoid shell escaping issues
+          echo "${BODY}" > /tmp/release-body.txt
+
+          # Extract key items that might need Go client changes
+          # Look for new RPC methods, breaking changes, new params
+          echo "## Release Notes (first 100 lines)" > /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo "Upstream version: \`${VERSION}\`" >> /tmp/issue-body.md
+          echo "Release URL: https://github.com/openclaw/openclaw/releases/tag/${VERSION}" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo "### Changelog excerpt" >> /tmp/issue-body.md
+          echo '```' >> /tmp/issue-body.md
+          cat /tmp/release-body.txt >> /tmp/issue-body.md
+          echo '```' >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo "### Action items" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo "- [ ] Review changelog for new RPC methods" >> /tmp/issue-body.md
+          echo "- [ ] Review changelog for breaking changes to existing methods" >> /tmp/issue-body.md
+          echo "- [ ] Review changelog for new protocol types" >> /tmp/issue-body.md
+          echo "- [ ] Update \`protocol/protocol.go\` if new types needed" >> /tmp/issue-body.md
+          echo "- [ ] Update \`gateway/\` if new RPC methods needed" >> /tmp/issue-body.md
+          echo "- [ ] Update \`CHANGELOG.md\`" >> /tmp/issue-body.md
+          echo "- [ ] Run tests: \`go test ./... -race\`" >> /tmp/issue-body.md
+          echo "- [ ] Tag release matching upstream version" >> /tmp/issue-body.md
+
+      - name: Ensure upstream-release label exists
+        if: steps.check.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "upstream-release" \
+            --repo "${{ github.repository }}" \
+            --description "Tracks new openclaw upstream releases" \
+            --color "0E8A16" 2>/dev/null || true
+
+      - name: Create tracking issue
+        if: steps.check.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.upstream.outputs.version }}"
+
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "Upstream release: openclaw ${VERSION}" \
+            --body-file /tmp/issue-body.md \
+            --label "upstream-release"
+
+          echo "Created tracking issue for ${VERSION}"

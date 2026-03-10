@@ -236,6 +236,14 @@ func TestAgentWait(t *testing.T) {
 
 // --- Session methods ---
 
+func TestSessionsGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsGet(ctx, protocol.SessionsGetParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestSessionsList(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.list", success: func(c *Client, ctx context.Context) error {
 		_, err := c.SessionsList(ctx, protocol.SessionsListParams{})
