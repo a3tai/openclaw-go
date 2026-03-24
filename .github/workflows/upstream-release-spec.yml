@@ -8,6 +8,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write
 
 jobs:
   spec-pr:
@@ -184,3 +185,21 @@ ${relevantBlock}
                 '- Final HITL review',
               ].join('\n'),
             });
+
+      - name: Trigger OpenCode release-sync run
+        if: steps.cpr.outputs.pull-request-number != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = String(context.payload.issue.number);
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'release-sync-a3t.yml',
+              ref: 'main',
+              inputs: {
+                issue_number: issueNumber,
+              },
+            });
+
+            core.info(`Triggered release-sync-a3t.yml for issue #${issueNumber}`);
