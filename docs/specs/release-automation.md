@@ -14,15 +14,19 @@ For every upstream OpenClaw release, run an automated downstream sync pipeline:
 
 - `check-upstream-releases.yml`
   - scans recent upstream stable releases and creates missing tracking issues
+  - includes previous stable version + compare URL in each tracking issue for explicit release-diff context
 - `upstream-release-spec.yml`
   - on `upstream-release` issue events, creates/updates `docs/specs/<version>.md` in a PR
+  - generates and embeds upstream release diff evidence (`scripts/upstream_release_diff.py`) into the spec
   - auto-dispatches `release-sync-a3t.yml` after spec PR creation/update
 - `release-sync-a3t.yml`
   - trigger to run OpenCode release-sync automation from tracking issues
   - restores OpenCode auth from repository secrets (`OPENCODE_AUTH_JSON`, optional `OPENCODE_MCP_AUTH_JSON`)
+  - validates release coverage using `scripts/validate_release_sync.py`
 - `ci.yml`
   - runs `Release Smoke` (core package smoke tests)
   - runs `Release E2E` (mock server + examples/client + examples/chat)
+  - runs `Release Diff Coverage` for release PRs to validate release-delta method/test coverage
 - `pr-guard.yml` (`Release Gates` job)
   - enforces release checklist completion for release-sync PRs
 - `release-publish.yml`
@@ -73,6 +77,7 @@ Release implementation PRs must not merge until all are complete:
   - `Release E2E`
 - Branch protection should require CODEOWNERS review and required checks.
 - Drift detection runs every 6 hours and raises an issue when upstream methods diverge.
+- Drift report classifies upstream compat/internal methods separately from true extras to reduce false positives.
 
 ## Deferred
 

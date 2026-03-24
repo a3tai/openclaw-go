@@ -211,7 +211,6 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const body = pr.body || "";
-            const title = pr.title || "";
             const labels = new Set((pr.labels || []).map((l) => l.name));
 
             const files = await github.paginate(
@@ -230,7 +229,6 @@ jobs:
             const isReleasePR =
               labels.has("release-sync") ||
               labels.has("upstream-release") ||
-              /upstream release|release\s*sync|release:\s*v\d+/i.test(title) ||
               hasSpecFile;
 
             if (!isReleasePR) {
