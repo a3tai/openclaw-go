@@ -26,43 +26,157 @@ jobs:
             });
 
             forks.sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at));
-            const top = forks.slice(0, 30).map((f) => ({
-              full_name: f.full_name,
-              html_url: f.html_url,
-              stargazers_count: f.stargazers_count,
-              open_issues_count: f.open_issues_count,
-              pushed_at: f.pushed_at,
-              default_branch: f.default_branch,
-            }));
+            const inspected = forks.slice(0, 20);
+            const analyses = [];
+
+            for (const fork of inspected) {
+              const analysis = {
+                full_name: fork.full_name,
+                html_url: fork.html_url,
+                stargazers_count: fork.stargazers_count,
+                open_issues_count: fork.open_issues_count,
+                pushed_at: fork.pushed_at,
+                default_branch: fork.default_branch,
+              };
+
+              try {
+                const basehead = `${context.repo.owner}:main...${fork.owner.login}:${fork.default_branch}`;
+                const compare = await github.rest.repos.compareCommitsWithBasehead({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  basehead,
+                });
+
+                const data = compare.data;
+                const commits = (data.commits || []).map((c) => {
+                  const subject = (c.commit?.message || '').split('\n')[0].trim();
+                  return {
+                    sha: (c.sha || '').slice(0, 7),
+                    subject,
+                    html_url: c.html_url,
+                  };
+                });
+                const files = (data.files || []).map((f) => ({
+                  filename: f.filename,
+                  status: f.status,
+                  additions: f.additions,
+                  deletions: f.deletions,
+                }));
+
+                analysis.status = data.status || 'unknown';
+                analysis.ahead_by = data.ahead_by || 0;
+                analysis.behind_by = data.behind_by || 0;
+                analysis.commits = commits.slice(0, 5);
+                analysis.files = files.slice(0, 8);
+                analysis.total_commits = commits.length;
+                analysis.total_files = files.length;
+              } catch (error) {
+                analysis.status = 'compare_failed';
+                analysis.ahead_by = 0;
+                analysis.behind_by = 0;
+                analysis.commits = [];
+                analysis.files = [];
+                analysis.total_commits = 0;
+                analysis.total_files = 0;
+                analysis.error = error?.message || 'compare request failed';
+              }
+
+              analyses.push(analysis);
+            }
+
+            analyses.sort((a, b) => {
+              if (b.ahead_by !== a.ahead_by) {
+                return b.ahead_by - a.ahead_by;
+              }
+              return new Date(b.pushed_at) - new Date(a.pushed_at);
+            });
+
+            const divergent = analyses.filter((a) => a.ahead_by > 0).slice(0, 12);
 
             core.setOutput('count', String(forks.length));
-            core.setOutput('forks_json', JSON.stringify(top));
+            core.setOutput('inspected_count', String(inspected.length));
+            core.setOutput('forks_json', JSON.stringify(divergent));
+            core.setOutput('all_analyses_json', JSON.stringify(analyses.slice(0, 20)));
 
       - name: Open or update forks report issue
         id: issue
         uses: actions/github-script@v7
         env:
           FORKS_JSON: ${{ steps.forks.outputs.forks_json }}
+          ALL_ANALYSES_JSON: ${{ steps.forks.outputs.all_analyses_json }}
           FORKS_COUNT: ${{ steps.forks.outputs.count }}
+          INSPECTED_COUNT: ${{ steps.forks.outputs.inspected_count }}
         with:
           script: |
             const title = 'Automation: Forks activity report';
             const rows = JSON.parse(process.env.FORKS_JSON || '[]');
+            const allRows = JSON.parse(process.env.ALL_ANALYSES_JSON || '[]');
             const total = Number(process.env.FORKS_COUNT || '0');
+            const inspected = Number(process.env.INSPECTED_COUNT || '0');
+
+            const statusSummary = allRows.reduce((acc, row) => {
+              const key = row.status || 'unknown';
+              acc[key] = (acc[key] || 0) + 1;
+              return acc;
+            }, {});
+
+            const statusLines = Object.entries(statusSummary)
+              .sort((a, b) => b[1] - a[1])
+              .map(([status, count]) => `- ${status}: **${count}**`);
+
+            const details = rows.flatMap((f) => {
+              const commitLines = (f.commits || []).length
+                ? [
+                    ...f.commits.map((c) => `  - [\`${c.sha}\`](${c.html_url}) ${c.subject || '(no subject)'}`),
+                  ]
+                : ['  - none'];
+
+              const fileLines = (f.files || []).length
+                ? [
+                    ...f.files.map((file) => `  - \`${file.status}\` \`${file.filename}\` (+${file.additions}/-${file.deletions})`),
+                  ]
+                : ['  - none'];
+
+              const lines = [
+                `#### ${f.full_name}`,
+                `- Fork: ${f.html_url}`,
+                `- Compare status: **${f.status}** (ahead: **${f.ahead_by}**, behind: **${f.behind_by}**)`,
+                `- Last push: ${f.pushed_at}`,
+                `- Commits ahead sampled (${(f.commits || []).length}/${f.total_commits || 0}):`,
+                ...commitLines,
+                `- Changed files sampled (${(f.files || []).length}/${f.total_files || 0}):`,
+                ...fileLines,
+              ];
+
+              if (f.error) {
+                lines.push(`- Compare error: \`${f.error}\``);
+              }
+              lines.push('');
+              return lines;
+            });
 
             const body = [
-              '## Forks Activity Snapshot',
+              '## Forks Divergence Snapshot',
               '',
               `- Total forks: **${total}**`,
-              `- Included in table: **${rows.length}** most recently pushed`,
+              `- Inspected: **${inspected}** most recently pushed forks`,
+              `- Divergent forks ahead of upstream/main: **${rows.length}**`,
               '',
-              '| Fork | Last push (UTC) | Stars | Open issues |',
-              '|---|---:|---:|---:|',
-              ...rows.map((f) => `| [${f.full_name}](${f.html_url}) | ${f.pushed_at} | ${f.stargazers_count} | ${f.open_issues_count} |`),
+              '### Compare status counts',
+              ...(statusLines.length ? statusLines : ['- none']),
               '',
+              '### Divergent forks summary',
+              '| Fork | Ahead | Behind | Commits sampled | Files sampled | Last push (UTC) |',
+              '|---|---:|---:|---:|---:|---:|',
+              ...(rows.length
+                ? rows.map((f) => `| [${f.full_name}](${f.html_url}) | ${f.ahead_by} | ${f.behind_by} | ${(f.commits || []).length}/${f.total_commits || 0} | ${(f.files || []).length}/${f.total_files || 0} | ${f.pushed_at} |`)
+                : ['| none | 0 | 0 | 0 | 0 | - |']),
+              '',
+              '### Divergent fork details (commits + file diffs)',
+              ...(details.length ? details : ['No divergent forks detected in inspected set.', '']),
               '### Suggested follow-up',
-              '- Review top recently pushed forks for API/method additions not present upstream/mainline.',
-              '- If meaningful diffs are found, open an `upstream-release` or `release-sync` issue to track adoption.',
+              '- Review divergent forks with high `ahead` counts first and evaluate whether commits should be upstreamed into `openclaw` or `openclaw-go`.',
+              '- For relevant protocol/gateway deltas, open an `upstream-release` or `release-sync` issue and link to the fork commit(s).',
               '',
               '_Generated automatically by `forks-report.yml`._',
             ].join('\n');
