@@ -17,7 +17,8 @@ For every upstream OpenClaw release, run an automated downstream sync pipeline:
 - `upstream-release-spec.yml`
   - on `upstream-release` issue events, creates/updates `docs/specs/<version>.md` in a PR
 - `release-sync-a3t.yml`
-  - scaffold trigger for manual OpenCode/a3t release-sync execution
+  - trigger to run OpenCode release-sync automation from tracking issues
+  - restores OpenCode auth from repository secrets (`OPENCODE_AUTH_JSON`, optional `OPENCODE_MCP_AUTH_JSON`)
 - `pr-guard.yml` (`Release Gates` job)
   - enforces release checklist completion for release-sync PRs
 - `release-publish.yml`
@@ -60,6 +61,7 @@ Release implementation PRs must not merge until all are complete:
 ## Deferred
 
 - Discord notifications are intentionally deferred and will be added in a later phase.
+- Native a3t platform integration is deferred; current automation uses OpenCode CLI runner mode.
 
 ## Non-goals
 
