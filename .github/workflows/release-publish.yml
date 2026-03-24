@@ -1,0 +1,163 @@
+name: Publish Release From Merged PR
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: write
+
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve release metadata and validate release gates
+        id: meta
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const title = pr.title || '';
+            const labels = new Set((pr.labels || []).map((l) => l.name));
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              },
+            );
+            const paths = files.map((f) => f.filename);
+            const specFile = paths.find((p) => /^docs\/specs\/v\d+\.\d+\.\d+(?:-\d+)?\.md$/.test(p));
+
+            const isReleasePR =
+              labels.has('release-sync') ||
+              labels.has('upstream-release') ||
+              /upstream release|release\s*sync|release:\s*v\d+/i.test(title) ||
+              Boolean(specFile);
+
+            if (!isReleasePR) {
+              core.info('Not a release-sync PR. Skipping publish workflow.');
+              core.setOutput('should_publish', 'false');
+              return;
+            }
+
+            const version =
+              (specFile && specFile.match(/v\d+\.\d+\.\d+(?:-\d+)?/)?.[0]) ||
+              (title.match(/v\d+\.\d+\.\d+(?:-\d+)?/)?.[0]);
+
+            if (!version) {
+              core.setFailed('Could not resolve release version from spec file or PR title.');
+              return;
+            }
+
+            const requiredChecks = [
+              /- \[[xX]\]\s+Architecture review/,
+              /- \[[xX]\]\s+Go standards code review/,
+              /- \[[xX]\]\s+API coverage review/,
+              /- \[[xX]\]\s+Security review \(Kingpin \/ @slantview\)/,
+              /- \[[xX]\]\s+Final HITL review/,
+              /- \[[xX]\]\s+`go test \.\/\.\.\. -race`/,
+            ];
+
+            if (!requiredChecks.every((re) => re.test(body))) {
+              core.setFailed('Release PR merged without full required release checklist completion.');
+              return;
+            }
+
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+                labels: 'upstream-release',
+                per_page: 100,
+              },
+            );
+            const tracking = issues.find((i) => i.title.includes(version));
+
+            core.setOutput('should_publish', 'true');
+            core.setOutput('version', version);
+            core.setOutput('spec_file', specFile || `docs/specs/${version}.md`);
+            core.setOutput('tracking_issue', tracking ? String(tracking.number) : '');
+
+      - name: Checkout merge commit
+        if: steps.meta.outputs.should_publish == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Create tag if missing
+        if: steps.meta.outputs.should_publish == 'true'
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q "refs/tags/${VERSION}$"; then
+            echo "Tag ${VERSION} already exists on origin."
+          else
+            git tag "${VERSION}" "${MERGE_SHA}"
+            git push origin "${VERSION}"
+            echo "Created and pushed tag ${VERSION}."
+          fi
+
+      - name: Create GitHub release if missing
+        if: steps.meta.outputs.should_publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          SPEC_FILE: ${{ steps.meta.outputs.spec_file }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          if gh release view "${VERSION}" >/dev/null 2>&1; then
+            echo "Release ${VERSION} already exists."
+            exit 0
+          fi
+
+          NOTES_FILE="/tmp/release-notes.md"
+          {
+            echo "Sync with upstream openclaw ${VERSION}."
+            echo
+            echo "- Source PR: ${PR_URL}"
+            echo "- Spec: ${SPEC_FILE}"
+          } > "${NOTES_FILE}"
+
+          gh release create "${VERSION}" \
+            --title "${VERSION}" \
+            --notes-file "${NOTES_FILE}"
+
+      - name: Comment on and close tracking issue
+        if: steps.meta.outputs.should_publish == 'true' && steps.meta.outputs.tracking_issue != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = Number('${{ steps.meta.outputs.tracking_issue }}');
+            const version = '${{ steps.meta.outputs.version }}';
+            const releaseUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/${version}`;
+            const prUrl = context.payload.pull_request.html_url;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: [
+                `Released in ${releaseUrl}`,
+                `Merged PR: ${prUrl}`,
+              ].join('\n'),
+            });
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              state: 'closed',
+            });

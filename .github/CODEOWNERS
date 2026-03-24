@@ -1,0 +1,7 @@
+# Release and automation policy owners
+.github/workflows/* @slantview
+docs/specs/* @slantview
+
+# Public typed API surface
+protocol/* @slantview
+gateway/* @slantview

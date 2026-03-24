@@ -95,7 +95,10 @@ MIT License. See [LICENSE](LICENSE).
 
 ## Releasing
 
-This section is for maintainers with push access to the repository.
+This section is for maintainers.
+
+**Policy:** releases must come from reviewed code merged via PR. Do not push
+release commits directly to `main`.
 
 ### How to Cut a Release
 
@@ -119,16 +122,36 @@ This section is for maintainers with push access to the repository.
    under the appropriate headings (`Added`, `Changed`, `Deprecated`, `Removed`,
    `Fixed`, `Security`).
 
-3. **Commit and tag**
+3. **Create a release PR**
 
    ```bash
+   git checkout -b release/vX.Y.Z
    git add CHANGELOG.md
    git commit -s -m "release: vX.Y.Z"
-   git tag vX.Y.Z
-   git push origin main --tags
+   git push -u origin release/vX.Y.Z
+   gh pr create --base main --title "release: vX.Y.Z" --body "Release prep for vX.Y.Z"
    ```
 
-4. **Create the GitHub release**
+   Wait for review and required checks, then merge the PR.
+
+   Required release reviews:
+
+   - Architecture review
+   - Go standards code review
+   - API coverage review
+   - Security review by Kingpin
+   - Final HITL review
+
+4. **Tag from the reviewed merge commit**
+
+   ```bash
+   git checkout main
+   git pull --ff-only
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+5. **Create the GitHub release**
 
    ```bash
    gh release create vX.Y.Z \

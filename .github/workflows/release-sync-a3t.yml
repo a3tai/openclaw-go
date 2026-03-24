@@ -1,0 +1,92 @@
+name: Release Sync A3T Scaffold
+
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Tracking issue number
+        required: true
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  a3t-scaffold:
+    if: >-
+      (github.event_name == 'issues' && github.event.label.name == 'run-a3t') ||
+      (github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/a3t release-sync')) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve issue and post A3T run payload
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            let issueNumber;
+            if (context.eventName === 'workflow_dispatch') {
+              issueNumber = Number(core.getInput('issue_number', { required: true }));
+            } else if (context.eventName === 'issues') {
+              issueNumber = context.payload.issue.number;
+            } else {
+              issueNumber = context.payload.issue.number;
+            }
+
+            const issue = await github.rest.issues.get({
+              owner,
+              repo,
+              issue_number: issueNumber,
+            });
+
+            const title = issue.data.title || '';
+            const match = title.match(/v\d+\.\d+\.\d+(?:-\d+)?/);
+            if (!match) {
+              core.setFailed(`Could not parse release version from issue title: ${title}`);
+              return;
+            }
+            const version = match[0];
+            const specPath = `docs/specs/${version}.md`;
+            const branchName = `release-sync/${version}`;
+
+            const payload = [
+              `A3T release-sync scaffold for ${version}`,
+              '',
+              'Inputs:',
+              `- issue: #${issueNumber}`,
+              `- branch: ${branchName}`,
+              `- spec: ${specPath}`,
+              '',
+              'Expected implementation scope:',
+              '- read spec and upstream release notes',
+              '- update protocol and gateway typed surfaces as needed',
+              '- update gateway method tests and changelog',
+              '- run go test ./... -race',
+              '- open/update PR with release gate checklist completed',
+              '',
+              'Manual OpenCode trigger command example:',
+              `- opencode run "sync ${version} from ${specPath} and open PR from ${branchName}"`,
+              '',
+              'This workflow is scaffold-only (manual invocation model).',
+            ].join('\n');
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              labels: ['upstream-release', 'release-sync'],
+            });
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              body: payload,
+            });
