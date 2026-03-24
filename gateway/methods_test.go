@@ -1019,6 +1019,14 @@ func TestTalkMode(t *testing.T) {
 	tm.run()
 }
 
+func TestTalkSpeak(t *testing.T) {
+	m := &testMethod{t: t, method: "talk.speak", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSpeak(ctx, protocol.TalkSpeakParams{Text: "hello"})
+		return err
+	}}
+	m.run()
+}
+
 // --- Send / Wake / System ---
 
 func TestSendMessage(t *testing.T) {

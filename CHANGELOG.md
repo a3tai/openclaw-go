@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SessionsGetParams` protocol type with `Key`, `SessionKey`, and `Limit` fields
 - `NodePendingEnqueue(ctx, NodePendingEnqueueParams)` and `NodePendingDrain(ctx, NodePendingDrainParams)` for pending node work queue operations (`node.pending.enqueue`, `node.pending.drain`; openclaw v2026.3.11)
 - `NodePendingEnqueueParams`, `NodePendingDrainParams`, `NodePendingWorkItem`, `NodePendingEnqueueResult`, and `NodePendingDrainResult` protocol types
+- `TalkSpeak(ctx, TalkSpeakParams)` typed method and `TalkSpeakParams`/`TalkSpeakResult` protocol types for voice synthesis via gateway (`talk.speak`; openclaw v2026.3.22)
 
 ## [1.0.0] - 2026-02-20
 

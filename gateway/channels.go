@@ -33,3 +33,12 @@ func (c *Client) TalkConfig(ctx context.Context, params protocol.TalkConfigParam
 func (c *Client) TalkMode(ctx context.Context, params protocol.TalkModeParams) error {
 	return c.sendRPCVoid(ctx, "talk.mode", params)
 }
+
+// TalkSpeak synthesizes speech audio through the configured talk provider.
+func (c *Client) TalkSpeak(ctx context.Context, params protocol.TalkSpeakParams) (*protocol.TalkSpeakResult, error) {
+	var result protocol.TalkSpeakResult
+	if err := c.sendRPCTyped(ctx, "talk.speak", params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

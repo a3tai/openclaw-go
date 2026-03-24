@@ -1267,6 +1267,33 @@ type TalkConfigResult struct {
 	Config TalkConfigData `json:"config"`
 }
 
+// TalkSpeakParams are the params for "talk.speak".
+// Added in openclaw v2026.3.22.
+type TalkSpeakParams struct {
+	Text         string   `json:"text"`
+	VoiceID      string   `json:"voiceId,omitempty"`
+	ModelID      string   `json:"modelId,omitempty"`
+	OutputFormat string   `json:"outputFormat,omitempty"`
+	Speed        *float64 `json:"speed,omitempty"`
+	Stability    *float64 `json:"stability,omitempty"`
+	Similarity   *float64 `json:"similarity,omitempty"`
+	Style        *float64 `json:"style,omitempty"`
+	SpeakerBoost *bool    `json:"speakerBoost,omitempty"`
+	Seed         *int     `json:"seed,omitempty"`
+	Normalize    string   `json:"normalize,omitempty"`
+	Language     string   `json:"language,omitempty"`
+}
+
+// TalkSpeakResult is the result of "talk.speak".
+type TalkSpeakResult struct {
+	AudioBase64     string `json:"audioBase64"`
+	Provider        string `json:"provider"`
+	OutputFormat    string `json:"outputFormat,omitempty"`
+	VoiceCompatible *bool  `json:"voiceCompatible,omitempty"`
+	MimeType        string `json:"mimeType,omitempty"`
+	FileExtension   string `json:"fileExtension,omitempty"`
+}
+
 // TalkConfigData holds the talk configuration sections.
 type TalkConfigData struct {
 	Talk    *TalkConfigTalk    `json:"talk,omitempty"`
