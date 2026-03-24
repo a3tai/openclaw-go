@@ -9,6 +9,7 @@ permissions:
   contents: write
   pull-requests: read
   issues: write
+  checks: read
 
 jobs:
   publish:
@@ -69,6 +70,37 @@ jobs:
 
             if (!requiredChecks.every((re) => re.test(body))) {
               core.setFailed('Release PR merged without full required release checklist completion.');
+              return;
+            }
+
+            const mergeSHA = pr.merge_commit_sha;
+            const checkRuns = await github.paginate(
+              github.rest.checks.listForRef,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: mergeSHA,
+                per_page: 100,
+              },
+              (response) => response.data.check_runs,
+            );
+
+            const requiredRunNames = ['Test', 'Release Gates', 'Release Smoke', 'Release E2E'];
+            const byName = new Map(checkRuns.map((run) => [run.name, run]));
+            const failedRuns = [];
+            for (const name of requiredRunNames) {
+              const run = byName.get(name);
+              if (!run) {
+                failedRuns.push(`${name} (missing)`);
+                continue;
+              }
+              if (run.status !== 'completed' || run.conclusion !== 'success') {
+                failedRuns.push(`${name} (${run.conclusion || run.status})`);
+              }
+            }
+
+            if (failedRuns.length > 0) {
+              core.setFailed(`Release publish blocked: required checks not green: ${failedRuns.join(', ')}`);
               return;
             }
 

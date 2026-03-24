@@ -8,16 +8,26 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write
 
 jobs:
   spec-pr:
-    if: contains(join(github.event.issue.labels.*.name, ','), 'upstream-release')
     runs-on: ubuntu-latest
-
     steps:
+      - name: Determine if issue is upstream-release
+        id: gate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = (context.payload.issue?.labels || []).map((l) => l.name);
+            const enabled = labels.includes('upstream-release');
+            core.setOutput('enabled', enabled ? 'true' : 'false');
+
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.enabled == 'true'
 
       - name: Generate release spec file
+        if: steps.gate.outputs.enabled == 'true'
         id: generate
         uses: actions/github-script@v7
         with:
@@ -53,7 +63,7 @@ jobs:
 
             const keywords = [
               'gateway', 'protocol', 'rpc', 'node.pending', 'talk.speak',
-              'sessions_spawn', 'sessions_yield', 'breaking', 'security'
+              'sessions_spawn', 'sessions_yield', 'breaking', 'security',
             ];
 
             const relevant = releaseBody
@@ -70,38 +80,40 @@ jobs:
               ? relevant.map((line) => `- ${line.replace(/^[-\s]+/, '')}`).join('\n')
               : '- No obvious gateway/protocol deltas auto-detected; manual review required.';
 
-            const spec = `# Upstream Sync Spec: ${version}
-
-- Upstream release: ${upstreamReleaseUrl}
-- Tracking issue: ${issueUrl}
-
-## Relevant upstream deltas (auto-detected)
-
-${relevantBlock}
-
-## openclaw-go changes required
-
-- [ ] Confirm protocol type delta coverage in \`protocol/\`
-- [ ] Confirm gateway typed RPC coverage in \`gateway/\`
-- [ ] Confirm/expand test coverage in \`gateway/methods_test.go\`
-- [ ] Update \`CHANGELOG.md\`
-
-            ## Required review gates
-
-            - [ ] Architecture review
-            - [ ] Go standards code review
-            - [ ] API coverage review
-            - [ ] Security review (Kingpin)
-            - [ ] Final HITL review
-
-## Validation
-
-- [ ] \`go test ./... -race\`
-
-## Status
-
-- Draft
-`;
+            const spec = [
+              `# Upstream Sync Spec: ${version}`,
+              '',
+              `- Upstream release: ${upstreamReleaseUrl}`,
+              `- Tracking issue: ${issueUrl}`,
+              '',
+              '## Relevant upstream deltas (auto-detected)',
+              '',
+              relevantBlock,
+              '',
+              '## openclaw-go changes required',
+              '',
+              '- [ ] Confirm protocol type delta coverage in `protocol/`',
+              '- [ ] Confirm gateway typed RPC coverage in `gateway/`',
+              '- [ ] Confirm/expand test coverage in `gateway/methods_test.go`',
+              '- [ ] Update `CHANGELOG.md`',
+              '',
+              '## Required review gates',
+              '',
+              '- [ ] Architecture review',
+              '- [ ] Go standards code review',
+              '- [ ] API coverage review',
+              '- [ ] Security review (Kingpin)',
+              '- [ ] Final HITL review',
+              '',
+              '## Validation',
+              '',
+              '- [ ] `go test ./... -race`',
+              '',
+              '## Status',
+              '',
+              '- Draft',
+              '',
+            ].join('\n');
 
             const dir = path.join(process.env.GITHUB_WORKSPACE, 'docs', 'specs');
             fs.mkdirSync(dir, { recursive: true });
@@ -112,6 +124,7 @@ ${relevantBlock}
             core.setOutput('spec_path', `docs/specs/${version}.md`);
 
       - name: Ensure release labels exist
+        if: steps.gate.outputs.enabled == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -135,6 +148,7 @@ ${relevantBlock}
             }
 
       - name: Create or update spec PR
+        if: steps.gate.outputs.enabled == 'true'
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
@@ -151,22 +165,20 @@ ${relevantBlock}
               - go standards code review
               - api coverage review
               - security review (Kingpin)
+              - final HITL review
           branch: "automation/spec-${{ steps.generate.outputs.version }}"
           labels: |
             upstream-release
             release-sync
-          reviewers: |
-            slantview
           add-paths: |
             ${{ steps.generate.outputs.spec_path }}
           signoff: true
 
       - name: Comment on tracking issue
-        if: steps.cpr.outputs.pull-request-number != ''
+        if: steps.gate.outputs.enabled == 'true' && steps.cpr.outputs.pull-request-number != ''
         uses: actions/github-script@v7
         with:
           script: |
-            const prNumber = '${{ steps.cpr.outputs.pull-request-number }}';
             const prUrl = '${{ steps.cpr.outputs.pull-request-url }}';
 
             await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
@@ -184,3 +196,21 @@ ${relevantBlock}
                 '- Final HITL review',
               ].join('\n'),
             });
+
+      - name: Trigger OpenCode release-sync run
+        if: steps.gate.outputs.enabled == 'true' && steps.cpr.outputs.pull-request-number != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = String(context.payload.issue.number);
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'release-sync-a3t.yml',
+              ref: 'main',
+              inputs: {
+                issue_number: issueNumber,
+              },
+            });
+
+            core.info(`Triggered release-sync-a3t.yml for issue #${issueNumber}`);

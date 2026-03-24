@@ -114,6 +114,200 @@ const (
 	FrameTypeInvokeResponse FrameType = "invoke-res"
 )
 
+// EventName identifies a gateway protocol event name.
+type EventName string
+
+// Known event name constants.
+const (
+	// EventConnectChallenge is the initial server challenge sent before connect.
+	EventConnectChallenge EventName = "connect.challenge"
+	// EventTick is the keepalive tick event from the gateway.
+	EventTick EventName = "tick"
+	// EventShutdown indicates gateway shutdown or maintenance state.
+	EventShutdown EventName = "shutdown"
+	// EventPresence carries presence snapshot/update information.
+	EventPresence EventName = "presence"
+	// EventHealth carries health snapshot/update information.
+	EventHealth EventName = "health"
+	// EventHeartbeat is the heartbeat stream event from agent/runtime.
+	EventHeartbeat EventName = "heartbeat"
+	// EventChat carries chat stream updates (delta/final/error).
+	EventChat EventName = "chat"
+	// EventAgent carries agent stream updates.
+	EventAgent EventName = "agent"
+	// EventCron carries cron execution lifecycle events.
+	EventCron EventName = "cron"
+	// EventVoicewakeChanged notifies that voicewake config changed.
+	EventVoicewakeChanged EventName = "voicewake.changed"
+	// EventNodeInvokeRequest is a gateway->node invoke request event.
+	EventNodeInvokeRequest EventName = "node.invoke.request"
+	// EventNodePairRequested is emitted when node pairing is requested.
+	EventNodePairRequested EventName = "node.pair.requested"
+	// EventNodePairResolved is emitted when node pairing is approved/rejected.
+	EventNodePairResolved EventName = "node.pair.resolved"
+	// EventDevicePairRequest is emitted when device pairing is requested.
+	EventDevicePairRequest EventName = "device.pair.requested"
+	// EventDevicePairResolve is emitted when device pairing is resolved.
+	EventDevicePairResolve EventName = "device.pair.resolved"
+	// EventExecApproval is emitted when command execution needs approval.
+	EventExecApproval EventName = "exec.approval.requested"
+	// EventExecFinished is emitted when command execution finishes.
+	EventExecFinished EventName = "exec.finished"
+	// EventExecDenied is emitted when command execution is denied.
+	EventExecDenied EventName = "exec.denied"
+)
+
+// MethodName identifies a gateway RPC method name.
+type MethodName string
+
+// Known RPC method name constants.
+const (
+	// Agent identity and lifecycle.
+	MethodAgentIdentityGet MethodName = "agent.identity.get"
+	MethodAgentWait        MethodName = "agent.wait"
+
+	// Agent management and attached files.
+	MethodAgentsCreate    MethodName = "agents.create"
+	MethodAgentsDelete    MethodName = "agents.delete"
+	MethodAgentsFilesGet  MethodName = "agents.files.get"
+	MethodAgentsFilesList MethodName = "agents.files.list"
+	MethodAgentsFilesSet  MethodName = "agents.files.set"
+	MethodAgentsList      MethodName = "agents.list"
+	MethodAgentsUpdate    MethodName = "agents.update"
+
+	// Browser and channel integration.
+	MethodBrowserRequest MethodName = "browser.request"
+	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStatus MethodName = "channels.status"
+
+	// Chat request/stream controls.
+	MethodChatAbort   MethodName = "chat.abort"
+	MethodChatHistory MethodName = "chat.history"
+	MethodChatInject  MethodName = "chat.inject"
+	MethodChatSend    MethodName = "chat.send"
+
+	// Configuration and schema operations.
+	MethodConfigApply        MethodName = "config.apply"
+	MethodConfigGet          MethodName = "config.get"
+	MethodConfigPatch        MethodName = "config.patch"
+	MethodConfigSchema       MethodName = "config.schema"
+	MethodConfigSchemaLookup MethodName = "config.schema.lookup"
+	MethodConfigSet          MethodName = "config.set"
+
+	// Cron management and execution history.
+	MethodCronAdd    MethodName = "cron.add"
+	MethodCronList   MethodName = "cron.list"
+	MethodCronRemove MethodName = "cron.remove"
+	MethodCronRun    MethodName = "cron.run"
+	MethodCronRuns   MethodName = "cron.runs"
+	MethodCronStatus MethodName = "cron.status"
+	MethodCronUpdate MethodName = "cron.update"
+
+	// Device pairing and token management.
+	MethodDevicePairApprove MethodName = "device.pair.approve"
+	MethodDevicePairList    MethodName = "device.pair.list"
+	MethodDevicePairReject  MethodName = "device.pair.reject"
+	MethodDevicePairRemove  MethodName = "device.pair.remove"
+	MethodDeviceTokenRevoke MethodName = "device.token.revoke"
+	MethodDeviceTokenRotate MethodName = "device.token.rotate"
+
+	// Diagnostics and execution approvals.
+	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
+	MethodExecApprovalRequest  MethodName = "exec.approval.request"
+	MethodExecApprovalResolve  MethodName = "exec.approval.resolve"
+	MethodExecApprovalsGet     MethodName = "exec.approvals.get"
+	MethodExecApprovalsNodeGet MethodName = "exec.approvals.node.get"
+	MethodExecApprovalsNodeSet MethodName = "exec.approvals.node.set"
+	MethodExecApprovalsSet     MethodName = "exec.approvals.set"
+
+	// Gateway status and logs.
+	MethodGatewayIdentityGet MethodName = "gateway.identity.get"
+	MethodLastHeartbeat      MethodName = "last-heartbeat"
+	MethodLogsTail           MethodName = "logs.tail"
+	MethodModelsList         MethodName = "models.list"
+
+	// Node RPC and node queue/pairing operations.
+	MethodNodeCanvasCapabilityRefresh MethodName = "node.canvas.capability.refresh"
+	MethodNodeDescribe                MethodName = "node.describe"
+	MethodNodeEvent                   MethodName = "node.event"
+	MethodNodeInvoke                  MethodName = "node.invoke"
+	MethodNodeInvokeResult            MethodName = "node.invoke.result"
+	MethodNodeList                    MethodName = "node.list"
+	MethodNodePairApprove             MethodName = "node.pair.approve"
+	MethodNodePairList                MethodName = "node.pair.list"
+	MethodNodePairReject              MethodName = "node.pair.reject"
+	MethodNodePairRequest             MethodName = "node.pair.request"
+	MethodNodePairVerify              MethodName = "node.pair.verify"
+	MethodNodePendingAck              MethodName = "node.pending.ack"
+	MethodNodePendingDrain            MethodName = "node.pending.drain"
+	MethodNodePendingEnqueue          MethodName = "node.pending.enqueue"
+	MethodNodePendingPull             MethodName = "node.pending.pull"
+	MethodNodeRename                  MethodName = "node.rename"
+
+	// Utility and secrets.
+	MethodPushTest       MethodName = "push.test"
+	MethodSecretsReload  MethodName = "secrets.reload"
+	MethodSecretsResolve MethodName = "secrets.resolve"
+
+	// Session lifecycle, messaging, and usage analytics.
+	MethodSessionsAbort               MethodName = "sessions.abort"
+	MethodSessionsCompact             MethodName = "sessions.compact"
+	MethodSessionsCreate              MethodName = "sessions.create"
+	MethodSessionsDelete              MethodName = "sessions.delete"
+	MethodSessionsGet                 MethodName = "sessions.get"
+	MethodSessionsList                MethodName = "sessions.list"
+	MethodSessionsMessagesSubscribe   MethodName = "sessions.messages.subscribe"
+	MethodSessionsMessagesUnsubscribe MethodName = "sessions.messages.unsubscribe"
+	MethodSessionsPatch               MethodName = "sessions.patch"
+	MethodSessionsPreview             MethodName = "sessions.preview"
+	MethodSessionsReset               MethodName = "sessions.reset"
+	MethodSessionsResolve             MethodName = "sessions.resolve"
+	MethodSessionsSend                MethodName = "sessions.send"
+	MethodSessionsSteer               MethodName = "sessions.steer"
+	MethodSessionsSubscribe           MethodName = "sessions.subscribe"
+	MethodSessionsUnsubscribe         MethodName = "sessions.unsubscribe"
+	MethodSessionsUsage               MethodName = "sessions.usage"
+	MethodSessionsUsageLogs           MethodName = "sessions.usage.logs"
+	MethodSessionsUsageTimeseries     MethodName = "sessions.usage.timeseries"
+
+	// Runtime controls and skills.
+	MethodSetHeartbeats MethodName = "set-heartbeats"
+	MethodSkillsBins    MethodName = "skills.bins"
+	MethodSkillsInstall MethodName = "skills.install"
+	MethodSkillsStatus  MethodName = "skills.status"
+	MethodSkillsUpdate  MethodName = "skills.update"
+
+	// System presence/events and voice interactions.
+	MethodSystemEvent    MethodName = "system-event"
+	MethodSystemPresence MethodName = "system-presence"
+	MethodTalkConfig     MethodName = "talk.config"
+	MethodTalkMode       MethodName = "talk.mode"
+	MethodTalkSpeak      MethodName = "talk.speak"
+
+	// Tool and TTS interfaces.
+	MethodToolsCatalog MethodName = "tools.catalog"
+	MethodTTSConvert   MethodName = "tts.convert"
+	MethodTTSDisable   MethodName = "tts.disable"
+	MethodTTSEnable    MethodName = "tts.enable"
+	MethodTTSProviders MethodName = "tts.providers"
+	MethodTTSStatus    MethodName = "tts.status"
+
+	// Update, usage, and voice wake configuration.
+	MethodUpdateRun    MethodName = "update.run"
+	MethodUsageCost    MethodName = "usage.cost"
+	MethodUsageStatus  MethodName = "usage.status"
+	MethodVoiceWakeGet MethodName = "voicewake.get"
+	MethodVoiceWakeSet MethodName = "voicewake.set"
+
+	// Web auth and interactive setup wizard.
+	MethodWebLoginStart MethodName = "web.login.start"
+	MethodWebLoginWait  MethodName = "web.login.wait"
+	MethodWizardCancel  MethodName = "wizard.cancel"
+	MethodWizardNext    MethodName = "wizard.next"
+	MethodWizardStart   MethodName = "wizard.start"
+	MethodWizardStatus  MethodName = "wizard.status"
+)
+
 // ---------------------------------------------------------------------------
 // Framing
 // ---------------------------------------------------------------------------
@@ -138,7 +332,7 @@ type Response struct {
 // Event is a uni-directional notification frame (either direction).
 type Event struct {
 	Type         FrameType       `json:"type"`                   // always "event"
-	EventName    string          `json:"event"`                  // event name
+	EventName    EventName       `json:"event"`                  // event name
 	Payload      json.RawMessage `json:"payload,omitempty"`      // event-specific data
 	Seq          *int64          `json:"seq,omitempty"`          // optional sequence number
 	StateVersion *StateVersion   `json:"stateVersion,omitempty"` // optional state version
@@ -156,7 +350,7 @@ type ErrorPayload struct {
 // RawFrame is used for initial deserialization to determine the frame type.
 type RawFrame struct {
 	Type  FrameType `json:"type"`
-	Event string    `json:"event,omitempty"` // only for event frames
+	Event EventName `json:"event,omitempty"` // only for event frames
 }
 
 // ---------------------------------------------------------------------------
@@ -646,6 +840,43 @@ type SessionsResolveParams struct {
 	IncludeUnknown *bool  `json:"includeUnknown,omitempty"`
 }
 
+// SessionsCreateParams are the params for "sessions.create".
+type SessionsCreateParams struct {
+	Key              string `json:"key,omitempty"`
+	AgentID          string `json:"agentId,omitempty"`
+	Label            string `json:"label,omitempty"`
+	Model            string `json:"model,omitempty"`
+	ParentSessionKey string `json:"parentSessionKey,omitempty"`
+	Task             string `json:"task,omitempty"`
+	Message          string `json:"message,omitempty"`
+}
+
+// SessionsSendParams are the params for "sessions.send" and "sessions.steer".
+type SessionsSendParams struct {
+	Key            string          `json:"key"`
+	Message        string          `json:"message"`
+	Thinking       string          `json:"thinking,omitempty"`
+	Attachments    json.RawMessage `json:"attachments,omitempty"`
+	TimeoutMs      *int            `json:"timeoutMs,omitempty"`
+	IdempotencyKey string          `json:"idempotencyKey,omitempty"`
+}
+
+// SessionsAbortParams are the params for "sessions.abort".
+type SessionsAbortParams struct {
+	Key   string `json:"key"`
+	RunID string `json:"runId,omitempty"`
+}
+
+// SessionsMessagesSubscribeParams are the params for "sessions.messages.subscribe".
+type SessionsMessagesSubscribeParams struct {
+	Key string `json:"key"`
+}
+
+// SessionsMessagesUnsubscribeParams are the params for "sessions.messages.unsubscribe".
+type SessionsMessagesUnsubscribeParams struct {
+	Key string `json:"key"`
+}
+
 // SessionsPatchParams are the params for "sessions.patch".
 type SessionsPatchParams struct {
 	Key             string  `json:"key"`
@@ -698,6 +929,17 @@ type SessionsUsageParams struct {
 	EndDate              string `json:"endDate,omitempty"`
 	Limit                *int   `json:"limit,omitempty"`
 	IncludeContextWeight *bool  `json:"includeContextWeight,omitempty"`
+}
+
+// SessionsUsageTimeseriesParams are the params for "sessions.usage.timeseries".
+type SessionsUsageTimeseriesParams struct {
+	Key string `json:"key"`
+}
+
+// SessionsUsageLogsParams are the params for "sessions.usage.logs".
+type SessionsUsageLogsParams struct {
+	Key   string `json:"key"`
+	Limit *int   `json:"limit,omitempty"`
 }
 
 // ---------------------------------------------------------------------------
@@ -795,6 +1037,11 @@ type NodePendingDrainParams struct {
 	MaxItems *int `json:"maxItems,omitempty"`
 }
 
+// NodePendingAckParams are the params for "node.pending.ack".
+type NodePendingAckParams struct {
+	IDs []string `json:"ids"`
+}
+
 // NodePendingWorkItem is a queued node.pending work item.
 type NodePendingWorkItem struct {
 	ID          string         `json:"id"`
@@ -819,6 +1066,34 @@ type NodePendingDrainResult struct {
 	Revision int                   `json:"revision"`
 	Items    []NodePendingWorkItem `json:"items"`
 	HasMore  bool                  `json:"hasMore"`
+}
+
+// NodePendingAction is a pending action returned by "node.pending.pull".
+type NodePendingAction struct {
+	ID           string  `json:"id"`
+	Command      string  `json:"command"`
+	ParamsJSON   *string `json:"paramsJSON"`
+	EnqueuedAtMs int64   `json:"enqueuedAtMs"`
+}
+
+// NodePendingPullResult is the result of "node.pending.pull".
+type NodePendingPullResult struct {
+	NodeID  string              `json:"nodeId"`
+	Actions []NodePendingAction `json:"actions"`
+}
+
+// NodePendingAckResult is the result of "node.pending.ack".
+type NodePendingAckResult struct {
+	NodeID         string   `json:"nodeId"`
+	AckedIDs       []string `json:"ackedIds"`
+	RemainingCount int      `json:"remainingCount"`
+}
+
+// NodeCanvasCapabilityRefreshResult is the result of "node.canvas.capability.refresh".
+type NodeCanvasCapabilityRefreshResult struct {
+	CanvasCapability            string `json:"canvasCapability"`
+	CanvasCapabilityExpiresAtMs int64  `json:"canvasCapabilityExpiresAtMs"`
+	CanvasHostURL               string `json:"canvasHostUrl"`
 }
 
 // NodeInvokeRequestEvent is the payload of a "node.invoke.request" event.
@@ -920,6 +1195,11 @@ type ConfigPatchParams struct {
 	RestartDelayMs *int   `json:"restartDelayMs,omitempty"`
 }
 
+// ConfigSchemaLookupParams are the params for "config.schema.lookup".
+type ConfigSchemaLookupParams struct {
+	Path string `json:"path"`
+}
+
 // ConfigSchemaResponse is the response for "config.schema".
 type ConfigSchemaResponse struct {
 	Schema      json.RawMessage         `json:"schema"`
@@ -938,6 +1218,26 @@ type ConfigUIHint struct {
 	Sensitive    *bool           `json:"sensitive,omitempty"`
 	Placeholder  string          `json:"placeholder,omitempty"`
 	ItemTemplate json.RawMessage `json:"itemTemplate,omitempty"`
+}
+
+// ConfigSchemaLookupChild describes one child entry in a schema lookup result.
+type ConfigSchemaLookupChild struct {
+	Key         string          `json:"key"`
+	Path        string          `json:"path"`
+	Type        json.RawMessage `json:"type,omitempty"`
+	Required    bool            `json:"required"`
+	HasChildren bool            `json:"hasChildren"`
+	Hint        *ConfigUIHint   `json:"hint,omitempty"`
+	HintPath    string          `json:"hintPath,omitempty"`
+}
+
+// ConfigSchemaLookupResult is the result for "config.schema.lookup".
+type ConfigSchemaLookupResult struct {
+	Path     string                    `json:"path"`
+	Schema   json.RawMessage           `json:"schema"`
+	Hint     *ConfigUIHint             `json:"hint,omitempty"`
+	HintPath string                    `json:"hintPath,omitempty"`
+	Children []ConfigSchemaLookupChild `json:"children"`
 }
 
 // ---------------------------------------------------------------------------
@@ -1416,6 +1716,12 @@ type SkillsUpdateParams struct {
 	Env      map[string]string `json:"env,omitempty"`
 }
 
+// ToolsCatalogParams are the params for "tools.catalog".
+type ToolsCatalogParams struct {
+	AgentID        string `json:"agentId,omitempty"`
+	IncludePlugins *bool  `json:"includePlugins,omitempty"`
+}
+
 // ---------------------------------------------------------------------------
 // Wizard types
 // ---------------------------------------------------------------------------
@@ -1852,6 +2158,49 @@ type ExecApprovalResolvedEvent struct {
 	Decision   string `json:"decision"`
 	ResolvedBy string `json:"resolvedBy,omitempty"`
 	Ts         int64  `json:"ts"`
+}
+
+// SecretsReloadParams are the params for "secrets.reload".
+type SecretsReloadParams struct{}
+
+// SecretsResolveParams are the params for "secrets.resolve".
+type SecretsResolveParams struct {
+	CommandName string   `json:"commandName"`
+	TargetIDs   []string `json:"targetIds"`
+}
+
+// SecretsResolveAssignment is one resolved assignment for "secrets.resolve".
+type SecretsResolveAssignment struct {
+	Path         string          `json:"path,omitempty"`
+	PathSegments []string        `json:"pathSegments"`
+	Value        json.RawMessage `json:"value"`
+}
+
+// SecretsResolveResult is the result for "secrets.resolve".
+type SecretsResolveResult struct {
+	OK               *bool                      `json:"ok,omitempty"`
+	Assignments      []SecretsResolveAssignment `json:"assignments,omitempty"`
+	Diagnostics      []string                   `json:"diagnostics,omitempty"`
+	InactiveRefPaths []string                   `json:"inactiveRefPaths,omitempty"`
+}
+
+// GatewayIdentityResult is the result for "gateway.identity.get".
+type GatewayIdentityResult struct {
+	DeviceID  string `json:"deviceId"`
+	PublicKey string `json:"publicKey"`
+}
+
+// DoctorMemoryEmbeddingStatus describes embedding provider availability.
+type DoctorMemoryEmbeddingStatus struct {
+	OK    bool   `json:"ok"`
+	Error string `json:"error,omitempty"`
+}
+
+// DoctorMemoryStatusResult is the result for "doctor.memory.status".
+type DoctorMemoryStatusResult struct {
+	AgentID   string                      `json:"agentId"`
+	Provider  string                      `json:"provider,omitempty"`
+	Embedding DoctorMemoryEmbeddingStatus `json:"embedding"`
 }
 
 // ---------------------------------------------------------------------------

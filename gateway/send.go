@@ -19,15 +19,15 @@ func (c *Client) Wake(ctx context.Context, params protocol.WakeParams) error {
 
 // LastHeartbeat retrieves the last heartbeat timestamp.
 func (c *Client) LastHeartbeat(ctx context.Context) (json.RawMessage, error) {
-	return c.sendRPC(ctx, "last-heartbeat", nil)
+	return c.sendRPC(ctx, string(protocol.MethodLastHeartbeat), nil)
 }
 
 // SetHeartbeats enables or disables heartbeat events.
 func (c *Client) SetHeartbeats(ctx context.Context, enabled bool) error {
-	return c.sendRPCVoid(ctx, "set-heartbeats", map[string]bool{"enabled": enabled})
+	return c.sendRPCVoid(ctx, string(protocol.MethodSetHeartbeats), map[string]bool{"enabled": enabled})
 }
 
 // SystemEvent sends a system event.
 func (c *Client) SystemEvent(ctx context.Context, params any) error {
-	return c.sendRPCVoid(ctx, "system-event", params)
+	return c.sendRPCVoid(ctx, string(protocol.MethodSystemEvent), params)
 }

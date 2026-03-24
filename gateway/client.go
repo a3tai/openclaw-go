@@ -156,7 +156,7 @@ func (c *Client) Send(ctx context.Context, method string, params any) (*protocol
 
 // SendEvent sends a one-way event frame.
 func (c *Client) SendEvent(eventName string, payload any) error {
-	data, err := protocol.MarshalEvent(eventName, payload)
+	data, err := protocol.MarshalEvent(protocol.EventName(eventName), payload)
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func (c *Client) readChallenge(ctx context.Context) (*protocol.ConnectChallenge,
 	if err := json.Unmarshal(msg, &ev); err != nil {
 		return nil, fmt.Errorf("unmarshal challenge event: %w", err)
 	}
-	if ev.Type != protocol.FrameTypeEvent || ev.EventName != "connect.challenge" {
+	if ev.Type != protocol.FrameTypeEvent || ev.EventName != protocol.EventConnectChallenge {
 		return nil, fmt.Errorf("expected connect.challenge event, got type=%s event=%s", ev.Type, ev.EventName)
 	}
 	var ch protocol.ConnectChallenge

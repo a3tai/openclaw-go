@@ -41,3 +41,80 @@ jobs:
 
       - name: Build examples
         run: go build ./examples/...
+
+  release-smoke:
+    name: Release Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Smoke test core release packages
+        run: go test ./protocol ./gateway ./chatcompletions ./toolsinvoke -race
+
+  release-e2e:
+    name: Release E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Start mock server
+        run: |
+          nohup go run ./examples/server > /tmp/openclaw-mock.log 2>&1 &
+          echo $! > /tmp/openclaw-mock.pid
+
+      - name: Wait for server readiness
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sS -o /dev/null -X POST -H 'Content-Type: application/json' \
+              -d '{"model":"openclaw:main","messages":[{"role":"user","content":"ping"}]}' \
+              http://localhost:18789/v1/chat/completions; then
+              echo "Mock server is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Mock server failed to start"
+          cat /tmp/openclaw-mock.log || true
+          exit 1
+
+      - name: Run example client end-to-end
+        run: timeout 90s go run ./examples/client
+
+      - name: Run example chat flow end-to-end
+        run: timeout 60s go run ./examples/chat
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat /tmp/openclaw-mock.log || true
+
+      - name: Stop mock server
+        if: always()
+        run: |
+          if [ -f /tmp/openclaw-mock.pid ]; then
+            kill "$(cat /tmp/openclaw-mock.pid)" || true
+          fi
+
+  upstream-api-parity:
+    name: Upstream API Parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone upstream openclaw
+        run: git clone --depth 1 https://github.com/openclaw/openclaw /tmp/openclaw
+
+      - name: Assert no missing upstream RPC methods
+        run: |
+          python3 scripts/upstream_drift_report.py \
+            --upstream-root /tmp/openclaw \
+            --go-root .

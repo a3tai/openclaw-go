@@ -1,0 +1,125 @@
+name: Upstream API Drift Report
+
+on:
+  schedule:
+    - cron: '15 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone upstream openclaw
+        run: git clone --depth 1 https://github.com/openclaw/openclaw /tmp/openclaw
+
+      - name: Build drift report JSON
+        run: |
+          python3 scripts/upstream_drift_report.py \
+            --upstream-root /tmp/openclaw \
+            --go-root . \
+            --output /tmp/upstream-drift.json \
+            --allow-missing
+
+      - name: Open or update drift report issue
+        id: issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('/tmp/upstream-drift.json', 'utf8'));
+
+            const title = 'Automation: Upstream API drift report';
+            const labels = ['release-sync'];
+
+            const missing = report.missing_in_go || [];
+            const extra = report.extra_in_go || [];
+            const missingDetails = report.missing_details || [];
+            const extraDetails = report.extra_details || [];
+
+            const body = [
+              '## Upstream API Drift',
+              '',
+              `- Upstream methods: **${report.upstream_method_count}**`,
+              `- openclaw-go methods: **${report.go_method_count}**`,
+              `- Missing in openclaw-go: **${missing.length}**`,
+              `- Extra in openclaw-go: **${extra.length}**`,
+              '',
+              '### Missing methods',
+              ...(missingDetails.length
+                ? missingDetails.map((item) => `- \`${item.method}\` (upstream: \`${item.upstream_source}\`)`)
+                : ['- none']),
+              '',
+              '### Extra methods',
+              ...(extraDetails.length
+                ? extraDetails.map((item) => `- \`${item.method}\` (go: \`${item.go_source}\`)`)
+                : ['- none']),
+              '',
+              '_Generated automatically by `upstream-api-drift-report.yml`._',
+            ].join('\n');
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            const existing = openIssues.find((i) => i.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+              core.info(`Updated issue #${existing.number}`);
+              core.setOutput('issue_number', String(existing.number));
+              return;
+            }
+
+            const created = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels,
+              assignees: ['slantview'],
+            });
+            core.info(`Created issue #${created.data.number}`);
+            core.setOutput('issue_number', String(created.data.number));
+
+      - name: Send drift report email via Resend
+        if: always()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          RESEND_TO_EMAIL: ${{ secrets.RESEND_TO_EMAIL }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RESEND_API_KEY:-}" ] || [ -z "${RESEND_FROM_EMAIL:-}" ] || [ -z "${RESEND_TO_EMAIL:-}" ]; then
+            echo "Resend secrets not configured; skipping email notification."
+            exit 0
+          fi
+
+          if [ -z "${ISSUE_NUMBER:-}" ]; then
+            echo "Issue number missing; skipping email notification."
+            exit 0
+          fi
+
+          ISSUE_URL="https://github.com/${REPO}/issues/${ISSUE_NUMBER}"
+          SUBJECT="[openclaw-go] Upstream API drift report"
+          BODY="Upstream API drift report is available: ${ISSUE_URL}"
+
+          curl -sS https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"from\":\"${RESEND_FROM_EMAIL}\",\"to\":[\"${RESEND_TO_EMAIL}\"],\"subject\":\"${SUBJECT}\",\"text\":\"${BODY}\"}" >/tmp/resend-drift.json
+          echo "Sent Resend drift email notification"

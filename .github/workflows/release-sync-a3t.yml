@@ -163,7 +163,6 @@ jobs:
             chmod 600 "$HOME/.local/share/opencode/mcp-auth.json"
             echo "Restored OpenCode MCP auth file"
           fi
-
       - name: Build OpenCode prompt
         run: |
           cat > /tmp/release-sync-prompt.md <<'EOF'

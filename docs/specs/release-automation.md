@@ -16,13 +16,23 @@ For every upstream OpenClaw release, run an automated downstream sync pipeline:
   - scans recent upstream stable releases and creates missing tracking issues
 - `upstream-release-spec.yml`
   - on `upstream-release` issue events, creates/updates `docs/specs/<version>.md` in a PR
+  - auto-dispatches `release-sync-a3t.yml` after spec PR creation/update
 - `release-sync-a3t.yml`
   - trigger to run OpenCode release-sync automation from tracking issues
   - restores OpenCode auth from repository secrets (`OPENCODE_AUTH_JSON`, optional `OPENCODE_MCP_AUTH_JSON`)
+- `ci.yml`
+  - runs `Release Smoke` (core package smoke tests)
+  - runs `Release E2E` (mock server + examples/client + examples/chat)
 - `pr-guard.yml` (`Release Gates` job)
   - enforces release checklist completion for release-sync PRs
 - `release-publish.yml`
   - on merged release-sync PR: tag, publish release, comment+close tracking issue
+- `upstream-api-drift-report.yml`
+  - compares upstream server methods to openclaw-go gateway surface and files an automated drift report issue
+  - optionally sends a Resend email notification when `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_TO_EMAIL` are configured
+- `forks-report.yml`
+  - publishes a scheduled forks activity report issue assigned to maintainers for review
+  - optionally sends a Resend email notification when `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_TO_EMAIL` are configured
 
 ## Upstream-release issue format
 
@@ -56,7 +66,13 @@ Release implementation PRs must not merge until all are complete:
 - PR template includes mandatory checkbox block.
 - PR guard fails release-sync PRs when required checklist items are not checked.
 - Release publish workflow validates checklist completion before tagging.
+- Release publish workflow also validates green check runs on merge commit:
+  - `Test`
+  - `Release Gates`
+  - `Release Smoke`
+  - `Release E2E`
 - Branch protection should require CODEOWNERS review and required checks.
+- Drift detection runs every 6 hours and raises an issue when upstream methods diverge.
 
 ## Deferred
 

@@ -47,7 +47,7 @@ func main() {
 			protocol.ScopeOperatorApprovals,
 		),
 		gateway.WithOnEvent(func(ev protocol.Event) {
-			if ev.EventName == "exec.approval.requested" {
+			if ev.EventName == protocol.EventExecApproval {
 				var req protocol.ExecApprovalRequested
 				if json.Unmarshal(ev.Payload, &req) == nil {
 					cwd := "<unknown>"

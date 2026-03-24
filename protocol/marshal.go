@@ -44,7 +44,7 @@ func MarshalErrorResponse(id string, errPayload ErrorPayload) ([]byte, error) {
 }
 
 // MarshalEvent serializes an Event.
-func MarshalEvent(eventName string, payload any) ([]byte, error) {
+func MarshalEvent(eventName EventName, payload any) ([]byte, error) {
 	p, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload: %w", err)
