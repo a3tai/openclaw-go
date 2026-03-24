@@ -90,6 +90,9 @@ jobs:
       - name: Run example client end-to-end
         run: timeout 90s go run ./examples/client
 
+      - name: Run example chat flow end-to-end
+        run: timeout 60s go run ./examples/chat
+
       - name: Show server log on failure
         if: failure()
         run: cat /tmp/openclaw-mock.log || true
