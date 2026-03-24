@@ -948,6 +948,14 @@ func TestExecApprovalRequestMethod(t *testing.T) {
 	tm.run()
 }
 
+func TestExecApprovalResolveMethod(t *testing.T) {
+	tm := &testMethod{t: t, method: "exec.approval.resolve", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ExecApprovalResolve(ctx, protocol.ExecApprovalResolveParams{ID: "a1", Decision: "approve"})
+		return err
+	}}
+	tm.run()
+}
+
 // --- Skills ---
 
 func TestSkillsStatus(t *testing.T) {
