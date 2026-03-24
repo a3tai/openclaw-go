@@ -67,6 +67,10 @@ jobs:
 
             for (const release of stable) {
               const version = release.tag_name;
+              const previous = stable.find((r) => new Date(r.published_at) < new Date(release.published_at))?.tag_name || null;
+              const compareUrl = previous
+                ? `https://github.com/openclaw/openclaw/compare/${previous}...${version}`
+                : null;
               const issueTitle = `Upstream release: openclaw ${version}`;
               if (existingTitles.has(issueTitle)) {
                 core.info(`Already tracked: ${version}`);
@@ -83,6 +87,7 @@ jobs:
                 "",
                 `Upstream version: \`${version}\``,
                 `Release URL: ${release.html_url}`,
+                ...(previous ? [`Previous stable version: \`${previous}\``, `Release diff: ${compareUrl}`] : []),
                 "",
                 "### Changelog excerpt",
                 "```",

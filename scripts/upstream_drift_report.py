@@ -14,12 +14,16 @@ from pathlib import Path
 
 
 UPSTREAM_METHOD_RE = re.compile(r'"([a-z][a-z0-9_.-]+)"\s*:\s*(?:async\s*)?\(')
+UPSTREAM_LITERAL_RE = re.compile(r'"([a-z][a-z0-9_.-]+)"')
 GO_LITERAL_METHOD_RE = re.compile(r'sendRPC(?:Typed|Void)?\(ctx,\s*"([a-z][a-z0-9_.-]+)"')
 GO_CONST_METHOD_RE = re.compile(r'sendRPC(?:Typed|Void)?\(ctx,\s*string\(protocol\.(Method[A-Za-z0-9]+)\)')
 PROTOCOL_METHOD_CONST_RE = re.compile(r'\b(Method[A-Za-z0-9]+)\s+MethodName\s*=\s*"([a-z][a-z0-9_.-]+)"')
+METHOD_LIST_BLOCK_RE = re.compile(r"const\s+BASE_METHODS\s*=\s*\[(.*?)\]\s*;", re.DOTALL)
+
+IGNORED_UPSTREAM_METHODS = {"connect"}
 
 
-def collect_upstream_methods(upstream_root: Path) -> tuple[set[str], dict[str, str]]:
+def _collect_methods_from_server_handlers(upstream_root: Path) -> tuple[set[str], dict[str, str]]:
     methods: set[str] = set()
     sources: dict[str, str] = {}
     methods_dir = upstream_root / "src" / "gateway" / "server-methods"
@@ -33,6 +37,59 @@ def collect_upstream_methods(upstream_root: Path) -> tuple[set[str], dict[str, s
             methods.add(method)
             sources.setdefault(method, str(path.relative_to(upstream_root)))
     return methods, sources
+
+
+def _collect_methods_from_base_list(upstream_root: Path) -> tuple[set[str], dict[str, str]]:
+    path = upstream_root / "src" / "gateway" / "server-methods-list.ts"
+    if not path.exists():
+        return set(), {}
+
+    content = path.read_text(encoding="utf-8")
+    block = METHOD_LIST_BLOCK_RE.search(content)
+    if not block:
+        return set(), {}
+
+    methods = set(UPSTREAM_LITERAL_RE.findall(block.group(1)))
+    methods -= IGNORED_UPSTREAM_METHODS
+    source = str(path.relative_to(upstream_root))
+    return methods, {m: source for m in methods}
+
+
+def _collect_methods_from_scopes(upstream_root: Path) -> tuple[set[str], dict[str, str]]:
+    path = upstream_root / "src" / "gateway" / "method-scopes.ts"
+    if not path.exists():
+        return set(), {}
+
+    content = path.read_text(encoding="utf-8")
+    literals = set(UPSTREAM_LITERAL_RE.findall(content))
+    methods = {
+        m
+        for m in literals
+        if not m.startswith("operator.") and not m.endswith(".")
+    }
+    methods -= IGNORED_UPSTREAM_METHODS
+    source = str(path.relative_to(upstream_root))
+    return methods, {m: source for m in methods}
+
+
+def collect_upstream_methods(upstream_root: Path) -> tuple[set[str], dict[str, str], set[str], set[str]]:
+    handler_methods, handler_sources = _collect_methods_from_server_handlers(upstream_root)
+    listed_methods, listed_sources = _collect_methods_from_base_list(upstream_root)
+    scoped_methods, scoped_sources = _collect_methods_from_scopes(upstream_root)
+
+    methods = handler_methods | listed_methods | scoped_methods
+    sources: dict[str, str] = {}
+    for method in sorted(methods):
+        if method in listed_sources:
+            sources[method] = listed_sources[method]
+        elif method in scoped_sources:
+            sources[method] = scoped_sources[method]
+        else:
+            sources[method] = handler_sources.get(method, "")
+
+    list_only = listed_methods - handler_methods
+    scope_only = scoped_methods - handler_methods - listed_methods
+    return methods, sources, list_only, scope_only
 
 
 def collect_protocol_method_constants(go_root: Path) -> dict[str, str]:
@@ -74,7 +131,7 @@ def main() -> int:
     upstream_root = Path(args.upstream_root)
     go_root = Path(args.go_root)
 
-    upstream_methods, upstream_sources = collect_upstream_methods(upstream_root)
+    upstream_methods, upstream_sources, list_only_methods, scope_only_methods = collect_upstream_methods(upstream_root)
     go_methods, go_sources = collect_go_methods(go_root)
 
     missing = sorted(upstream_methods - go_methods)
@@ -93,6 +150,9 @@ def main() -> int:
             {"method": m, "go_source": go_sources.get(m, "")}
             for m in extra
         ],
+        "upstream_methods_list_only": sorted(list_only_methods),
+        "upstream_methods_scope_only": sorted(scope_only_methods),
+        "go_methods_not_in_base_list": sorted(go_methods & list_only_methods),
     }
 
     encoded = json.dumps(report, indent=2)

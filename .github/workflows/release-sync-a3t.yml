@@ -175,12 +175,19 @@ jobs:
           4. Keep changes minimal and focused to this release.
           5. Do not push directly to main.
           6. Keep review-gate checkboxes in PR body unchecked unless verified by human review.
+          7. Ensure release-delta methods are represented in `gateway/methods_test.go`.
 
           After coding, run:
           - `go test ./... -race`
+          - `python3 scripts/validate_release_sync.py --upstream-root /tmp/openclaw --go-root . --version ${{ steps.meta.outputs.version }}`
 
           If no code changes are required for this release, still update `${{ steps.meta.outputs.spec_path }}` to document why.
           EOF
+
+      - name: Clone upstream openclaw for release validation
+        run: |
+          git clone https://github.com/openclaw/openclaw /tmp/openclaw
+          git -C /tmp/openclaw checkout "${{ steps.meta.outputs.version }}"
 
       - name: Run OpenCode release sync
         run: |
@@ -198,7 +205,12 @@ jobs:
           opencode run "${ARGS[@]}" "$PROMPT_CONTENT"
 
       - name: Run validation tests
-        run: go test ./... -race
+        run: |
+          go test ./... -race
+          python3 scripts/validate_release_sync.py \
+            --upstream-root /tmp/openclaw \
+            --go-root . \
+            --version "${{ steps.meta.outputs.version }}"
 
       - name: Create or update release-sync PR
         id: cpr

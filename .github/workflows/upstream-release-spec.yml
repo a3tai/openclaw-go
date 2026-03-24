@@ -26,6 +26,38 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.gate.outputs.enabled == 'true'
 
+      - name: Resolve release version
+        if: steps.gate.outputs.enabled == 'true'
+        id: version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title || '';
+            const match = title.match(/v\d+\.\d+\.\d+(?:-\d+)?/);
+
+            if (!match) {
+              core.setFailed(`Could not parse version from issue title: ${title}`);
+              return;
+            }
+
+            core.setOutput('version', match[0]);
+
+      - name: Clone upstream openclaw
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          git clone https://github.com/openclaw/openclaw /tmp/openclaw
+          git -C /tmp/openclaw checkout "${{ steps.version.outputs.version }}"
+
+      - name: Build upstream release diff report
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          python3 scripts/upstream_release_diff.py \
+            --upstream-root /tmp/openclaw \
+            --version "${{ steps.version.outputs.version }}" \
+            --output /tmp/upstream-release-diff.json \
+            --markdown-output /tmp/upstream-release-diff.md
+
       - name: Generate release spec file
         if: steps.gate.outputs.enabled == 'true'
         id: generate
@@ -36,17 +68,11 @@ jobs:
             const path = require('path');
 
             const issue = context.payload.issue;
-            const title = issue.title || '';
-            const match = title.match(/v\d+\.\d+\.\d+(?:-\d+)?/);
-
-            if (!match) {
-              core.setFailed(`Could not parse version from issue title: ${title}`);
-              return;
-            }
-
-            const version = match[0];
+            const version = '${{ steps.version.outputs.version }}';
             const issueUrl = issue.html_url;
             const upstreamReleaseUrl = `https://github.com/openclaw/openclaw/releases/tag/${version}`;
+            const releaseDiffMarkdown = fs.readFileSync('/tmp/upstream-release-diff.md', 'utf8').trim();
+            const releaseDiffJson = JSON.parse(fs.readFileSync('/tmp/upstream-release-diff.json', 'utf8'));
 
             let releaseBody = '';
             try {
@@ -86,12 +112,16 @@ jobs:
               `- Upstream release: ${upstreamReleaseUrl}`,
               `- Tracking issue: ${issueUrl}`,
               '',
+              releaseDiffMarkdown,
+              '',
               '## Relevant upstream deltas (auto-detected)',
               '',
               relevantBlock,
               '',
               '## openclaw-go changes required',
               '',
+              `- [ ] Confirm coverage for added methods: ${releaseDiffJson.added_methods.length}`,
+              `- [ ] Confirm coverage for changed methods: ${releaseDiffJson.changed_methods.length}`,
               '- [ ] Confirm protocol type delta coverage in `protocol/`',
               '- [ ] Confirm gateway typed RPC coverage in `gateway/`',
               '- [ ] Confirm/expand test coverage in `gateway/methods_test.go`',

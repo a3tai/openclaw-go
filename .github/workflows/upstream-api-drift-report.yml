@@ -41,6 +41,9 @@ jobs:
             const extra = report.extra_in_go || [];
             const missingDetails = report.missing_details || [];
             const extraDetails = report.extra_details || [];
+            const listOnly = report.upstream_methods_list_only || [];
+            const scopeOnly = report.upstream_methods_scope_only || [];
+            const goNotInBase = report.go_methods_not_in_base_list || [];
 
             const body = [
               '## Upstream API Drift',
@@ -49,6 +52,8 @@ jobs:
               `- openclaw-go methods: **${report.go_method_count}**`,
               `- Missing in openclaw-go: **${missing.length}**`,
               `- Extra in openclaw-go: **${extra.length}**`,
+              `- Upstream methods not in BASE_METHODS (compat/internal): **${listOnly.length + scopeOnly.length}**`,
+              `- openclaw-go methods in upstream compat/internal set: **${goNotInBase.length}**`,
               '',
               '### Missing methods',
               ...(missingDetails.length
@@ -59,6 +64,23 @@ jobs:
               ...(extraDetails.length
                 ? extraDetails.map((item) => `- \`${item.method}\` (go: \`${item.go_source}\`)`)
                 : ['- none']),
+              '',
+              '### Upstream compat/internal methods (not in BASE_METHODS)',
+              ...(listOnly.length || scopeOnly.length
+                ? [
+                    ...listOnly.map((m) => `- \`${m}\` (listed outside handler-map source set)`),
+                    ...scopeOnly.map((m) => `- \`${m}\` (scope-only source set)`),
+                  ]
+                : ['- none']),
+              '',
+              '### openclaw-go methods currently in upstream compat/internal set',
+              ...(goNotInBase.length
+                ? goNotInBase.map((m) => `- \`${m}\``)
+                : ['- none']),
+              '',
+              '### Deprecation policy',
+              '- Methods listed under `Extra methods` are not present in upstream method sources and should be treated as deprecation candidates until upstream evidence is found.',
+              '- Methods listed under `openclaw-go methods currently in upstream compat/internal set` are still upstream-recognized but may not be part of the advertised BASE_METHODS list.',
               '',
               '_Generated automatically by `upstream-api-drift-report.yml`._',
             ].join('\n');

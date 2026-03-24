@@ -117,3 +117,72 @@ jobs:
           python3 scripts/upstream_drift_report.py \
             --upstream-root /tmp/openclaw \
             --go-root .
+
+  release-diff-coverage:
+    name: Release Diff Coverage
+    if: github.event_name == 'pull_request' && !startsWith(github.event.pull_request.title, 'docs(spec):')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version from PR
+        id: release
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+
+          event = json.load(open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8"))
+          title = event.get("pull_request", {}).get("title", "")
+          match = re.search(r"v\d+\.\d+\.\d+(?:-\d+)?", title)
+          version = match.group(0) if match else ""
+
+          base_ref = os.environ.get("GITHUB_BASE_REF") or "main"
+          subprocess.run(["git", "fetch", "origin", base_ref, "--depth", "1"], check=True)
+          diff = subprocess.check_output(
+              ["git", "diff", "--name-only", f"origin/{base_ref}...HEAD"],
+              text=True,
+          ).splitlines()
+
+          if not version:
+              for path in diff:
+                  m = re.match(r"docs/specs/(v\d+\.\d+\.\d+(?:-\d+)?)\.md$", path)
+                  if m:
+                      version = m.group(1)
+                      break
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              if version:
+                  out.write(f"enabled=true\nversion={version}\n")
+              else:
+                  out.write("enabled=false\n")
+          PY
+
+      - name: Skip non-release PRs
+        if: steps.release.outputs.enabled != 'true'
+        run: echo "No release version detected; skipping release diff validation."
+
+      - name: Clone upstream openclaw
+        if: steps.release.outputs.enabled == 'true'
+        run: |
+          git clone https://github.com/openclaw/openclaw /tmp/openclaw
+          git -C /tmp/openclaw checkout "${{ steps.release.outputs.version }}"
+
+      - name: Validate release diff coverage
+        if: steps.release.outputs.enabled == 'true'
+        run: |
+          python3 scripts/validate_release_sync.py \
+            --upstream-root /tmp/openclaw \
+            --go-root . \
+            --version "${{ steps.release.outputs.version }}" \
+            --output /tmp/release-diff-validation.json
+
+      - name: Show release diff validation report
+        if: steps.release.outputs.enabled == 'true'
+        run: cat /tmp/release-diff-validation.json
