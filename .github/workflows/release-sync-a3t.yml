@@ -28,6 +28,8 @@ jobs:
       OPENCODE_MODEL: ${{ vars.OPENCODE_MODEL }}
       OPENCODE_AGENT: ${{ vars.OPENCODE_AGENT }}
       OPENCODE_CONFIG_CONTENT: ${{ secrets.OPENCODE_CONFIG_CONTENT }}
+      OPENCODE_AUTH_JSON: ${{ secrets.OPENCODE_AUTH_JSON }}
+      OPENCODE_MCP_AUTH_JSON: ${{ secrets.OPENCODE_MCP_AUTH_JSON }}
       OPENCODE_PERMISSION: ${{ vars.OPENCODE_PERMISSION }}
       OPENCODE_INSTALL_CMD: ${{ vars.OPENCODE_INSTALL_CMD }}
     steps:
@@ -137,6 +139,25 @@ jobs:
             exit 1
           fi
           opencode --version
+
+      - name: Restore OpenCode auth/config secrets
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/share/opencode"
+
+          if [ -n "${OPENCODE_AUTH_JSON:-}" ]; then
+            printf '%s' "$OPENCODE_AUTH_JSON" > "$HOME/.local/share/opencode/auth.json"
+            chmod 600 "$HOME/.local/share/opencode/auth.json"
+            echo "Restored OpenCode provider auth file"
+          else
+            echo "::warning::OPENCODE_AUTH_JSON is empty; auth may fail for private providers"
+          fi
+
+          if [ -n "${OPENCODE_MCP_AUTH_JSON:-}" ]; then
+            printf '%s' "$OPENCODE_MCP_AUTH_JSON" > "$HOME/.local/share/opencode/mcp-auth.json"
+            chmod 600 "$HOME/.local/share/opencode/mcp-auth.json"
+            echo "Restored OpenCode MCP auth file"
+          fi
 
       - name: Build OpenCode prompt
         run: |
