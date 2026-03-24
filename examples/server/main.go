@@ -97,7 +97,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 			ConnID:  fmt.Sprintf("conn-%d", time.Now().UnixNano()),
 		},
 		Features: protocol.HelloFeatures{
-			Methods: []string{"system-presence", "exec.approval.resolve", "chat.send"},
+			Methods: []string{"system-presence", "exec.approval.resolve", "chat.send", "chat.history"},
 			Events:  []string{"tick", "exec.approval.requested", "chat"},
 		},
 		Snapshot: protocol.Snapshot{
@@ -160,6 +160,38 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 
 			case "exec.approval.resolve":
 				data, _ := protocol.MarshalResponse(r.ID, map[string]string{"status": "ok"})
+				mu.Lock()
+				conn.WriteMessage(websocket.TextMessage, data)
+				mu.Unlock()
+
+			case "chat.send":
+				var p protocol.ChatSendParams
+				_ = json.Unmarshal(r.Params, &p)
+
+				resp := protocol.ChatEvent{
+					RunID:      fmt.Sprintf("run-%d", time.Now().UnixNano()),
+					SessionKey: p.SessionKey,
+					Seq:        1,
+					State:      "final",
+					Message:    json.RawMessage(fmt.Sprintf("%q", "Mock response to: "+p.Message)),
+				}
+				data, _ := protocol.MarshalResponse(r.ID, resp)
+				mu.Lock()
+				conn.WriteMessage(websocket.TextMessage, data)
+				mu.Unlock()
+
+			case "chat.history":
+				var p protocol.ChatHistoryParams
+				_ = json.Unmarshal(r.Params, &p)
+
+				history := map[string]any{
+					"sessionKey": p.SessionKey,
+					"messages": []map[string]string{
+						{"role": "user", "content": "What is OpenClaw?"},
+						{"role": "assistant", "content": "Mock response to: What is OpenClaw?"},
+					},
+				}
+				data, _ := protocol.MarshalResponse(r.ID, history)
 				mu.Lock()
 				conn.WriteMessage(websocket.TextMessage, data)
 				mu.Unlock()
