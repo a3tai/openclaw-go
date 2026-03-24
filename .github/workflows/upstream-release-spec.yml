@@ -71,38 +71,40 @@ jobs:
               ? relevant.map((line) => `- ${line.replace(/^[-\s]+/, '')}`).join('\n')
               : '- No obvious gateway/protocol deltas auto-detected; manual review required.';
 
-            const spec = `# Upstream Sync Spec: ${version}
-
-- Upstream release: ${upstreamReleaseUrl}
-- Tracking issue: ${issueUrl}
-
-## Relevant upstream deltas (auto-detected)
-
-${relevantBlock}
-
-## openclaw-go changes required
-
-- [ ] Confirm protocol type delta coverage in \`protocol/\`
-- [ ] Confirm gateway typed RPC coverage in \`gateway/\`
-- [ ] Confirm/expand test coverage in \`gateway/methods_test.go\`
-- [ ] Update \`CHANGELOG.md\`
-
-            ## Required review gates
-
-            - [ ] Architecture review
-            - [ ] Go standards code review
-            - [ ] API coverage review
-            - [ ] Security review (Kingpin)
-            - [ ] Final HITL review
-
-## Validation
-
-- [ ] \`go test ./... -race\`
-
-## Status
-
-- Draft
-`;
+            const spec = [
+              `# Upstream Sync Spec: ${version}`,
+              '',
+              `- Upstream release: ${upstreamReleaseUrl}`,
+              `- Tracking issue: ${issueUrl}`,
+              '',
+              '## Relevant upstream deltas (auto-detected)',
+              '',
+              relevantBlock,
+              '',
+              '## openclaw-go changes required',
+              '',
+              '- [ ] Confirm protocol type delta coverage in `protocol/`',
+              '- [ ] Confirm gateway typed RPC coverage in `gateway/`',
+              '- [ ] Confirm/expand test coverage in `gateway/methods_test.go`',
+              '- [ ] Update `CHANGELOG.md`',
+              '',
+              '## Required review gates',
+              '',
+              '- [ ] Architecture review',
+              '- [ ] Go standards code review',
+              '- [ ] API coverage review',
+              '- [ ] Security review (Kingpin)',
+              '- [ ] Final HITL review',
+              '',
+              '## Validation',
+              '',
+              '- [ ] `go test ./... -race`',
+              '',
+              '## Status',
+              '',
+              '- Draft',
+              '',
+            ].join('\n');
 
             const dir = path.join(process.env.GITHUB_WORKSPACE, 'docs', 'specs');
             fs.mkdirSync(dir, { recursive: true });
