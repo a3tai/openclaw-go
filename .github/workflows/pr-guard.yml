@@ -211,7 +211,11 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const body = pr.body || "";
-            const labels = new Set((pr.labels || []).map((l) => l.name));
+            const labels = new Set(
+              (pr.labels || [])
+                .filter((label) => label && typeof label.name === 'string')
+                .map((label) => label.name),
+            );
 
             const files = await github.paginate(
               github.rest.pulls.listFiles,

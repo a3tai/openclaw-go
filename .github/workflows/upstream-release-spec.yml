@@ -19,7 +19,9 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const labels = (context.payload.issue?.labels || []).map((l) => l.name);
+            const labels = (context.payload.issue?.labels || [])
+              .filter((label) => label && typeof label.name === 'string')
+              .map((label) => label.name);
             const enabled = labels.includes('upstream-release');
             core.setOutput('enabled', enabled ? 'true' : 'false');
 
