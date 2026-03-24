@@ -196,8 +196,9 @@ See the [`docs/`](docs/) directory for per-package API guides:
 
 ## About
 
-This project is independently maintained by [a3t.ai](https://a3t.ai) and is not
-officially affiliated with the OpenClaw project.
+This project is independently maintained by Rude Company LLC (d/b/a
+[a3t.ai](https://a3t.ai)) and is not officially affiliated with the OpenClaw
+project.
 
 Many thanks to [Peter Steinberger](https://github.com/steipete) for creating
 [OpenClaw](https://github.com/nicepkg/openclaw) and giving it to the world.
@@ -210,7 +211,7 @@ possible. With all love and respect.
 
 - [OpenClaw](https://openclaw.ai) -- the open gateway for AI agents
 - [OpenClaw GitHub](https://github.com/nicepkg/openclaw)
-- [a3t.ai](https://a3t.ai) -- maintainers of this Go client library
+- [a3t.ai](https://a3t.ai) -- website for Rude Company LLC, maintainers of this Go client library
 
 ## License
 

@@ -103,7 +103,6 @@ jobs:
           if [ -f /tmp/openclaw-mock.pid ]; then
             kill "$(cat /tmp/openclaw-mock.pid)" || true
           fi
-
   upstream-api-parity:
     name: Upstream API Parity
     runs-on: ubuntu-latest

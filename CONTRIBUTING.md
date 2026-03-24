@@ -1,7 +1,8 @@
 # Contributing to openclaw-go
 
 Thanks for your interest in contributing. This project is independently maintained
-by [a3t.ai](https://a3t.ai). We welcome thoughtful, well-tested contributions.
+by Rude Company LLC (d/b/a [a3t.ai](https://a3t.ai)). We welcome thoughtful,
+well-tested contributions.
 
 ## Before You Start
 
