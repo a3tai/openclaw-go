@@ -24,7 +24,11 @@ jobs:
             const pr = context.payload.pull_request;
             const body = pr.body || '';
             const title = pr.title || '';
-            const labels = new Set((pr.labels || []).map((l) => l.name));
+            const labels = new Set(
+              (pr.labels || [])
+                .filter((label) => label && typeof label.name === 'string')
+                .map((label) => label.name),
+            );
 
             const files = await github.paginate(
               github.rest.pulls.listFiles,
@@ -86,7 +90,11 @@ jobs:
             );
 
             const requiredRunNames = ['Test', 'Release Gates', 'Release Smoke', 'Release E2E'];
-            const byName = new Map(checkRuns.map((run) => [run.name, run]));
+            const byName = new Map(
+              (checkRuns || [])
+                .filter((run) => run && typeof run.name === 'string')
+                .map((run) => [run.name, run]),
+            );
             const failedRuns = [];
             for (const name of requiredRunNames) {
               const run = byName.get(name);
