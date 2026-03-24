@@ -65,7 +65,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		Nonce: fmt.Sprintf("nonce-%d", time.Now().UnixNano()),
 		Ts:    time.Now().UnixMilli(),
 	}
-	evData, _ := protocol.MarshalEvent("connect.challenge", challenge)
+	evData, _ := protocol.MarshalEvent(protocol.EventConnectChallenge, challenge)
 	if err := conn.WriteMessage(websocket.TextMessage, evData); err != nil {
 		log.Printf("[ws] write challenge: %v", err)
 		return
@@ -98,7 +98,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		},
 		Features: protocol.HelloFeatures{
 			Methods: []string{"system-presence", "exec.approval.resolve", "chat.send", "chat.history"},
-			Events:  []string{"tick", "exec.approval.requested", "chat"},
+			Events:  []string{string(protocol.EventTick), string(protocol.EventExecApproval), string(protocol.EventChat)},
 		},
 		Snapshot: protocol.Snapshot{
 			Presence:     []protocol.PresenceEntry{{Ts: time.Now().UnixMilli(), DeviceID: "mock-device", Roles: []string{"operator"}}},

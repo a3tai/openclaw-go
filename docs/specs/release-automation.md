@@ -27,6 +27,12 @@ For every upstream OpenClaw release, run an automated downstream sync pipeline:
   - enforces release checklist completion for release-sync PRs
 - `release-publish.yml`
   - on merged release-sync PR: tag, publish release, comment+close tracking issue
+- `upstream-api-drift-report.yml`
+  - compares upstream server methods to openclaw-go gateway surface and files an automated drift report issue
+  - optionally sends a Resend email notification when `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_TO_EMAIL` are configured
+- `forks-report.yml`
+  - publishes a scheduled forks activity report issue assigned to maintainers for review
+  - optionally sends a Resend email notification when `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_TO_EMAIL` are configured
 
 ## Upstream-release issue format
 
@@ -66,6 +72,7 @@ Release implementation PRs must not merge until all are complete:
   - `Release Smoke`
   - `Release E2E`
 - Branch protection should require CODEOWNERS review and required checks.
+- Drift detection runs every 6 hours and raises an issue when upstream methods diverge.
 
 ## Deferred
 

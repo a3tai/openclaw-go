@@ -9,7 +9,7 @@ import (
 // ModelsList lists available models.
 func (c *Client) ModelsList(ctx context.Context) (*protocol.ModelsListResult, error) {
 	var result protocol.ModelsListResult
-	if err := c.sendRPCTyped(ctx, "models.list", struct{}{}, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodModelsList), struct{}{}, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil

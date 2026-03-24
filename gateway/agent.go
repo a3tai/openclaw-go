@@ -15,7 +15,7 @@ func (c *Client) Agent(ctx context.Context, params protocol.AgentParams) (json.R
 // AgentIdentity retrieves the identity of an agent.
 func (c *Client) AgentIdentity(ctx context.Context, params protocol.AgentIdentityParams) (*protocol.AgentIdentityResult, error) {
 	var result protocol.AgentIdentityResult
-	if err := c.sendRPCTyped(ctx, "agent.identity.get", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodAgentIdentityGet), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -23,5 +23,5 @@ func (c *Client) AgentIdentity(ctx context.Context, params protocol.AgentIdentit
 
 // AgentWait waits for an agent run to complete.
 func (c *Client) AgentWait(ctx context.Context, params protocol.AgentWaitParams) (json.RawMessage, error) {
-	return c.sendRPC(ctx, "agent.wait", params)
+	return c.sendRPC(ctx, string(protocol.MethodAgentWait), params)
 }

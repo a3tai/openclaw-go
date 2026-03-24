@@ -10,7 +10,7 @@ import (
 // Requires the operator.approvals scope.
 func (c *Client) ExecApprovalResolve(ctx context.Context, params protocol.ExecApprovalResolveParams) (*protocol.ExecApprovalResolveResult, error) {
 	var result protocol.ExecApprovalResolveResult
-	if err := c.sendRPCTyped(ctx, "exec.approval.resolve", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalResolve), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -19,7 +19,7 @@ func (c *Client) ExecApprovalResolve(ctx context.Context, params protocol.ExecAp
 // ExecApprovalRequest submits a new exec approval request.
 func (c *Client) ExecApprovalRequest(ctx context.Context, params protocol.ExecApprovalRequestParams) (*protocol.ExecApprovalRequestResult, error) {
 	var result protocol.ExecApprovalRequestResult
-	if err := c.sendRPCTyped(ctx, "exec.approval.request", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalRequest), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -38,7 +38,7 @@ func (c *Client) ExecApprovalWaitDecision(ctx context.Context, params protocol.E
 // ExecApprovalsGet retrieves the exec approvals configuration.
 func (c *Client) ExecApprovalsGet(ctx context.Context) (*protocol.ExecApprovalsSnapshot, error) {
 	var snap protocol.ExecApprovalsSnapshot
-	if err := c.sendRPCTyped(ctx, "exec.approvals.get", protocol.ExecApprovalsGetParams{}, &snap); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalsGet), protocol.ExecApprovalsGetParams{}, &snap); err != nil {
 		return nil, err
 	}
 	return &snap, nil
@@ -46,13 +46,13 @@ func (c *Client) ExecApprovalsGet(ctx context.Context) (*protocol.ExecApprovalsS
 
 // ExecApprovalsSet updates the exec approvals configuration.
 func (c *Client) ExecApprovalsSet(ctx context.Context, params protocol.ExecApprovalsSetParams) error {
-	return c.sendRPCVoid(ctx, "exec.approvals.set", params)
+	return c.sendRPCVoid(ctx, string(protocol.MethodExecApprovalsSet), params)
 }
 
 // ExecApprovalsNodeGet retrieves exec approvals for a specific node.
 func (c *Client) ExecApprovalsNodeGet(ctx context.Context, params protocol.ExecApprovalsNodeGetParams) (*protocol.ExecApprovalsSnapshot, error) {
 	var snap protocol.ExecApprovalsSnapshot
-	if err := c.sendRPCTyped(ctx, "exec.approvals.node.get", params, &snap); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalsNodeGet), params, &snap); err != nil {
 		return nil, err
 	}
 	return &snap, nil
@@ -60,5 +60,5 @@ func (c *Client) ExecApprovalsNodeGet(ctx context.Context, params protocol.ExecA
 
 // ExecApprovalsNodeSet updates exec approvals for a specific node.
 func (c *Client) ExecApprovalsNodeSet(ctx context.Context, params protocol.ExecApprovalsNodeSetParams) error {
-	return c.sendRPCVoid(ctx, "exec.approvals.node.set", params)
+	return c.sendRPCVoid(ctx, string(protocol.MethodExecApprovalsNodeSet), params)
 }

@@ -268,6 +268,70 @@ func TestSessionsResolve(t *testing.T) {
 	tm.run()
 }
 
+func TestSessionsCreate(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.create", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCreate(ctx, protocol.SessionsCreateParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsSend(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.send", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsSend(ctx, protocol.SessionsSendParams{Key: "main", Message: "hello"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsSteer(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.steer", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsSteer(ctx, protocol.SessionsSendParams{Key: "main", Message: "hello"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsAbort(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.abort", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsAbort(ctx, protocol.SessionsAbortParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsSubscribe(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsUnsubscribe(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsMessagesSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.messages.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsMessagesSubscribe(ctx, protocol.SessionsMessagesSubscribeParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsMessagesUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.messages.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsMessagesUnsubscribe(ctx, protocol.SessionsMessagesUnsubscribeParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestSessionsPatch(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.patch", success: func(c *Client, ctx context.Context) error {
 		return c.SessionsPatch(ctx, protocol.SessionsPatchParams{Key: "main"})
@@ -299,6 +363,22 @@ func TestSessionsCompact(t *testing.T) {
 func TestSessionsUsage(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.usage", success: func(c *Client, ctx context.Context) error {
 		_, err := c.SessionsUsage(ctx, protocol.SessionsUsageParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsUsageTimeseries(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.usage.timeseries", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsUsageTimeseries(ctx, protocol.SessionsUsageTimeseriesParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsUsageLogs(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.usage.logs", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsUsageLogs(ctx, protocol.SessionsUsageLogsParams{Key: "main"})
 		return err
 	}}
 	tm.run()
@@ -368,6 +448,14 @@ func TestConfigSchema(t *testing.T) {
 
 	tm := &testMethod{t: t, method: "config.schema", success: func(c *Client, ctx context.Context) error {
 		_, err := c.ConfigSchema(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestConfigSchemaLookup(t *testing.T) {
+	tm := &testMethod{t: t, method: "config.schema.lookup", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ConfigSchemaLookup(ctx, protocol.ConfigSchemaLookupParams{Path: "session.mainKey"})
 		return err
 	}}
 	tm.run()
@@ -607,6 +695,30 @@ func TestNodePendingEnqueue(t *testing.T) {
 func TestNodePendingDrain(t *testing.T) {
 	m := &testMethod{t: t, method: "node.pending.drain", success: func(c *Client, ctx context.Context) error {
 		_, err := c.NodePendingDrain(ctx, protocol.NodePendingDrainParams{})
+		return err
+	}}
+	m.run()
+}
+
+func TestNodePendingPull(t *testing.T) {
+	m := &testMethod{t: t, method: "node.pending.pull", success: func(c *Client, ctx context.Context) error {
+		_, err := c.NodePendingPull(ctx)
+		return err
+	}}
+	m.run()
+}
+
+func TestNodePendingAck(t *testing.T) {
+	m := &testMethod{t: t, method: "node.pending.ack", success: func(c *Client, ctx context.Context) error {
+		_, err := c.NodePendingAck(ctx, protocol.NodePendingAckParams{IDs: []string{"a1"}})
+		return err
+	}}
+	m.run()
+}
+
+func TestNodeCanvasCapabilityRefresh(t *testing.T) {
+	m := &testMethod{t: t, method: "node.canvas.capability.refresh", success: func(c *Client, ctx context.Context) error {
+		_, err := c.NodeCanvasCapabilityRefresh(ctx)
 		return err
 	}}
 	m.run()
@@ -1027,6 +1139,22 @@ func TestTalkSpeak(t *testing.T) {
 	m.run()
 }
 
+func TestWebLoginStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "web.login.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.WebLoginStart(ctx, protocol.WebLoginStartParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestWebLoginWait(t *testing.T) {
+	tm := &testMethod{t: t, method: "web.login.wait", success: func(c *Client, ctx context.Context) error {
+		_, err := c.WebLoginWait(ctx, protocol.WebLoginWaitParams{})
+		return err
+	}}
+	tm.run()
+}
+
 // --- Send / Wake / System ---
 
 func TestSendMessage(t *testing.T) {
@@ -1062,6 +1190,22 @@ func TestSetHeartbeats(t *testing.T) {
 func TestSystemEvent(t *testing.T) {
 	tm := &testMethod{t: t, method: "system-event", success: func(c *Client, ctx context.Context) error {
 		return c.SystemEvent(ctx, map[string]string{"type": "test"})
+	}}
+	tm.run()
+}
+
+func TestGatewayIdentityGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "gateway.identity.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.GatewayIdentityGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.status", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryStatus(ctx)
+		return err
 	}}
 	tm.run()
 }
@@ -1114,6 +1258,29 @@ func TestPushTest(t *testing.T) {
 func TestBrowserRequest(t *testing.T) {
 	tm := &testMethod{t: t, method: "browser.request", success: func(c *Client, ctx context.Context) error {
 		_, err := c.BrowserRequest(ctx, map[string]string{"url": "https://example.com"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSecretsReload(t *testing.T) {
+	tm := &testMethod{t: t, method: "secrets.reload", success: func(c *Client, ctx context.Context) error {
+		return c.SecretsReload(ctx)
+	}}
+	tm.run()
+}
+
+func TestSecretsResolve(t *testing.T) {
+	tm := &testMethod{t: t, method: "secrets.resolve", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SecretsResolve(ctx, protocol.SecretsResolveParams{CommandName: "send", TargetIDs: []string{"slack"}})
+		return err
+	}}
+	tm.run()
+}
+
+func TestToolsCatalog(t *testing.T) {
+	tm := &testMethod{t: t, method: "tools.catalog", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ToolsCatalog(ctx, protocol.ToolsCatalogParams{})
 		return err
 	}}
 	tm.run()

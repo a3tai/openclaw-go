@@ -35,7 +35,7 @@ func main() {
 		gateway.WithScopes(protocol.ScopeOperatorRead, protocol.ScopeOperatorWrite),
 		gateway.WithOnEvent(func(ev protocol.Event) {
 			// Handle chat events as they arrive.
-			if ev.EventName == "chat" {
+			if ev.EventName == protocol.EventChat {
 				var data map[string]any
 				if json.Unmarshal(ev.Payload, &data) == nil {
 					state, _ := data["state"].(string)

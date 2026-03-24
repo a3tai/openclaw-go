@@ -103,3 +103,18 @@ jobs:
           if [ -f /tmp/openclaw-mock.pid ]; then
             kill "$(cat /tmp/openclaw-mock.pid)" || true
           fi
+
+  upstream-api-parity:
+    name: Upstream API Parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone upstream openclaw
+        run: git clone --depth 1 https://github.com/openclaw/openclaw /tmp/openclaw
+
+      - name: Assert no missing upstream RPC methods
+        run: |
+          python3 scripts/upstream_drift_report.py \
+            --upstream-root /tmp/openclaw \
+            --go-root .

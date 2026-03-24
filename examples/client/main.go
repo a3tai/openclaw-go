@@ -107,7 +107,7 @@ func demonstrateGateway(ctx context.Context) {
 
 	// Send a custom event.
 	fmt.Println("  Sending event...")
-	err = client.SendEvent("exec.finished", protocol.ExecFinished{
+	err = client.SendEvent(string(protocol.EventExecFinished), protocol.ExecFinished{
 		SessionKey: "main",
 		RunID:      "run-example",
 	})

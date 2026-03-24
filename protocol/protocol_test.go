@@ -2043,6 +2043,84 @@ func TestExecApprovalWaitDecisionTypesRoundTrip(t *testing.T) {
 	}
 }
 
+func TestSessionGatewayExtendedTypesRoundTrip(t *testing.T) {
+	create := SessionsCreateParams{Key: "main", AgentID: "agent1", Message: "hi"}
+	data, _ := json.Marshal(create)
+	var gotCreate SessionsCreateParams
+	json.Unmarshal(data, &gotCreate)
+	if gotCreate.Key != "main" || gotCreate.AgentID != "agent1" {
+		t.Errorf("sessions.create mismatch: %#v", gotCreate)
+	}
+
+	send := SessionsSendParams{Key: "main", Message: "hello"}
+	data, _ = json.Marshal(send)
+	var gotSend SessionsSendParams
+	json.Unmarshal(data, &gotSend)
+	if gotSend.Message != "hello" {
+		t.Errorf("sessions.send message = %q", gotSend.Message)
+	}
+
+	abs := SessionsAbortParams{Key: "main", RunID: "r1"}
+	data, _ = json.Marshal(abs)
+	var gotAbort SessionsAbortParams
+	json.Unmarshal(data, &gotAbort)
+	if gotAbort.RunID != "r1" {
+		t.Errorf("sessions.abort runId = %q", gotAbort.RunID)
+	}
+}
+
+func TestNodePendingExtendedTypesRoundTrip(t *testing.T) {
+	ack := NodePendingAckParams{IDs: []string{"a1", "a2"}}
+	data, _ := json.Marshal(ack)
+	var gotAck NodePendingAckParams
+	json.Unmarshal(data, &gotAck)
+	if len(gotAck.IDs) != 2 {
+		t.Errorf("ids len = %d", len(gotAck.IDs))
+	}
+
+	pull := NodePendingPullResult{NodeID: "n1", Actions: []NodePendingAction{{ID: "a1", Command: "status"}}}
+	data, _ = json.Marshal(pull)
+	var gotPull NodePendingPullResult
+	json.Unmarshal(data, &gotPull)
+	if gotPull.NodeID != "n1" || len(gotPull.Actions) != 1 {
+		t.Errorf("node.pending.pull mismatch: %#v", gotPull)
+	}
+
+	canvas := NodeCanvasCapabilityRefreshResult{CanvasCapability: "cap", CanvasCapabilityExpiresAtMs: 123, CanvasHostURL: "https://x"}
+	data, _ = json.Marshal(canvas)
+	var gotCanvas NodeCanvasCapabilityRefreshResult
+	json.Unmarshal(data, &gotCanvas)
+	if gotCanvas.CanvasCapability != "cap" {
+		t.Errorf("canvas capability = %q", gotCanvas.CanvasCapability)
+	}
+}
+
+func TestConfigSecretsAndSystemTypesRoundTrip(t *testing.T) {
+	lookup := ConfigSchemaLookupResult{Path: "session.mainKey", Schema: json.RawMessage(`{"type":"string"}`)}
+	data, _ := json.Marshal(lookup)
+	var gotLookup ConfigSchemaLookupResult
+	json.Unmarshal(data, &gotLookup)
+	if gotLookup.Path != "session.mainKey" {
+		t.Errorf("lookup path = %q", gotLookup.Path)
+	}
+
+	resolve := SecretsResolveResult{Assignments: []SecretsResolveAssignment{{PathSegments: []string{"x"}, Value: json.RawMessage(`"y"`)}}}
+	data, _ = json.Marshal(resolve)
+	var gotResolve SecretsResolveResult
+	json.Unmarshal(data, &gotResolve)
+	if len(gotResolve.Assignments) != 1 {
+		t.Errorf("assignments len = %d", len(gotResolve.Assignments))
+	}
+
+	ident := GatewayIdentityResult{DeviceID: "d1", PublicKey: "pk"}
+	data, _ = json.Marshal(ident)
+	var gotIdent GatewayIdentityResult
+	json.Unmarshal(data, &gotIdent)
+	if gotIdent.DeviceID != "d1" {
+		t.Errorf("deviceId = %q", gotIdent.DeviceID)
+	}
+}
+
 // --- Helpers ---
 
 func intPtr(v int) *int       { return &v }

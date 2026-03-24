@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -9,7 +10,7 @@ import (
 // ChannelsStatus retrieves the status of all channels.
 func (c *Client) ChannelsStatus(ctx context.Context, params protocol.ChannelsStatusParams) (*protocol.ChannelsStatusResult, error) {
 	var result protocol.ChannelsStatusResult
-	if err := c.sendRPCTyped(ctx, "channels.status", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodChannelsStatus), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -17,13 +18,13 @@ func (c *Client) ChannelsStatus(ctx context.Context, params protocol.ChannelsSta
 
 // ChannelsLogout logs out of a channel account.
 func (c *Client) ChannelsLogout(ctx context.Context, params protocol.ChannelsLogoutParams) error {
-	return c.sendRPCVoid(ctx, "channels.logout", params)
+	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsLogout), params)
 }
 
 // TalkConfig retrieves the talk (voice) configuration.
 func (c *Client) TalkConfig(ctx context.Context, params protocol.TalkConfigParams) (*protocol.TalkConfigResult, error) {
 	var result protocol.TalkConfigResult
-	if err := c.sendRPCTyped(ctx, "talk.config", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTalkConfig), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -31,14 +32,24 @@ func (c *Client) TalkConfig(ctx context.Context, params protocol.TalkConfigParam
 
 // TalkMode sets the talk mode (voice).
 func (c *Client) TalkMode(ctx context.Context, params protocol.TalkModeParams) error {
-	return c.sendRPCVoid(ctx, "talk.mode", params)
+	return c.sendRPCVoid(ctx, string(protocol.MethodTalkMode), params)
 }
 
 // TalkSpeak synthesizes speech audio through the configured talk provider.
 func (c *Client) TalkSpeak(ctx context.Context, params protocol.TalkSpeakParams) (*protocol.TalkSpeakResult, error) {
 	var result protocol.TalkSpeakResult
-	if err := c.sendRPCTyped(ctx, "talk.speak", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTalkSpeak), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
+}
+
+// WebLoginStart starts an interactive web login flow for a channel provider.
+func (c *Client) WebLoginStart(ctx context.Context, params protocol.WebLoginStartParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodWebLoginStart), params)
+}
+
+// WebLoginWait waits for completion of an interactive web login flow.
+func (c *Client) WebLoginWait(ctx context.Context, params protocol.WebLoginWaitParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodWebLoginWait), params)
 }
