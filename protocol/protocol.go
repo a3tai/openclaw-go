@@ -779,6 +779,48 @@ type NodeEventParams struct {
 	PayloadJSON string          `json:"payloadJSON,omitempty"`
 }
 
+// NodePendingEnqueueParams are the params for "node.pending.enqueue".
+// Added in openclaw v2026.3.11.
+type NodePendingEnqueueParams struct {
+	NodeID      string `json:"nodeId"`
+	Type        string `json:"type"` // "status.request" or "location.request"
+	Priority    string `json:"priority,omitempty"`
+	ExpiresInMs *int   `json:"expiresInMs,omitempty"`
+	Wake        *bool  `json:"wake,omitempty"`
+}
+
+// NodePendingDrainParams are the params for "node.pending.drain".
+// Added in openclaw v2026.3.11.
+type NodePendingDrainParams struct {
+	MaxItems *int `json:"maxItems,omitempty"`
+}
+
+// NodePendingWorkItem is a queued node.pending work item.
+type NodePendingWorkItem struct {
+	ID          string         `json:"id"`
+	Type        string         `json:"type"`
+	Priority    string         `json:"priority"`
+	CreatedAtMs int64          `json:"createdAtMs"`
+	ExpiresAtMs *int64         `json:"expiresAtMs,omitempty"`
+	Payload     map[string]any `json:"payload,omitempty"`
+}
+
+// NodePendingEnqueueResult is the result of "node.pending.enqueue".
+type NodePendingEnqueueResult struct {
+	NodeID        string              `json:"nodeId"`
+	Revision      int                 `json:"revision"`
+	Queued        NodePendingWorkItem `json:"queued"`
+	WakeTriggered bool                `json:"wakeTriggered"`
+}
+
+// NodePendingDrainResult is the result of "node.pending.drain".
+type NodePendingDrainResult struct {
+	NodeID   string                `json:"nodeId"`
+	Revision int                   `json:"revision"`
+	Items    []NodePendingWorkItem `json:"items"`
+	HasMore  bool                  `json:"hasMore"`
+}
+
 // NodeInvokeRequestEvent is the payload of a "node.invoke.request" event.
 type NodeInvokeRequestEvent struct {
 	ID             string `json:"id"`

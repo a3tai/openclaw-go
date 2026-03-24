@@ -596,6 +596,22 @@ func TestNodeRename(t *testing.T) {
 	tm.run()
 }
 
+func TestNodePendingEnqueue(t *testing.T) {
+	m := &testMethod{t: t, method: "node.pending.enqueue", success: func(c *Client, ctx context.Context) error {
+		_, err := c.NodePendingEnqueue(ctx, protocol.NodePendingEnqueueParams{NodeID: "n1", Type: "status.request"})
+		return err
+	}}
+	m.run()
+}
+
+func TestNodePendingDrain(t *testing.T) {
+	m := &testMethod{t: t, method: "node.pending.drain", success: func(c *Client, ctx context.Context) error {
+		_, err := c.NodePendingDrain(ctx, protocol.NodePendingDrainParams{})
+		return err
+	}}
+	m.run()
+}
+
 // --- Node pairing ---
 
 func TestNodePairRequest(t *testing.T) {

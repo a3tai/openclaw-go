@@ -36,3 +36,21 @@ func (c *Client) NodeEvent(ctx context.Context, params protocol.NodeEventParams)
 func (c *Client) NodeRename(ctx context.Context, params protocol.NodeRenameParams) error {
 	return c.sendRPCVoid(ctx, "node.rename", params)
 }
+
+// NodePendingEnqueue enqueues pending work for a node.
+func (c *Client) NodePendingEnqueue(ctx context.Context, params protocol.NodePendingEnqueueParams) (*protocol.NodePendingEnqueueResult, error) {
+	var result protocol.NodePendingEnqueueResult
+	if err := c.sendRPCTyped(ctx, "node.pending.enqueue", params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// NodePendingDrain drains pending work for the connected node identity.
+func (c *Client) NodePendingDrain(ctx context.Context, params protocol.NodePendingDrainParams) (*protocol.NodePendingDrainResult, error) {
+	var result protocol.NodePendingDrainResult
+	if err := c.sendRPCTyped(ctx, "node.pending.drain", params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

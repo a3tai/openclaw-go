@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `SessionsGet(ctx, SessionsGetParams)` — retrieve session messages by key (`sessions.get` RPC, openclaw v2026.3.7)
 - `SessionsGetParams` protocol type with `Key`, `SessionKey`, and `Limit` fields
+- `NodePendingEnqueue(ctx, NodePendingEnqueueParams)` and `NodePendingDrain(ctx, NodePendingDrainParams)` for pending node work queue operations (`node.pending.enqueue`, `node.pending.drain`; openclaw v2026.3.11)
+- `NodePendingEnqueueParams`, `NodePendingDrainParams`, `NodePendingWorkItem`, `NodePendingEnqueueResult`, and `NodePendingDrainResult` protocol types
 
 ## [1.0.0] - 2026-02-20
 
