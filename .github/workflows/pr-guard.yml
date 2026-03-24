@@ -194,3 +194,72 @@ jobs:
           fi
 
           echo "PR description looks good."
+
+  # -----------------------------------------------------------------------
+  # Enforce release review gates for release-sync PRs
+  # -----------------------------------------------------------------------
+  release-gates:
+    name: Release Gates
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Validate release gate checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || "";
+            const title = pr.title || "";
+            const labels = new Set((pr.labels || []).map((l) => l.name));
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              },
+            );
+
+            const changedPaths = files.map((f) => f.filename);
+            const hasSpecFile = changedPaths.some((p) => /^docs\/specs\/v\d+\.\d+\.\d+(?:-\d+)?\.md$/.test(p));
+
+            const isReleasePR =
+              labels.has("release-sync") ||
+              labels.has("upstream-release") ||
+              /upstream release|release\s*sync|release:\s*v\d+/i.test(title) ||
+              hasSpecFile;
+
+            if (!isReleasePR) {
+              core.info("Not a release-sync PR; skipping release gate enforcement.");
+              return;
+            }
+
+            const requiredChecks = [
+              { name: "Architecture review", re: /- \[[xX]\]\s+Architecture review/ },
+              { name: "Go standards code review", re: /- \[[xX]\]\s+Go standards code review/ },
+              { name: "API coverage review", re: /- \[[xX]\]\s+API coverage review/ },
+              { name: "Security review \(Kingpin \/ @slantview\)", re: /- \[[xX]\]\s+Security review \(Kingpin \/ @slantview\)/ },
+              { name: "Final HITL review", re: /- \[[xX]\]\s+Final HITL review/ },
+              { name: "go test ./... -race", re: /- \[[xX]\]\s+`go test \.\/\.\.\. -race`/ },
+            ];
+
+            const missing = requiredChecks.filter((c) => !c.re.test(body)).map((c) => c.name);
+            if (!hasSpecFile) {
+              missing.push("docs/specs/<version>.md in PR diff");
+            }
+
+            if (missing.length > 0) {
+              core.setFailed(
+                [
+                  "Release gate validation failed.",
+                  "Missing required items:",
+                  ...missing.map((m) => `- ${m}`),
+                ].join("\n"),
+              );
+            } else {
+              core.info("Release gate validation passed.");
+            }

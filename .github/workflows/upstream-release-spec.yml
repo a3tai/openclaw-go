@@ -1,0 +1,186 @@
+name: Upstream Release Spec
+
+on:
+  issues:
+    types: [opened, reopened, edited, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  spec-pr:
+    if: contains(join(github.event.issue.labels.*.name, ','), 'upstream-release')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate release spec file
+        id: generate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const issue = context.payload.issue;
+            const title = issue.title || '';
+            const match = title.match(/v\d+\.\d+\.\d+(?:-\d+)?/);
+
+            if (!match) {
+              core.setFailed(`Could not parse version from issue title: ${title}`);
+              return;
+            }
+
+            const version = match[0];
+            const issueUrl = issue.html_url;
+            const upstreamReleaseUrl = `https://github.com/openclaw/openclaw/releases/tag/${version}`;
+
+            let releaseBody = '';
+            try {
+              const rel = await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+                owner: 'openclaw',
+                repo: 'openclaw',
+                tag: version,
+              });
+              releaseBody = rel.data.body || '';
+            } catch (err) {
+              core.warning(`Could not fetch upstream tag ${version}; using issue body excerpt fallback.`);
+              releaseBody = issue.body || '';
+            }
+
+            const keywords = [
+              'gateway', 'protocol', 'rpc', 'node.pending', 'talk.speak',
+              'sessions_spawn', 'sessions_yield', 'breaking', 'security'
+            ];
+
+            const relevant = releaseBody
+              .split(/\r?\n/)
+              .map((line) => line.trim())
+              .filter((line) => line.startsWith('-'))
+              .filter((line) => {
+                const lower = line.toLowerCase();
+                return keywords.some((k) => lower.includes(k));
+              })
+              .slice(0, 20);
+
+            const relevantBlock = relevant.length > 0
+              ? relevant.map((line) => `- ${line.replace(/^[-\s]+/, '')}`).join('\n')
+              : '- No obvious gateway/protocol deltas auto-detected; manual review required.';
+
+            const spec = `# Upstream Sync Spec: ${version}
+
+- Upstream release: ${upstreamReleaseUrl}
+- Tracking issue: ${issueUrl}
+
+## Relevant upstream deltas (auto-detected)
+
+${relevantBlock}
+
+## openclaw-go changes required
+
+- [ ] Confirm protocol type delta coverage in \`protocol/\`
+- [ ] Confirm gateway typed RPC coverage in \`gateway/\`
+- [ ] Confirm/expand test coverage in \`gateway/methods_test.go\`
+- [ ] Update \`CHANGELOG.md\`
+
+            ## Required review gates
+
+            - [ ] Architecture review
+            - [ ] Go standards code review
+            - [ ] API coverage review
+            - [ ] Security review (Kingpin)
+            - [ ] Final HITL review
+
+## Validation
+
+- [ ] \`go test ./... -race\`
+
+## Status
+
+- Draft
+`;
+
+            const dir = path.join(process.env.GITHUB_WORKSPACE, 'docs', 'specs');
+            fs.mkdirSync(dir, { recursive: true });
+            const filePath = path.join(dir, `${version}.md`);
+            fs.writeFileSync(filePath, spec, 'utf8');
+
+            core.setOutput('version', version);
+            core.setOutput('spec_path', `docs/specs/${version}.md`);
+
+      - name: Ensure release labels exist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = [
+              { name: 'upstream-release', color: '0E8A16', description: 'Tracks new openclaw upstream releases' },
+              { name: 'release-sync', color: '1D76DB', description: 'Tracks downstream release sync work' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ...label,
+                });
+              } catch (err) {
+                if (err.status !== 422) {
+                  throw err;
+                }
+              }
+            }
+
+      - name: Create or update spec PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs(spec): draft upstream sync spec ${{ steps.generate.outputs.version }}"
+          title: "docs(spec): draft upstream sync spec ${{ steps.generate.outputs.version }}"
+          body: |
+            Generated from upstream release tracking issue #${{ github.event.issue.number }}.
+
+            Includes:
+            - auto-generated release sync spec at `${{ steps.generate.outputs.spec_path }}`
+            - required review gates:
+              - architecture review
+              - go standards code review
+              - api coverage review
+              - security review (Kingpin)
+          branch: "automation/spec-${{ steps.generate.outputs.version }}"
+          labels: |
+            upstream-release
+            release-sync
+          reviewers: |
+            slantview
+          add-paths: |
+            ${{ steps.generate.outputs.spec_path }}
+          signoff: true
+
+      - name: Comment on tracking issue
+        if: steps.cpr.outputs.pull-request-number != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = '${{ steps.cpr.outputs.pull-request-number }}';
+            const prUrl = '${{ steps.cpr.outputs.pull-request-url }}';
+
+            await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: [
+                `Opened/updated spec PR: ${prUrl}`,
+                '',
+                'Required release gates before tagging:',
+                '- Architecture review',
+                '- Go standards code review',
+                '- API coverage review',
+                '- Security review (Kingpin)',
+                '- Final HITL review',
+              ].join('\n'),
+            });
