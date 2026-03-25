@@ -43,7 +43,7 @@ type keypairJSON struct {
 type Identity struct {
 	DeviceID        string
 	PublicKeyB64URL string
-	privateKey      ed25519.PrivateKey
+	PrivateKey      ed25519.PrivateKey
 }
 
 // DeviceIdentityProto mirrors protocol.DeviceIdentity without import cycles.
@@ -86,7 +86,7 @@ func (id *Identity) BuildDeviceIdentity(p SigningParams) *DeviceIdentityProto {
 		p.Token,
 		p.Nonce,
 	)
-	sig := ed25519.Sign(id.privateKey, []byte(payload))
+	sig := ed25519.Sign(id.PrivateKey, []byte(payload))
 	return &DeviceIdentityProto{
 		ID:        id.DeviceID,
 		PublicKey: id.PublicKeyB64URL,
@@ -144,7 +144,7 @@ func (s *Store) load() (*Identity, error) {
 	return &Identity{
 		DeviceID:        correctID,
 		PublicKeyB64URL: kp.PublicKey,
-		privateKey:      priv,
+		PrivateKey:      priv,
 	}, nil
 }
 
@@ -171,7 +171,7 @@ func (s *Store) generate() (*Identity, error) {
 	return &Identity{
 		DeviceID:        deviceID,
 		PublicKeyB64URL: pubB64,
-		privateKey:      priv,
+		PrivateKey:      priv,
 	}, nil
 }
 

@@ -26,7 +26,7 @@ func TestBuildDeviceIdentity_V2Payload_SignatureVerifies(t *testing.T) {
 	id := &Identity{
 		DeviceID:        deviceID,
 		PublicKeyB64URL: pubB64,
-		privateKey:      priv,
+		PrivateKey:      priv,
 	}
 
 	p := SigningParams{

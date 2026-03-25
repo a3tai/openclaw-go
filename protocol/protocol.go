@@ -285,8 +285,9 @@ const (
 	MethodTalkSpeak      MethodName = "talk.speak"
 
 	// Tool and TTS interfaces.
-	MethodToolsCatalog MethodName = "tools.catalog"
-	MethodTTSConvert   MethodName = "tts.convert"
+	MethodToolsCatalog  MethodName = "tools.catalog"
+	MethodToolsEffective MethodName = "tools.effective"
+	MethodTTSConvert    MethodName = "tts.convert"
 	MethodTTSDisable   MethodName = "tts.disable"
 	MethodTTSEnable    MethodName = "tts.enable"
 	MethodTTSProviders MethodName = "tts.providers"
@@ -1720,6 +1721,13 @@ type SkillsUpdateParams struct {
 type ToolsCatalogParams struct {
 	AgentID        string `json:"agentId,omitempty"`
 	IncludePlugins *bool  `json:"includePlugins,omitempty"`
+}
+
+// ToolsEffectiveParams are the params for "tools.effective".
+// SessionKey is required; AgentID is optional and must match the session's agent when provided.
+type ToolsEffectiveParams struct {
+	SessionKey string `json:"sessionKey"`
+	AgentID    string `json:"agentId,omitempty"`
 }
 
 // ---------------------------------------------------------------------------
