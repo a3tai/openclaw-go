@@ -169,6 +169,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
           branch: ${{ steps.meta.outputs.branch_name }}
           commit-message: "chore(release): sync ${{ steps.meta.outputs.version }} from upstream"
           title: "chore(release): sync ${{ steps.meta.outputs.version }} from upstream"
