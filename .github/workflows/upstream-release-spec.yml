@@ -229,7 +229,7 @@ jobs:
               ].join('\n'),
             });
 
-      - name: Trigger OpenCode release-sync run
+      - name: Trigger Claude Code release-sync run
         if: steps.gate.outputs.enabled == 'true' && steps.cpr.outputs.pull-request-number != ''
         uses: actions/github-script@v7
         with:
@@ -238,11 +238,11 @@ jobs:
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'release-sync-a3t.yml',
+              workflow_id: 'release-sync-claude.yml',
               ref: 'main',
               inputs: {
                 issue_number: issueNumber,
               },
             });
 
-            core.info(`Triggered release-sync-a3t.yml for issue #${issueNumber}`);
+            core.info(`Triggered release-sync-claude.yml for issue #${issueNumber}`);
