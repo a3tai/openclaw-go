@@ -240,6 +240,14 @@ jobs:
               return;
             }
 
+            // Spec-only PRs (just docs/specs/*.md, no Go code) are draft spec documents
+            // — they don't need release gates enforced, only code sync PRs do.
+            const hasGoChanges = changedPaths.some((p) => p.endsWith('.go'));
+            if (!hasGoChanges && hasSpecFile) {
+              core.info("Spec-only PR (no Go changes) — skipping release gate enforcement.");
+              return;
+            }
+
             const requiredChecks = [
               { name: "Architecture review", re: /- \[[xX]\]\s+Architecture review/ },
               { name: "Go standards code review", re: /- \[[xX]\]\s+Go standards code review/ },
