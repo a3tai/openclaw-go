@@ -135,22 +135,31 @@ jobs:
             const pr = context.payload.pull_request;
             if (!pr) return;
 
-            // Approve the PR
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr.number,
-              event: 'APPROVE',
-              body: [
-                '**Auto-approved** by release-auto-review.',
-                '',
-                '✅ Change safety: additive only — no breaking changes detected',
-                '✅ Tests: `go test ./... -race` passed',
-                '✅ Security scan: clean',
-                '',
-                'Review gates auto-satisfied for additive release sync. Enabling auto-merge.',
-              ].join('\n'),
-            });
+            // GitHub Actions bot cannot approve its own PRs — skip approval
+            // for bot-authored PRs and rely on auto-merge alone.
+            const prAuthor = pr.user?.login || '';
+            const isBotPR = prAuthor === 'github-actions[bot]' || prAuthor.endsWith('[bot]');
+
+            if (!isBotPR) {
+              // Approve the PR (only works for non-bot-authored PRs)
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                event: 'APPROVE',
+                body: [
+                  '**Auto-approved** by release-auto-review.',
+                  '',
+                  '✅ Change safety: additive only — no breaking changes detected',
+                  '✅ Tests: `go test ./... -race` passed',
+                  '✅ Security scan: clean',
+                  '',
+                  'Review gates auto-satisfied for additive release sync. Enabling auto-merge.',
+                ].join('\n'),
+              });
+            } else {
+              core.info('Bot-authored PR — skipping self-approval, enabling auto-merge directly.');
+            }
 
             // Enable auto-merge (squash)
             await github.graphql(`
