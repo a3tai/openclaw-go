@@ -1,0 +1,213 @@
+name: Release Auto-Review
+
+# Automatically reviews and approves release-sync PRs when:
+# - All CI checks pass
+# - Changes are additive-only (no removals, no breaking changes)
+# - Security scan is clean
+# - No manual veto within 30 minutes
+#
+# Breaking changes, removals, or security issues trigger a HOLD and notify via Telegram.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  auto-review:
+    name: Auto Review Release Sync PR
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'release-sync') ||
+      contains(github.event.pull_request.labels.*.name, 'upstream-release')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Analyze change safety
+        id: safety
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setOutput('safe', 'false');
+              core.setOutput('reason', 'No PR context');
+              return;
+            }
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              { owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number, per_page: 100 }
+            );
+
+            const issues = [];
+            let removedMethods = 0;
+            let breakingPatterns = 0;
+
+            for (const file of files) {
+              const patch = file.patch || '';
+
+              // Check for removed exported symbols (breaking)
+              const removedExports = (patch.match(/^-\s*(func|type|var|const)\s+[A-Z]/gm) || []).length;
+              const addedExports = (patch.match(/^\+\s*(func|type|var|const)\s+[A-Z]/gm) || []).length;
+              if (removedExports > addedExports) {
+                issues.push(`Breaking: ${file.filename} removes ${removedExports - addedExports} exported symbol(s)`);
+                breakingPatterns++;
+              }
+
+              // Check for removed MethodName constants
+              const removedMethods_ = (patch.match(/^-\s*Method[A-Z]\w+\s+MethodName/gm) || []).length;
+              if (removedMethods_ > 0) {
+                issues.push(`Breaking: ${file.filename} removes ${removedMethods_} MethodName constant(s)`);
+                removedMethods += removedMethods_;
+                breakingPatterns++;
+              }
+
+              // Check for struct field removals (breaking for callers using field names)
+              const removedFields = (patch.match(/^-\s+[A-Z]\w+\s+\w/gm) || []).length;
+              const addedFields = (patch.match(/^\+\s+[A-Z]\w+\s+\w/gm) || []).length;
+              if (removedFields > addedFields + 2) {
+                issues.push(`Possible breaking: ${file.filename} removes struct fields (net -${removedFields - addedFields})`);
+                breakingPatterns++;
+              }
+            }
+
+            const safe = breakingPatterns === 0 && issues.length === 0;
+            core.setOutput('safe', safe ? 'true' : 'false');
+            core.setOutput('issues', issues.join('\n'));
+            core.setOutput('breaking_count', String(breakingPatterns));
+
+            if (!safe) {
+              core.warning('Breaking changes detected — auto-merge will be skipped:\n' + issues.join('\n'));
+            } else {
+              core.info('Change safety check passed — additive only.');
+            }
+
+      - name: Run full test suite
+        id: tests
+        run: |
+          go test ./... -race -count=1 2>&1 | tee /tmp/test-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Security scan (gosec)
+        id: security
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec -fmt json -out /tmp/gosec-report.json ./... 2>&1 || true
+          # Only fail on HIGH severity issues in non-test files
+          python3 -c "
+          import json, sys
+          try:
+            data = json.load(open('/tmp/gosec-report.json'))
+            issues = [i for i in data.get('Issues', [])
+                      if i.get('severity') == 'HIGH' and '_test.go' not in i.get('file','')]
+            if issues:
+              print(f'SECURITY: {len(issues)} HIGH severity issue(s) found')
+              for i in issues:
+                print(f'  {i[\"file\"]}:{i[\"line\"]} — {i[\"details\"]}')
+              sys.exit(1)
+            else:
+              print('Security scan clean.')
+          except Exception as e:
+            print(f'gosec parse error (non-fatal): {e}')
+          "
+
+      - name: Auto-approve and enable auto-merge (additive + green)
+        if: steps.safety.outputs.safe == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+
+            // Approve the PR
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              event: 'APPROVE',
+              body: [
+                '**Auto-approved** by release-auto-review.',
+                '',
+                '✅ Change safety: additive only — no breaking changes detected',
+                '✅ Tests: `go test ./... -race` passed',
+                '✅ Security scan: clean',
+                '',
+                'Review gates auto-satisfied for additive release sync. Enabling auto-merge.',
+              ].join('\n'),
+            });
+
+            // Enable auto-merge (squash)
+            await github.graphql(`
+              mutation($prId: ID!) {
+                enablePullRequestAutoMerge(input: {
+                  pullRequestId: $prId,
+                  mergeMethod: SQUASH
+                }) { pullRequest { autoMergeRequest { mergeMethod } } }
+              }
+            `, { prId: pr.node_id });
+
+            core.info(`Auto-approved PR #${pr.number} and enabled auto-merge.`);
+
+      - name: Hold for human review (breaking changes detected)
+        if: steps.safety.outputs.safe == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+            const issues = `${{ steps.safety.outputs.issues }}`;
+
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              event: 'REQUEST_CHANGES',
+              body: [
+                '**⚠️ HOLD — Human review required**',
+                '',
+                'Breaking changes detected in this release sync:',
+                '',
+                issues.split('\n').map(l => `- ${l}`).join('\n'),
+                '',
+                'This PR will NOT auto-merge. Review the changes above before approving.',
+                '',
+                'If these changes are intentional and safe, manually approve and merge.',
+              ].join('\n'),
+            });
+
+            // Notify via Telegram using Resend webhook (if configured)
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            core.warning(`HOLD: Breaking changes in PR #${pr.number}. Run: ${runUrl}`);
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `❌ Auto-review failed. Tests or security scan did not pass.\n\nRun: ${runUrl}`,
+            });

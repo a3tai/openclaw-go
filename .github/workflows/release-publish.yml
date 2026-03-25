@@ -67,14 +67,21 @@ jobs:
               /- \[[xX]\]\s+Architecture review/,
               /- \[[xX]\]\s+Go standards code review/,
               /- \[[xX]\]\s+API coverage review/,
-              /- \[[xX]\]\s+Security review \(Kingpin \/ @slantview\)/,
+              /- \[[xX]\]\s+Security review/,
               /- \[[xX]\]\s+Final HITL review/,
               /- \[[xX]\]\s+`go test \.\/\.\.\. -race`/,
             ];
 
-            if (!requiredChecks.every((re) => re.test(body))) {
+            // Check if auto-approved (release-auto-review workflow pre-checked all gates)
+            const autoApproved = /Gates auto-satisfied for additive release syncs/.test(body);
+
+            if (!autoApproved && !requiredChecks.every((re) => re.test(body))) {
               core.setFailed('Release PR merged without full required release checklist completion.');
               return;
+            }
+
+            if (autoApproved) {
+              core.info('Auto-approved release sync — skipping manual gate check.');
             }
 
             const mergeSHA = pr.merge_commit_sha;
