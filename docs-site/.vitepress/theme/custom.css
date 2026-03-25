@@ -1,0 +1,156 @@
+/* Brand colors — amber ties to OpenClaw's palette */
+:root {
+  --vp-c-brand-1: #f5a623;
+  --vp-c-brand-2: #d4891e;
+  --vp-c-brand-3: #b8730f;
+  --vp-c-brand-soft: rgba(245, 166, 35, 0.12);
+}
+
+/* Dark mode surface overrides */
+.dark {
+  --vp-c-bg: #0d0d0f;
+  --vp-c-bg-soft: #1a1a1f;
+  --vp-c-bg-mute: #141418;
+  --vp-c-bg-alt: #101013;
+  --vp-c-border: #2a2a35;
+  --vp-c-divider: #2a2a35;
+  --vp-c-gutter: #0d0d0f;
+}
+
+/* Navbar */
+.dark .VPNav {
+  border-bottom-color: #2a2a35;
+  background: rgba(13, 13, 15, 0.92);
+  backdrop-filter: saturate(180%) blur(12px);
+}
+
+/* Sidebar */
+.dark .VPSidebar {
+  background: #0d0d0f;
+  border-right-color: #2a2a35;
+}
+
+/* Active sidebar item */
+.dark .VPSidebarItem.is-active > .item .link {
+  color: var(--vp-c-brand-1);
+}
+
+/* Code blocks */
+.dark .vp-code-group .tabs,
+.dark [class*='language-'] {
+  background: #111116 !important;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+}
+
+/* Inline code */
+.dark :not(pre) > code {
+  background: #1a1a1f;
+  color: #f5a623;
+  border: 1px solid #2a2a35;
+}
+
+/* Hero section */
+.dark .VPHero .name {
+  background: linear-gradient(135deg, #f5a623 0%, #fff 60%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .VPHero .text {
+  color: #e0e0e0;
+}
+
+.dark .VPHero .tagline {
+  color: #888;
+}
+
+/* Hero action — primary button */
+.VPButton.medium.brand {
+  background: #f5a623;
+  border-color: #f5a623;
+  color: #0d0d0f;
+  font-weight: 600;
+}
+
+.VPButton.medium.brand:hover {
+  background: #d4891e;
+  border-color: #d4891e;
+}
+
+/* Feature cards */
+.dark .VPFeature {
+  background: #1a1a1f;
+  border-color: #2a2a35;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.dark .VPFeature:hover {
+  border-color: #f5a623;
+  transform: translateY(-2px);
+}
+
+.dark .VPFeature .icon {
+  background: rgba(245, 166, 35, 0.1);
+}
+
+/* Home page content area */
+.dark .VPHomeContent {
+  --vp-home-hero-name-color: #f5a623;
+}
+
+/* Install block on home page */
+.install-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #111116;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  padding: 14px 20px;
+  margin: 24px 0;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+  font-size: 15px;
+  max-width: 480px;
+}
+
+.install-block .prompt {
+  color: #555;
+  user-select: none;
+}
+
+.install-block .cmd {
+  color: #f5a623;
+  flex: 1;
+}
+
+/* Table styling */
+.dark table {
+  border-color: #2a2a35;
+}
+
+.dark thead tr {
+  background: #1a1a1f;
+  border-bottom-color: #2a2a35;
+}
+
+.dark tbody tr {
+  border-bottom-color: #1e1e24;
+}
+
+.dark tbody tr:hover {
+  background: #141418;
+}
+
+/* Badge overrides */
+img[src*="shields.io"],
+img[src*="badge"] {
+  margin-right: 4px;
+}
+
+/* Footer */
+.dark .VPFooter {
+  background: #0d0d0f;
+  border-top-color: #2a2a35;
+}
