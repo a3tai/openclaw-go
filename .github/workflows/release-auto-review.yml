@@ -161,17 +161,38 @@ jobs:
               core.info('Bot-authored PR — skipping self-approval, enabling auto-merge directly.');
             }
 
-            // Enable auto-merge (squash)
-            await github.graphql(`
-              mutation($prId: ID!) {
-                enablePullRequestAutoMerge(input: {
-                  pullRequestId: $prId,
-                  mergeMethod: SQUASH
-                }) { pullRequest { autoMergeRequest { mergeMethod } } }
+            // Enable auto-merge (squash) when the repo allows it. If auto-merge
+            // is disabled in repo settings or the integration can't enable it,
+            // do not fail the workflow — the PR is still validated and can be
+            // merged manually.
+            const repoInfo = await github.graphql(`
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  autoMergeAllowed
+                }
               }
-            `, { prId: pr.node_id });
+            `, { owner: context.repo.owner, repo: context.repo.repo });
 
-            core.info(`Auto-approved PR #${pr.number} and enabled auto-merge.`);
+            if (!repoInfo.repository.autoMergeAllowed) {
+              core.info(`Auto-approved/validated PR #${pr.number}, but repo auto-merge is disabled. Skipping enablePullRequestAutoMerge.`);
+              return;
+            }
+
+            try {
+              await github.graphql(`
+                mutation($prId: ID!) {
+                  enablePullRequestAutoMerge(input: {
+                    pullRequestId: $prId,
+                    mergeMethod: SQUASH
+                  }) { pullRequest { autoMergeRequest { mergeMethod } } }
+                }
+              `, { prId: pr.node_id });
+
+              core.info(`Auto-approved PR #${pr.number} and enabled auto-merge.`);
+            } catch (err) {
+              core.warning(`Could not enable auto-merge for PR #${pr.number}: ${err.message}`);
+              core.info('Continuing without failing the workflow; PR remains validated for manual merge.');
+            }
 
       - name: Hold for human review (breaking changes detected)
         if: steps.safety.outputs.safe == 'false'
