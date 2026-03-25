@@ -40,3 +40,6 @@ temp/
 # Build output
 dist/
 build/
+docs-site/node_modules/
+docs-site/.vitepress/dist/
+docs-site/.vitepress/cache/
