@@ -7,7 +7,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/a3tai/openclaw-go)](go.mod)
 
-Go client library for [OpenClaw](https://openclaw.ai) -- the open gateway for AI agents.
+**The** Go client library for [OpenClaw](https://openclaw.ai) — the open gateway for AI agents. Maintained by [A3T](https://a3t.ai).
+
+```
+go get github.com/a3tai/openclaw-go
+```
 
 Provides typed clients for the Gateway WebSocket protocol, OpenAI-compatible HTTP APIs, local network discovery, and the Agent Client Protocol (ACP).
 
