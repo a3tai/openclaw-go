@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Resolve release metadata and validate release gates
         id: meta
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea # v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -185,7 +185,7 @@ jobs:
 
       - name: Comment on and close tracking issue
         if: steps.meta.outputs.should_publish == 'true' && steps.meta.outputs.tracking_issue != ''
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea # v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const issueNumber = Number('${{ steps.meta.outputs.tracking_issue }}');
