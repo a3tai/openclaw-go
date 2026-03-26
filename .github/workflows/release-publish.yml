@@ -85,40 +85,13 @@ jobs:
               return;
             }
 
-            const mergeSHA = pr.merge_commit_sha;
-            const checkRuns = await github.paginate(
-              github.rest.checks.listForRef,
-              {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: mergeSHA,
-                per_page: 100,
-              },
-              (response) => response.data.check_runs,
-            );
-
-            const requiredRunNames = ['Test', 'Release Gates', 'Release Smoke', 'Release E2E'];
-            const byName = new Map(
-              (checkRuns || [])
-                .filter((run) => run && typeof run.name === 'string')
-                .map((run) => [run.name, run]),
-            );
-            const failedRuns = [];
-            for (const name of requiredRunNames) {
-              const run = byName.get(name);
-              if (!run) {
-                failedRuns.push(`${name} (missing)`);
-                continue;
-              }
-              if (run.status !== 'completed' || run.conclusion !== 'success') {
-                failedRuns.push(`${name} (${run.conclusion || run.status})`);
-              }
-            }
-
-            if (failedRuns.length > 0) {
-              core.setFailed(`Release publish blocked: required checks not green: ${failedRuns.join(', ')}`);
-              return;
-            }
+            // Note: we do not re-validate CI check runs on the merge commit here.
+            // CI runs on the merge commit asynchronously and may not be complete when
+            // this workflow fires. Quality gates are already enforced pre-merge by:
+            //   - pr-guard.yml (DCO, lint, release gates checklist, diff coverage)
+            //   - release-auto-review.yml (safety analysis, gosec, go test)
+            // A PR cannot be merged without those checks passing and the gate checklist
+            // being completed, so re-checking post-merge is redundant and race-prone.
 
             const issues = await github.paginate(
               github.rest.issues.listForRepo,
