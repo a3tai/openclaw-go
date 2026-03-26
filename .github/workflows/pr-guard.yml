@@ -258,8 +258,29 @@ jobs:
             ];
 
             const missing = requiredChecks.filter((c) => !c.re.test(body)).map((c) => c.name);
+
+            // The spec file may have been merged separately (e.g. via the automation/spec-*
+            // PR) rather than included in this code-sync PR. Check main too.
             if (!hasSpecFile) {
-              missing.push("docs/specs/<version>.md in PR diff");
+              const version = (pr.title || '').match(/v\d+\.\d+\.\d+(?:-\d+)?/)?.[0];
+              let specOnMain = false;
+              if (version) {
+                try {
+                  await github.rest.repos.getContent({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    path: `docs/specs/${version}.md`,
+                    ref: 'main',
+                  });
+                  specOnMain = true;
+                  core.info(`Spec file docs/specs/${version}.md found on main — accepting.`);
+                } catch (e) {
+                  // not found
+                }
+              }
+              if (!specOnMain) {
+                missing.push("docs/specs/<version>.md in PR diff (or already on main)");
+              }
             }
 
             if (missing.length > 0) {
