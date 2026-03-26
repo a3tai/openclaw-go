@@ -4,6 +4,12 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Merged PR number to publish from
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -13,13 +19,15 @@ permissions:
 
 jobs:
   publish:
-    # Only run for merged PRs that carry release labels — avoids crashing on every
-    # merged fix/feat PR that has no version to resolve.
+    # Run on merged release PRs, or manual dispatch with a PR number.
     if: |
-      github.event.pull_request.merged == true &&
+      github.event_name == 'workflow_dispatch' ||
       (
-        contains(github.event.pull_request.labels.*.name, 'release-sync') ||
-        contains(github.event.pull_request.labels.*.name, 'upstream-release')
+        github.event.pull_request.merged == true &&
+        (
+          contains(github.event.pull_request.labels.*.name, 'release-sync') ||
+          contains(github.event.pull_request.labels.*.name, 'upstream-release')
+        )
       )
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +36,22 @@ jobs:
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
-            const pr = context.payload.pull_request;
+            let pr = context.payload.pull_request;
+
+            // Manual dispatch: fetch the PR by number
+            if (!pr && context.eventName === 'workflow_dispatch') {
+              const prNumber = Number(context.payload.inputs?.pr_number);
+              if (!prNumber) { core.setFailed('pr_number input required'); return; }
+              const { data } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+              pr = data;
+            }
+
+            if (!pr) { core.setFailed('No PR context available'); return; }
+
             const body = pr.body || '';
             const title = pr.title || '';
             const labels = new Set(
