@@ -28,18 +28,18 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'release-sync') ||
       contains(github.event.pull_request.labels.*.name, 'upstream-release')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: '1.24'
 
       - name: Analyze change safety
         id: safety
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea # v7
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -126,77 +126,39 @@ jobs:
             print(f'gosec parse error (non-fatal): {e}')
           "
 
-      - name: Auto-approve and enable auto-merge (additive + green)
+      - name: Post validation summary (human must approve and merge)
         if: steps.safety.outputs.safe == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
             if (!pr) return;
 
-            // GitHub Actions bot cannot approve its own PRs — skip approval
-            // for bot-authored PRs and rely on auto-merge alone.
-            const prAuthor = pr.user?.login || '';
-            const isBotPR = prAuthor === 'github-actions[bot]' || prAuthor.endsWith('[bot]');
+            // Per SLSA L2 / OpenSSF best practices: automated tooling validates,
+            // humans approve and merge. No auto-approval or auto-merge.
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: [
+                '## ✅ Automated validation passed',
+                '',
+                '| Check | Result |',
+                '|-------|--------|',
+                '| Change safety (breaking change detection) | ✅ Additive only |',
+                '| `go test ./... -race` | ✅ Passed |',
+                '| Security scan (gosec HIGH) | ✅ Clean |',
+                '',
+                '**Human review and approval required before merge.** Please review the diff, check the release gates, and approve when satisfied.',
+              ].join('\n'),
+            });
 
-            if (!isBotPR) {
-              // Approve the PR (only works for non-bot-authored PRs)
-              await github.rest.pulls.createReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                event: 'APPROVE',
-                body: [
-                  '**Auto-approved** by release-auto-review.',
-                  '',
-                  '✅ Change safety: additive only — no breaking changes detected',
-                  '✅ Tests: `go test ./... -race` passed',
-                  '✅ Security scan: clean',
-                  '',
-                  'Review gates auto-satisfied for additive release sync. Enabling auto-merge.',
-                ].join('\n'),
-              });
-            } else {
-              core.info('Bot-authored PR — skipping self-approval, enabling auto-merge directly.');
-            }
-
-            // Enable auto-merge (squash) when the repo allows it. If auto-merge
-            // is disabled in repo settings or the integration can't enable it,
-            // do not fail the workflow — the PR is still validated and can be
-            // merged manually.
-            const repoInfo = await github.graphql(`
-              query($owner: String!, $repo: String!) {
-                repository(owner: $owner, name: $repo) {
-                  autoMergeAllowed
-                }
-              }
-            `, { owner: context.repo.owner, repo: context.repo.repo });
-
-            if (!repoInfo.repository.autoMergeAllowed) {
-              core.info(`Auto-approved/validated PR #${pr.number}, but repo auto-merge is disabled. Skipping enablePullRequestAutoMerge.`);
-              return;
-            }
-
-            try {
-              await github.graphql(`
-                mutation($prId: ID!) {
-                  enablePullRequestAutoMerge(input: {
-                    pullRequestId: $prId,
-                    mergeMethod: SQUASH
-                  }) { pullRequest { autoMergeRequest { mergeMethod } } }
-                }
-              `, { prId: pr.node_id });
-
-              core.info(`Auto-approved PR #${pr.number} and enabled auto-merge.`);
-            } catch (err) {
-              core.warning(`Could not enable auto-merge for PR #${pr.number}: ${err.message}`);
-              core.info('Continuing without failing the workflow; PR remains validated for manual merge.');
-            }
+            core.info(`Validation summary posted on PR #${pr.number}. Awaiting human approval.`);
 
       - name: Hold for human review (breaking changes detected)
         if: steps.safety.outputs.safe == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -228,7 +190,7 @@ jobs:
 
       - name: Notify on failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
