@@ -164,40 +164,57 @@ jobs:
             --go-root . \
             --version "${{ steps.meta.outputs.version }}" || true
 
-      - name: Create or update release-sync PR
+      - name: Push branch and create PR
         id: cpr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          branch: ${{ steps.meta.outputs.branch_name }}
-          commit-message: "chore(release): sync ${{ steps.meta.outputs.version }} from upstream"
-          title: "chore(release): sync ${{ steps.meta.outputs.version }} from upstream"
-          labels: |
-            upstream-release
-            release-sync
-          draft: false
-          signoff: true
-          body: |
-            ## Summary
-            Automated release sync for upstream openclaw `${{ steps.meta.outputs.version }}`.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
 
-            - Source spec: `${{ steps.meta.outputs.spec_path }}`
-            - Implemented by: Claude Code (claude-sonnet)
-            - Validated: `go test ./... -race` ✅
+          # Clean up build artifacts before pushing
+          git checkout -- . 2>/dev/null || true
+          git clean -fd scripts/__pycache__ 2>/dev/null || true
 
-            ## Release Review Gates
-            - [x] Architecture review (auto: additive sync, validated against upstream)
-            - [x] Go standards code review (auto: golangci-lint clean)
-            - [x] API coverage review (auto: validate_release_sync.py passed)
-            - [x] Security review (auto: gosec clean, no HIGH issues)
-            - [x] Final HITL review (auto: no breaking changes detected)
-            - [x] `go test ./... -race`
+          # Push the branch (Claude already committed to it)
+          git push -u origin "${{ steps.meta.outputs.branch_name }}"
 
-            > Gates auto-satisfied for additive release syncs. Breaking changes trigger manual hold.
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --head "${{ steps.meta.outputs.branch_name }}" --json url --jq '.[0].url // empty')
+          if [ -n "$EXISTING_PR" ]; then
+            echo "pr_url=$EXISTING_PR" >> "$GITHUB_OUTPUT"
+            echo "PR already exists: $EXISTING_PR"
+            exit 0
+          fi
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "${{ steps.meta.outputs.branch_name }}" \
+            --title "chore(release): sync ${{ steps.meta.outputs.version }} from upstream" \
+            --label "upstream-release" \
+            --label "release-sync" \
+            --body "$(cat <<'EOF'
+          ## Summary
+          Automated release sync for upstream openclaw `${{ steps.meta.outputs.version }}`.
+
+          - Source spec: `${{ steps.meta.outputs.spec_path }}`
+          - Validated: `go test ./... -race`
+
+          Closes #${{ steps.meta.outputs.issue_number }}
+
+          ## Release Review Gates (required before merge)
+          - [ ] Architecture review
+          - [ ] Go standards code review
+          - [ ] API coverage review
+          - [ ] Security review (Kingpin / @slantview)
+          - [ ] Final HITL review
+          - [x] `go test ./... -race` (automated)
+          EOF
+          )")
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "Created PR: $PR_URL"
 
       - name: Comment on tracking issue
-        if: steps.cpr.outputs.pull-request-url != ''
+        if: steps.cpr.outputs.pr_url != ''
         uses: actions/github-script@v7
         with:
           script: |
@@ -207,7 +224,7 @@ jobs:
               issue_number: Number('${{ steps.meta.outputs.issue_number }}'),
               body: [
                 `Claude Code release-sync completed for ${{ steps.meta.outputs.version }}.`,
-                `Draft PR: ${{ steps.cpr.outputs.pull-request-url }}`,
+                `PR: ${{ steps.cpr.outputs.pr_url }}`,
                 '',
                 'Review gates required before merge — check PR description.',
               ].join('\n'),
