@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2026.3.24] - 2026-03-26
+
+Sync to upstream openclaw v2026.3.24. 1539 upstream files changed; 1 RPC method added (`tools.effective`); 30 methods touched.
+
 ### Added
 
+- `ToolsEffective(ctx, ToolsEffectiveParams)` — runtime-effective tool inventory for a session (`tools.effective` RPC). `SessionKey` is required; `AgentID` is optional and must match the session's agent when provided. Requires `operator.read` scope.
+- `ToolsEffectiveParams` protocol type with `SessionKey` and `AgentID` fields
 - `SessionsGet(ctx, SessionsGetParams)` — retrieve session messages by key (`sessions.get` RPC, openclaw v2026.3.7)
 - `SessionsGetParams` protocol type with `Key`, `SessionKey`, and `Limit` fields
 - `NodePendingEnqueue(ctx, NodePendingEnqueueParams)` and `NodePendingDrain(ctx, NodePendingDrainParams)` for pending node work queue operations (`node.pending.enqueue`, `node.pending.drain`; openclaw v2026.3.11)

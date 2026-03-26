@@ -1294,6 +1294,14 @@ func TestToolsCatalog(t *testing.T) {
 	tm.run()
 }
 
+func TestToolsEffective(t *testing.T) {
+	tm := &testMethod{t: t, method: "tools.effective", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ToolsEffective(ctx, protocol.ToolsEffectiveParams{SessionKey: "main"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestVoiceWakeGet(t *testing.T) {
 	tm := &testMethod{t: t, method: "voicewake.get", success: func(c *Client, ctx context.Context) error {
 		_, err := c.VoiceWakeGet(ctx)
