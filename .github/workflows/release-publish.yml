@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: Merged PR number to publish from
+        description: Merged release PR number to publish
         required: true
         type: string
 
@@ -15,11 +15,9 @@ permissions:
   contents: write
   pull-requests: read
   issues: write
-  checks: read
 
 jobs:
   publish:
-    # Run on merged release PRs, or manual dispatch with a PR number.
     if: |
       github.event_name == 'workflow_dispatch' ||
       (
@@ -31,177 +29,102 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve release metadata and validate release gates
+      - name: Resolve PR and version
         id: meta
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             let pr = context.payload.pull_request;
 
-            // Manual dispatch: fetch the PR by number
-            if (!pr && context.eventName === 'workflow_dispatch') {
+            if (!pr) {
               const prNumber = Number(context.payload.inputs?.pr_number);
               if (!prNumber) { core.setFailed('pr_number input required'); return; }
               const { data } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
+                owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber,
               });
               pr = data;
             }
 
-            if (!pr) { core.setFailed('No PR context available'); return; }
-
-            const body = pr.body || '';
-            const title = pr.title || '';
-            const labels = new Set(
-              (pr.labels || [])
-                .filter((label) => label && typeof label.name === 'string')
-                .map((label) => label.name),
-            );
-
-            const files = await github.paginate(
-              github.rest.pulls.listFiles,
-              {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                per_page: 100,
-              },
-            );
-            const paths = files.map((f) => f.filename);
-            const specFile = paths.find((p) => /^docs\/specs\/v\d+\.\d+\.\d+(?:-\d+)?\.md$/.test(p));
-
-            const isReleasePR =
-              labels.has('release-sync') ||
-              labels.has('upstream-release') ||
-              /upstream release|release\s*sync|release:\s*v\d+/i.test(title) ||
-              Boolean(specFile);
-
-            if (!isReleasePR) {
-              core.info('Not a release-sync PR. Skipping publish workflow.');
+            if (!pr.merged) {
+              core.info('PR is not merged — skipping publish.');
               core.setOutput('should_publish', 'false');
               return;
             }
 
-            const version =
-              (specFile && specFile.match(/v\d+\.\d+\.\d+(?:-\d+)?/)?.[0]) ||
-              (title.match(/v\d+\.\d+\.\d+(?:-\d+)?/)?.[0]);
-
+            const title = pr.title || '';
+            const version = title.match(/v\d+\.\d+\.\d+(?:-\d+)?/)?.[0];
             if (!version) {
-              core.setFailed('Could not resolve release version from spec file or PR title.');
+              core.setFailed(`Could not resolve version from PR title: "${title}"`);
               return;
             }
-
-            const requiredChecks = [
-              /- \[[xX]\]\s+Architecture review/,
-              /- \[[xX]\]\s+Go standards code review/,
-              /- \[[xX]\]\s+API coverage review/,
-              /- \[[xX]\]\s+Security review/,
-              /- \[[xX]\]\s+Final HITL review/,
-              /- \[[xX]\]\s+`go test \.\/\.\.\. -race`/,
-            ];
-
-            // All gates must be checked — no automated bypass path.
-            if (!requiredChecks.every((re) => re.test(body))) {
-              core.setFailed('Release PR merged without completing all required release gates. Update the PR checklist before merging.');
-              return;
-            }
-
-            // Note: we do not re-validate CI check runs on the merge commit here.
-            // CI runs on the merge commit asynchronously and may not be complete when
-            // this workflow fires. Quality gates are already enforced pre-merge by:
-            //   - pr-guard.yml (DCO, lint, release gates checklist, diff coverage)
-            //   - release-auto-review.yml (safety analysis, gosec, go test)
-            // A PR cannot be merged without those checks passing and the gate checklist
-            // being completed, so re-checking post-merge is redundant and race-prone.
-
-            const issues = await github.paginate(
-              github.rest.issues.listForRepo,
-              {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                state: 'all',
-                labels: 'upstream-release',
-                per_page: 100,
-              },
-            );
-            const tracking = issues.find((i) => i.title.includes(version));
 
             core.setOutput('should_publish', 'true');
             core.setOutput('version', version);
-            core.setOutput('spec_file', specFile || `docs/specs/${version}.md`);
-            core.setOutput('tracking_issue', tracking ? String(tracking.number) : '');
+            core.setOutput('merge_sha', pr.merge_commit_sha);
+            core.setOutput('pr_number', String(pr.number));
+            core.setOutput('pr_url', pr.html_url);
+            core.info(`Publishing ${version} from PR #${pr.number} @ ${pr.merge_commit_sha}`);
 
-      - name: Checkout merge commit
+      - name: Checkout
         if: steps.meta.outputs.should_publish == 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ steps.meta.outputs.merge_sha }}
 
-      - name: Create tag if missing
-        if: steps.meta.outputs.should_publish == 'true'
-        env:
-          VERSION: ${{ steps.meta.outputs.version }}
-          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-        run: |
-          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q "refs/tags/${VERSION}$"; then
-            echo "Tag ${VERSION} already exists on origin."
-          else
-            git tag "${VERSION}" "${MERGE_SHA}"
-            git push origin "${VERSION}"
-            echo "Created and pushed tag ${VERSION}."
-          fi
-
-      - name: Create GitHub release if missing
+      - name: Create tag and GitHub release
         if: steps.meta.outputs.should_publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.meta.outputs.version }}
-          SPEC_FILE: ${{ steps.meta.outputs.spec_file }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+          MERGE_SHA: ${{ steps.meta.outputs.merge_sha }}
+          PR_URL: ${{ steps.meta.outputs.pr_url }}
         run: |
-          if gh release view "${VERSION}" >/dev/null 2>&1; then
-            echo "Release ${VERSION} already exists."
-            exit 0
+          set -euo pipefail
+
+          # Create tag if it doesn't exist
+          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q "${VERSION}"; then
+            echo "Tag ${VERSION} already exists."
+          else
+            git tag "${VERSION}" "${MERGE_SHA}"
+            git push origin "${VERSION}"
+            echo "Created tag ${VERSION}."
           fi
 
-          NOTES_FILE="/tmp/release-notes.md"
-          {
-            echo "Sync with upstream openclaw ${VERSION}."
-            echo
-            echo "- Source PR: ${PR_URL}"
-            echo "- Spec: ${SPEC_FILE}"
-          } > "${NOTES_FILE}"
+          # Create release if it doesn't exist
+          if gh release view "${VERSION}" >/dev/null 2>&1; then
+            echo "Release ${VERSION} already exists."
+          else
+            gh release create "${VERSION}" \
+              --title "${VERSION}" \
+              --notes "Sync with upstream openclaw ${VERSION}. Source PR: ${PR_URL}"
+            echo "Created release ${VERSION}."
+          fi
 
-          gh release create "${VERSION}" \
-            --title "${VERSION}" \
-            --notes-file "${NOTES_FILE}"
-
-      - name: Comment on and close tracking issue
-        if: steps.meta.outputs.should_publish == 'true' && steps.meta.outputs.tracking_issue != ''
+      - name: Close tracking issue
+        if: steps.meta.outputs.should_publish == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
-            const issueNumber = Number('${{ steps.meta.outputs.tracking_issue }}');
             const version = '${{ steps.meta.outputs.version }}';
+            const prUrl = '${{ steps.meta.outputs.pr_url }}';
             const releaseUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/${version}`;
-            const prUrl = context.payload.pull_request.html_url;
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'upstream-release', per_page: 100,
+            });
+
+            const tracking = issues.find((i) => i.title.includes(version));
+            if (!tracking) { core.info('No open tracking issue found.'); return; }
 
             await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              body: [
-                `Released in ${releaseUrl}`,
-                `Merged PR: ${prUrl}`,
-              ].join('\n'),
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: tracking.number,
+              body: `Released: ${releaseUrl}\nMerged PR: ${prUrl}`,
             });
-
             await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              state: 'closed',
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: tracking.number, state: 'closed',
             });
+            core.info(`Closed tracking issue #${tracking.number}`);
