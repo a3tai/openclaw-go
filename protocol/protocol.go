@@ -2228,3 +2228,69 @@ type WebLoginWaitParams struct {
 	TimeoutMs *int   `json:"timeoutMs,omitempty"`
 	AccountID string `json:"accountId,omitempty"`
 }
+
+// ─── Plugin Approvals ─────────────────────────────────────────────────────
+
+// MethodPluginApprovalRequest is the method name for plugin.approval.request.
+const MethodPluginApprovalRequest MethodName = "plugin.approval.request"
+
+// MethodPluginApprovalResolve is the method name for plugin.approval.resolve.
+const MethodPluginApprovalResolve MethodName = "plugin.approval.resolve"
+
+// PluginApprovalRequestParams are the params for "plugin.approval.request".
+// A plugin calls this to request human approval before taking an action.
+type PluginApprovalRequestParams struct {
+	// PluginID is the ID of the plugin requesting approval.
+	PluginID string `json:"pluginId,omitempty"`
+	// Title is the short title of the approval request.
+	Title string `json:"title"`
+	// Description explains what the plugin wants to do.
+	Description string `json:"description"`
+	// Severity is the risk level: "info", "warning", or "critical".
+	Severity string `json:"severity,omitempty"`
+	// ToolName is the name of the tool call that triggered this request.
+	ToolName string `json:"toolName,omitempty"`
+	// ToolCallID is the ID of the tool call (for correlation with LLM turns).
+	ToolCallID string `json:"toolCallId,omitempty"`
+	// AgentID is the agent that invoked the plugin.
+	AgentID string `json:"agentId,omitempty"`
+	// SessionKey is the session in which the plugin is running.
+	SessionKey string `json:"sessionKey,omitempty"`
+	// TurnSourceChannel is the channel that triggered the agent turn.
+	TurnSourceChannel string `json:"turnSourceChannel,omitempty"`
+	// TurnSourceTo is the recipient in the source channel.
+	TurnSourceTo string `json:"turnSourceTo,omitempty"`
+	// TurnSourceAccountID is the account ID in the source channel.
+	TurnSourceAccountID string `json:"turnSourceAccountId,omitempty"`
+	// TurnSourceThreadID is the thread ID in the source channel.
+	TurnSourceThreadID any `json:"turnSourceThreadId,omitempty"`
+	// TimeoutMs is the maximum milliseconds to wait for a decision.
+	TimeoutMs *int `json:"timeoutMs,omitempty"`
+	// TwoPhase if true, allows the approver to first acknowledge then decide.
+	TwoPhase bool `json:"twoPhase,omitempty"`
+}
+
+// PluginApprovalRequestResult is the result of "plugin.approval.request".
+type PluginApprovalRequestResult struct {
+	// ID is the unique approval request ID.
+	ID string `json:"id"`
+	// Decision is the approver's decision: "approved" or "denied".
+	Decision string `json:"decision"`
+	// Note is an optional message from the approver.
+	Note string `json:"note,omitempty"`
+}
+
+// PluginApprovalResolveParams are the params for "plugin.approval.resolve".
+// An operator uses this to approve or deny a pending plugin approval request.
+type PluginApprovalResolveParams struct {
+	// ID is the approval request ID.
+	ID string `json:"id"`
+	// Decision is the resolution: "approved" or "denied".
+	Decision string `json:"decision"`
+}
+
+// PluginApprovalResolveResult is the result of "plugin.approval.resolve".
+type PluginApprovalResolveResult struct {
+	// ID is the approval request ID that was resolved.
+	ID string `json:"id"`
+}
