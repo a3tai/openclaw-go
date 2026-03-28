@@ -1,0 +1,933 @@
+/* ==================================================================
+   openclaw-go docs — Design System
+   Aesthetic: Deep Ocean Tech — navy depths, amber bioluminescence
+   ================================================================== */
+
+/* ---- Typefaces (fallback; primary load via <link> in config) ---- */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Albert+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ---- CSS Houdini: register property for gradient animation ---- */
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ---- Brand Tokens ---- */
+:root {
+  /* Amber spectrum */
+  --oc-amber: #f5a623;
+  --oc-amber-bright: #fbbf24;
+  --oc-amber-deep: #d97706;
+  --oc-amber-soft: rgba(245, 166, 35, 0.08);
+  --oc-amber-glow: rgba(245, 166, 35, 0.15);
+
+  /* Accents */
+  --oc-cyan: #22d3ee;
+  --oc-red: #ef4444;
+  --oc-green: #22c55e;
+  --oc-periwinkle: #818cf8;
+
+  /* VitePress brand overrides */
+  --vp-c-brand-1: var(--oc-amber);
+  --vp-c-brand-2: var(--oc-amber-deep);
+  --vp-c-brand-3: #b45309;
+  --vp-c-brand-soft: var(--oc-amber-soft);
+
+  /* Typography */
+  --vp-font-family-base: 'Albert Sans', system-ui, -apple-system, sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --oc-font-display: 'Outfit', 'Albert Sans', system-ui, sans-serif;
+
+  /* Hero name gradient */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(135deg, #f5a623 0%, #fde68a 50%, #fbbf24 100%);
+}
+
+/* ---- Dark Mode Palette ---- */
+.dark {
+  --vp-c-bg: #020617;
+  --vp-c-bg-soft: #0a1228;
+  --vp-c-bg-mute: #0f172a;
+  --vp-c-bg-alt: #060c1e;
+
+  --vp-c-text-1: #f1f5f9;
+  --vp-c-text-2: #94a3b8;
+  --vp-c-text-3: #475569;
+
+  --vp-c-border: rgba(148, 163, 184, 0.08);
+  --vp-c-divider: rgba(148, 163, 184, 0.06);
+  --vp-c-gutter: #020617;
+
+  --vp-code-bg: #060c1e;
+
+  color-scheme: dark;
+}
+
+/* ---- Keyframe Animations ---- */
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.03); }
+  50% { transform: translate(-10px, 25px) scale(0.98); }
+  75% { transform: translate(-25px, -15px) scale(1.02); }
+}
+
+@keyframes gradient-spin {
+  to { --gradient-angle: 360deg; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.03); }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { transform: scale(0.96); opacity: 0.2; }
+  50% { transform: scale(1.04); opacity: 0.5; }
+}
+
+/* ---- Global / Base ---- */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(245, 166, 35, 0.25);
+  color: #f1f5f9;
+}
+
+/* Display font for headings & UI */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--oc-font-display);
+}
+
+/* ---- Atmosphere (hero background effects) ---- */
+.atmosphere {
+  display: none;
+}
+
+.dark .atmosphere {
+  display: block;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .atmosphere-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 0%, transparent 70%);
+}
+
+.dark .atmosphere-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  will-change: transform;
+}
+
+.dark .atmosphere-orb--amber {
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.10), transparent 70%);
+  top: -200px;
+  right: -5%;
+  animation: float 20s ease-in-out infinite;
+}
+
+.dark .atmosphere-orb--blue {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.05), transparent 70%);
+  bottom: -150px;
+  left: 5%;
+  animation: float 25s ease-in-out infinite reverse;
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.dark .VPNav {
+  background: rgba(2, 6, 23, 0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.VPNavBar .VPImage.logo {
+  height: 36px;
+  width: 36px;
+  border-radius: 10px;
+}
+
+.dark .VPNavBar .title {
+  font-family: var(--oc-font-display);
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.02em;
+}
+
+.dark .VPNavBarMenuLink .text {
+  font-family: var(--oc-font-display);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.dark .VPNavBarMenuLink:hover .text {
+  color: #f1f5f9;
+}
+
+.dark .VPNavBarMenuLink.active .text {
+  color: var(--oc-amber);
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.dark .VPHero {
+  position: relative;
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+.dark .VPHero > .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Title */
+.dark .VPHero .name {
+  font-family: var(--oc-font-display);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+@media (min-width: 960px) {
+  .dark .VPHero .name {
+    font-size: 64px;
+    line-height: 1.1;
+  }
+}
+
+/* Animated shimmer gradient on title */
+.dark .VPHero .name .clip {
+  background: linear-gradient(
+    120deg,
+    var(--oc-amber) 0%,
+    #fde68a 25%,
+    var(--oc-amber-bright) 50%,
+    #fde68a 75%,
+    var(--oc-amber) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 8s linear infinite;
+}
+
+.dark .VPHero .text {
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+  color: #e2e8f0;
+  letter-spacing: -0.02em;
+}
+
+.dark .VPHero .tagline {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* Hero image — pulsing glow ring + drop shadow */
+.dark .VPHero .image-container {
+  position: relative;
+  overflow: visible;
+}
+
+.dark .VPHero .image-container::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 166, 35, 0.08);
+  animation: pulse-ring 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.dark .VPHero .image-bg {
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.08) 0%, transparent 70%) !important;
+  animation: pulse 6s ease-in-out infinite;
+}
+
+.dark .VPHero .VPImage.image-src {
+  filter:
+    drop-shadow(0 0 60px rgba(245, 166, 35, 0.18))
+    drop-shadow(0 0 120px rgba(245, 166, 35, 0.06));
+  transition: filter 0.5s ease;
+}
+
+.dark .VPHero .VPImage.image-src:hover {
+  filter:
+    drop-shadow(0 0 80px rgba(245, 166, 35, 0.25))
+    drop-shadow(0 0 160px rgba(245, 166, 35, 0.10));
+}
+
+/* ============================================================
+   HERO BUTTONS
+   ============================================================ */
+.VPButton.medium.brand {
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--oc-amber), var(--oc-amber-deep));
+  border: none;
+  color: #020617;
+  border-radius: 12px;
+  padding: 0 32px;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 4px 16px rgba(245, 166, 35, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+.VPButton.medium.brand:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 28px rgba(245, 166, 35, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, var(--oc-amber-bright), var(--oc-amber));
+}
+
+.VPButton.medium.brand:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(245, 166, 35, 0.15);
+}
+
+.dark .VPButton.medium.alt {
+  font-family: var(--oc-font-display);
+  font-weight: 500;
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 0 32px;
+  font-size: 0.95rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .VPButton.medium.alt:hover {
+  background: rgba(148, 163, 184, 0.10);
+  border-color: rgba(148, 163, 184, 0.20);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================
+   FEATURE CARDS
+   ============================================================ */
+.dark .VPFeatures {
+  position: relative;
+  z-index: 1;
+}
+
+.dark .VPFeature {
+  position: relative;
+  background: rgba(10, 18, 40, 0.5) !important;
+  border: 1px solid rgba(148, 163, 184, 0.06) !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+}
+
+/* Animated rotating gradient border (Houdini-powered) */
+.dark .VPFeature::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--gradient-angle, 0deg),
+    transparent 25%,
+    rgba(245, 166, 35, 0.3) 30%,
+    var(--oc-amber) 35%,
+    rgba(245, 166, 35, 0.3) 40%,
+    transparent 45%
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: gradient-spin 3s linear infinite;
+  pointer-events: none;
+}
+
+/* Top-edge highlight on hover */
+.dark .VPFeature::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.dark .VPFeature:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 60px rgba(245, 166, 35, 0.03);
+  background: rgba(10, 18, 40, 0.7) !important;
+}
+
+.dark .VPFeature:hover::before {
+  opacity: 1;
+}
+
+.dark .VPFeature:hover::after {
+  opacity: 1;
+}
+
+/* Staggered entrance animation */
+.dark .VPFeatures .item {
+  animation: fade-up 0.5s ease both;
+}
+
+.dark .VPFeatures .item:nth-child(1) { animation-delay: 0.05s; }
+.dark .VPFeatures .item:nth-child(2) { animation-delay: 0.10s; }
+.dark .VPFeatures .item:nth-child(3) { animation-delay: 0.15s; }
+.dark .VPFeatures .item:nth-child(4) { animation-delay: 0.20s; }
+.dark .VPFeatures .item:nth-child(5) { animation-delay: 0.25s; }
+.dark .VPFeatures .item:nth-child(6) { animation-delay: 0.30s; }
+
+/* Icon container */
+.dark .VPFeature .icon {
+  font-size: 1.75rem;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(245, 166, 35, 0.10), rgba(245, 166, 35, 0.03));
+  border: 1px solid rgba(245, 166, 35, 0.08);
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+
+.dark .VPFeature:hover .icon {
+  background: linear-gradient(135deg, rgba(245, 166, 35, 0.15), rgba(245, 166, 35, 0.06));
+  border-color: rgba(245, 166, 35, 0.18);
+  transform: scale(1.08);
+  box-shadow: 0 4px 20px rgba(245, 166, 35, 0.10);
+}
+
+.dark .VPFeature .title {
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+}
+
+.dark .VPFeature .details {
+  color: #94a3b8;
+  line-height: 1.65;
+  font-size: 0.88rem;
+}
+
+.dark .VPFeature .link-text {
+  color: var(--oc-amber);
+  font-family: var(--oc-font-display);
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.dark .VPFeature:hover .link-text {
+  color: var(--oc-amber-bright);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.dark .VPSidebar {
+  background: #020617;
+  border-right: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.dark .VPSidebarItem .text {
+  font-family: var(--oc-font-display);
+  font-size: 0.88rem;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.dark .VPSidebarItem.is-active > .item > .indicator {
+  background-color: var(--oc-amber);
+}
+
+.dark .VPSidebarItem.is-active > .item .link .text {
+  color: var(--oc-amber);
+  font-weight: 600;
+}
+
+.dark .VPSidebarItem:hover > .item .link .text {
+  color: #f1f5f9;
+}
+
+/* Group titles */
+.dark .VPSidebarItem.level-0 > .item .text {
+  font-weight: 700;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   CONTENT AREA
+   ============================================================ */
+.dark .vp-doc a {
+  color: var(--oc-amber);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.dark .vp-doc a:hover {
+  color: var(--oc-amber-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dark .vp-doc h1 {
+  font-family: var(--oc-font-display);
+  font-weight: 800;
+  font-size: 2.2rem;
+  letter-spacing: -0.03em;
+  color: #f1f5f9;
+}
+
+.dark .vp-doc h2 {
+  font-family: var(--oc-font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  color: #f1f5f9;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.dark .vp-doc h3 {
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+}
+
+.dark .vp-doc h4 {
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+/* ============================================================
+   CODE BLOCKS
+   ============================================================ */
+.dark [class*='language-'] {
+  background: #060c1e !important;
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* Subtle amber left accent */
+.dark [class*='language-']::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--oc-amber), transparent);
+  border-radius: 1px;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* Code group tabs */
+.dark .vp-code-group .tabs {
+  background: #060c1e !important;
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: none;
+  border-radius: 14px 14px 0 0;
+}
+
+.dark .vp-code-group [class*='language-'] {
+  border-radius: 0 0 14px 14px;
+  border-top: none;
+}
+
+/* Language label */
+.dark [class*='language-'] > .lang {
+  color: #475569;
+  font-family: var(--oc-font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Copy button */
+.dark [class*='language-'] > .copy {
+  background: rgba(148, 163, 184, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.dark [class*='language-'] > .copy:hover {
+  background: var(--oc-amber-soft);
+  border-color: rgba(245, 166, 35, 0.2);
+}
+
+.dark [class*='language-'] > .copy.copied {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+/* Inline code */
+.dark :not(pre) > code {
+  background: rgba(245, 166, 35, 0.06);
+  color: var(--oc-amber);
+  border: 1px solid rgba(245, 166, 35, 0.10);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 0.88em;
+  font-weight: 500;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.dark table {
+  border-color: rgba(148, 163, 184, 0.06);
+}
+
+.dark thead tr {
+  background: #0a1228;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.10);
+}
+
+.dark thead th {
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+  color: #f1f5f9;
+  font-size: 0.88rem;
+}
+
+.dark tbody tr {
+  border-bottom-color: rgba(148, 163, 184, 0.05);
+  transition: background 0.2s ease;
+}
+
+.dark tbody tr:hover {
+  background: rgba(10, 18, 40, 0.6);
+}
+
+.dark tbody td {
+  color: #94a3b8;
+}
+
+/* ============================================================
+   "ON THIS PAGE" OUTLINE
+   ============================================================ */
+.dark .VPDocAsideOutline .outline-link {
+  font-family: var(--oc-font-display);
+  font-size: 0.82rem;
+  color: #475569;
+  transition: color 0.2s ease;
+}
+
+.dark .VPDocAsideOutline .outline-link:hover,
+.dark .VPDocAsideOutline .outline-link.active {
+  color: var(--oc-amber);
+}
+
+/* ============================================================
+   CUSTOM CONTAINERS (tip / warning / info / danger)
+   ============================================================ */
+.dark .custom-block.tip {
+  border-color: var(--oc-amber);
+  background: rgba(245, 166, 35, 0.04);
+  border-radius: 12px;
+}
+
+.dark .custom-block.tip .custom-block-title {
+  color: var(--oc-amber);
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+}
+
+.dark .custom-block.warning {
+  border-color: var(--oc-red);
+  background: rgba(239, 68, 68, 0.04);
+  border-radius: 12px;
+}
+
+.dark .custom-block.warning .custom-block-title {
+  color: var(--oc-red);
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+}
+
+.dark .custom-block.info {
+  border-color: var(--oc-periwinkle);
+  background: rgba(129, 140, 248, 0.04);
+  border-radius: 12px;
+}
+
+.dark .custom-block.info .custom-block-title {
+  color: var(--oc-periwinkle);
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+}
+
+.dark .custom-block.danger {
+  border-color: var(--oc-red);
+  background: rgba(239, 68, 68, 0.04);
+  border-radius: 12px;
+}
+
+.dark .custom-block.danger .custom-block-title {
+  color: var(--oc-red);
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+}
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+.dark .VPNavBarSearch button,
+.dark .DocSearch-Button {
+  background: rgba(148, 163, 184, 0.05) !important;
+  border: 1px solid rgba(148, 163, 184, 0.08) !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease;
+}
+
+.dark .VPNavBarSearch button:hover,
+.dark .DocSearch-Button:hover {
+  border-color: rgba(148, 163, 184, 0.15) !important;
+  background: rgba(148, 163, 184, 0.08) !important;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.dark .VPFooter {
+  background: #020617;
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.dark .VPFooter .message,
+.dark .VPFooter .copyright {
+  color: #475569;
+  font-family: var(--oc-font-display);
+  font-size: 0.85rem;
+}
+
+.dark .VPFooter a {
+  color: var(--oc-amber);
+  transition: color 0.2s ease;
+}
+
+.dark .VPFooter a:hover {
+  color: var(--oc-amber-bright);
+}
+
+/* ============================================================
+   DOC FOOTER (edit link, last updated)
+   ============================================================ */
+.dark .VPDocFooter .edit-link-button {
+  color: #475569;
+  font-family: var(--oc-font-display);
+  transition: color 0.2s ease;
+}
+
+.dark .VPDocFooter .edit-link-button:hover {
+  color: var(--oc-amber);
+}
+
+.dark .VPDocFooter .last-updated-text {
+  color: #475569;
+}
+
+/* ============================================================
+   PAGER (prev / next)
+   ============================================================ */
+.dark .pager-link {
+  background: rgba(10, 18, 40, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-radius: 14px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .pager-link:hover {
+  border-color: rgba(245, 166, 35, 0.2);
+  background: rgba(10, 18, 40, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.dark .pager-link .title {
+  color: var(--oc-amber);
+  font-family: var(--oc-font-display);
+  font-weight: 600;
+}
+
+.dark .pager-link .desc {
+  font-family: var(--oc-font-display);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.25);
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+img[src*="shields.io"],
+img[src*="badge"],
+img[src*="pkg.go.dev"] {
+  margin-right: 6px;
+  border-radius: 6px;
+  transition: transform 0.2s ease;
+}
+
+img[src*="shields.io"]:hover,
+img[src*="badge"]:hover,
+img[src*="pkg.go.dev"]:hover {
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   HOME PAGE CONTENT (below features)
+   ============================================================ */
+.dark .VPHome > .vp-doc {
+  padding-top: 48px;
+}
+
+.dark .VPHome .vp-doc h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 56px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(245, 166, 35, 0.12);
+  position: relative;
+}
+
+/* Amber accent under homepage h2 */
+.dark .VPHome .vp-doc h2::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 48px;
+  height: 2px;
+  background: var(--oc-amber);
+  border-radius: 1px;
+}
+
+/* Home code blocks get enhanced shadow */
+.dark .VPHome [class*='language-'] {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 959px) {
+  .dark .VPHero .name {
+    font-size: 2.5rem;
+  }
+
+  .dark .atmosphere-orb--amber {
+    width: 400px;
+    height: 400px;
+  }
+
+  .dark .atmosphere-orb--blue {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 639px) {
+  .dark .VPHero .name {
+    font-size: 2rem;
+  }
+
+  .VPButton.medium.brand,
+  .dark .VPButton.medium.alt {
+    border-radius: 10px;
+    padding: 0 24px;
+    font-size: 0.9rem;
+  }
+
+  .dark .VPFeature {
+    border-radius: 12px !important;
+  }
+
+  .dark [class*='language-'] {
+    border-radius: 10px;
+  }
+}
