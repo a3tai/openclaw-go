@@ -295,13 +295,13 @@ const (
 	MethodTalkSpeak      MethodName = "talk.speak"
 
 	// Tool and TTS interfaces.
-	MethodToolsCatalog  MethodName = "tools.catalog"
+	MethodToolsCatalog   MethodName = "tools.catalog"
 	MethodToolsEffective MethodName = "tools.effective"
-	MethodTTSConvert    MethodName = "tts.convert"
-	MethodTTSDisable   MethodName = "tts.disable"
-	MethodTTSEnable    MethodName = "tts.enable"
-	MethodTTSProviders MethodName = "tts.providers"
-	MethodTTSStatus    MethodName = "tts.status"
+	MethodTTSConvert     MethodName = "tts.convert"
+	MethodTTSDisable     MethodName = "tts.disable"
+	MethodTTSEnable      MethodName = "tts.enable"
+	MethodTTSProviders   MethodName = "tts.providers"
+	MethodTTSStatus      MethodName = "tts.status"
 
 	// Update, usage, and voice wake configuration.
 	MethodUpdateRun    MethodName = "update.run"
@@ -2245,20 +2245,20 @@ type WebLoginWaitParams struct {
 
 // PluginApprovalRequestParams are the params for "plugin.approval.request".
 type PluginApprovalRequestParams struct {
-	PluginID             *string `json:"pluginId,omitempty"`
-	Title                string  `json:"title"`
-	Description          string  `json:"description"`
-	Severity             *string `json:"severity,omitempty"` // "info", "warning", "critical"
-	ToolName             *string `json:"toolName,omitempty"`
-	ToolCallID           *string `json:"toolCallId,omitempty"`
-	AgentID              *string `json:"agentId,omitempty"`
-	SessionKey           *string `json:"sessionKey,omitempty"`
-	TurnSourceChannel    *string `json:"turnSourceChannel,omitempty"`
-	TurnSourceTo         *string `json:"turnSourceTo,omitempty"`
-	TurnSourceAccountID  *string `json:"turnSourceAccountId,omitempty"`
-	TurnSourceThreadID   any     `json:"turnSourceThreadId,omitempty"` // string or number
-	TimeoutMs            *int    `json:"timeoutMs,omitempty"`
-	TwoPhase             *bool   `json:"twoPhase,omitempty"`
+	PluginID            *string `json:"pluginId,omitempty"`
+	Title               string  `json:"title"`
+	Description         string  `json:"description"`
+	Severity            *string `json:"severity,omitempty"` // "info", "warning", "critical"
+	ToolName            *string `json:"toolName,omitempty"`
+	ToolCallID          *string `json:"toolCallId,omitempty"`
+	AgentID             *string `json:"agentId,omitempty"`
+	SessionKey          *string `json:"sessionKey,omitempty"`
+	TurnSourceChannel   *string `json:"turnSourceChannel,omitempty"`
+	TurnSourceTo        *string `json:"turnSourceTo,omitempty"`
+	TurnSourceAccountID *string `json:"turnSourceAccountId,omitempty"`
+	TurnSourceThreadID  any     `json:"turnSourceThreadId,omitempty"` // string or number
+	TimeoutMs           *int    `json:"timeoutMs,omitempty"`
+	TwoPhase            *bool   `json:"twoPhase,omitempty"`
 }
 
 // PluginApprovalRequestResult is the result of "plugin.approval.request".
