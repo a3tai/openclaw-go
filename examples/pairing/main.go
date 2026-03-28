@@ -1,6 +1,6 @@
 // Command pairing demonstrates node and device pairing workflows.
 //
-// It connects as an operator and exercises:
+// It connects with device identity as an operator and exercises:
 //   - Listing paired nodes and devices
 //   - Node pairing: request, approve workflow
 //   - Device pairing: list, approve/reject/remove
@@ -8,36 +8,38 @@
 //
 // Usage:
 //
-//	go run ./examples/pairing
-//
-// Requires the mock server: go run ./examples/server
+//	go run ./examples/pairing <token> <host> [identity-dir]
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
 func main() {
+	cfg := gwconn.ParseArgs("Usage: pairing <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Pairing Example ===")
 	fmt.Println()
 
-	client := gateway.NewClient(
-		gateway.WithToken("example-token"),
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleOperator),
 		gateway.WithScopes(
 			protocol.ScopeOperatorRead,
 			protocol.ScopeOperatorWrite,
 			protocol.ScopeOperatorApprovals,
+			protocol.ScopeOperatorPairing,
 		),
 		gateway.WithOnEvent(func(ev protocol.Event) {
 			switch ev.EventName {
@@ -50,11 +52,7 @@ func main() {
 	)
 	defer client.Close()
 
-	fmt.Println("Connecting...")
-	if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
-		log.Fatalf("Connect: %v", err)
-	}
-	fmt.Println("Connected")
+	cfg.Connect(ctx, client)
 	fmt.Println()
 
 	// --- Node Pairing ---

@@ -1,6 +1,6 @@
 // Command config demonstrates gateway configuration management.
 //
-// It connects and exercises:
+// It connects with device identity and exercises:
 //   - Get current config
 //   - Get config schema
 //   - Patch config with partial changes
@@ -8,18 +8,16 @@
 //
 // Usage:
 //
-//	go run ./examples/config
-//
-// Requires the mock server: go run ./examples/server
+//	go run ./examples/config <token> <host> [identity-dir]
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -27,28 +25,27 @@ import (
 func intPtr(v int) *int { return &v }
 
 func main() {
+	cfg := gwconn.ParseArgs("Usage: config <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Config Example ===")
 	fmt.Println()
 
-	client := gateway.NewClient(
-		gateway.WithToken("example-token"),
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleOperator),
 		gateway.WithScopes(
-		protocol.ScopeOperatorRead,
-		protocol.ScopeOperatorWrite,
-		protocol.ScopeOperatorAdmin, // required for config.set, config.apply
-	),
+			protocol.ScopeOperatorRead,
+			protocol.ScopeOperatorWrite,
+			protocol.ScopeOperatorAdmin, // required for config.set, config.apply
+		),
 	)
 	defer client.Close()
 
-	fmt.Println("Connecting...")
-	if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
-		log.Fatalf("Connect: %v", err)
-	}
-	fmt.Println("Connected")
+	cfg.Connect(ctx, client)
 	fmt.Println()
 
 	// Get config.

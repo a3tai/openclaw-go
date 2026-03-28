@@ -1,39 +1,40 @@
 // Command node demonstrates connecting as a node (capability host).
 //
 // Nodes provide execution capabilities to the gateway. This example:
-//   - Connects as a node role
+//   - Connects as a node role with device identity
 //   - Declares its capabilities and commands
 //   - Handles invoke requests from the gateway
 //   - Sends node events back to the gateway
 //
 // Usage:
 //
-//	go run ./examples/node
-//
-// Requires the mock server: go run ./examples/server
+//	go run ./examples/node <token> <host> [identity-dir]
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
 func main() {
+	cfg := gwconn.ParseArgs("Usage: node <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Node Example ===")
 	fmt.Println()
 
 	// Connect as a node with an invoke handler.
-	client := gateway.NewClient(
-		gateway.WithToken("node-token"),
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleNode),
 		gateway.WithScopes(protocol.ScopeOperatorRead),
 		gateway.WithCaps("exec", "fs"),
@@ -61,13 +62,10 @@ func main() {
 	)
 	defer client.Close()
 
-	fmt.Println("Connecting as node...")
-	if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
-		log.Fatalf("Connect: %v", err)
-	}
+	cfg.Connect(ctx, client)
 
 	hello := client.Hello()
-	fmt.Printf("Connected (protocol=%d)\n\n", hello.Protocol)
+	fmt.Printf("Protocol: %d\n\n", hello.Protocol)
 
 	// Request pairing with the gateway.
 	fmt.Println("Requesting node pairing...")
@@ -80,7 +78,7 @@ func main() {
 		Commands:    []string{"shell", "read_file", "write_file"},
 	})
 	if err != nil {
-		fmt.Printf("NodePairRequest: %v (may not be implemented in mock)\n", err)
+		fmt.Printf("NodePairRequest: %v\n", err)
 	} else {
 		fmt.Printf("Pair result: %s\n", string(pairResult))
 	}
@@ -92,7 +90,7 @@ func main() {
 		PayloadJSON: `{"caps":["exec","fs"],"status":"ready"}`,
 	})
 	if err != nil {
-		fmt.Printf("NodeEvent: %v (may not be implemented in mock)\n", err)
+		fmt.Printf("NodeEvent: %v\n", err)
 	} else {
 		fmt.Println("Node event sent")
 	}
@@ -110,7 +108,7 @@ func main() {
 		Payload: resultPayload,
 	})
 	if err != nil {
-		fmt.Printf("NodeInvokeResult: %v (may not be implemented in mock)\n", err)
+		fmt.Printf("NodeInvokeResult: %v\n", err)
 	} else {
 		fmt.Println("Invoke result sent")
 	}
