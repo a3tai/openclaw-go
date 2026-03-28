@@ -37,7 +37,11 @@ func main() {
 	client := gateway.NewClient(
 		gateway.WithToken("example-token"),
 		gateway.WithRole(protocol.RoleOperator),
-		gateway.WithScopes(protocol.ScopeOperatorRead, protocol.ScopeOperatorWrite),
+		gateway.WithScopes(
+		protocol.ScopeOperatorRead,
+		protocol.ScopeOperatorWrite,
+		protocol.ScopeOperatorAdmin, // required for agents.create, agents.update, agents.delete
+	),
 	)
 	defer client.Close()
 
