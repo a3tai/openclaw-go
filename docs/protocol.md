@@ -76,6 +76,22 @@ protocol.ScopeOperatorApprovals // "operator.approvals"
 protocol.ScopeOperatorPairing   // "operator.pairing"
 ```
 
+
+## Scope Requirements
+
+Each RPC method requires a minimum scope. Declare all needed scopes in `WithScopes` at connect time.
+
+| Scope | Methods covered |
+|-------|----------------|
+| `operator.read` | `chat.history`, `cron.list`, `cron.status`, `cron.runs`, `sessions.list`, `sessions.preview`, `sessions.usage`, `agents.list`, `agents.files.list`, `config.get`, `config.schema`, `nodes.list`, `logs.tail`, `models.list` |
+| `operator.write` | `chat.send`, `chat.abort`, `sessions.send` |
+| `operator.admin` | `cron.add`, `cron.update`, `cron.run`, `cron.remove`, `agents.create`, `agents.update`, `agents.delete`, `agents.files.set`, `config.set`, `config.apply`, `sessions.patch`, `sessions.reset`, `skills.install`, `skills.update` |
+| `operator.approvals` | `exec.approvals.get`, `exec.approvals.resolve`, `exec.approvals.wait-decision` |
+| `operator.pairing` | `node.pair.request`, `node.pair.approve`, `device.pair.approve`, `device.token.rotate` |
+
+**Common mistake:** Using only `operator.read` + `operator.write` and hitting `missing scope: operator.admin` errors.
+The gateway enforces scopes on each RPC — only request what you need, but request everything you need.
+
 ## Connect Handshake
 
 The connection lifecycle is: challenge -> connect request -> hello-ok response.

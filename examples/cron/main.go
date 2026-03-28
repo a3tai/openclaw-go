@@ -39,7 +39,11 @@ func main() {
 	client := gateway.NewClient(
 		gateway.WithToken("example-token"),
 		gateway.WithRole(protocol.RoleOperator),
-		gateway.WithScopes(protocol.ScopeOperatorRead, protocol.ScopeOperatorWrite),
+		gateway.WithScopes(
+		protocol.ScopeOperatorRead,
+		protocol.ScopeOperatorWrite,
+		protocol.ScopeOperatorAdmin, // required for cron.add, cron.run, cron.remove
+	),
 	)
 	defer client.Close()
 
