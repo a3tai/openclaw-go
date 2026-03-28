@@ -63,11 +63,12 @@ func main() {
 	if err != nil {
 		fmt.Printf("CronList: %v\n", err)
 	} else {
-		data, _ := json.MarshalIndent(jobs, "  ", "  ")
-		fmt.Printf("Jobs:\n  %s\n", data)
+		fmt.Printf("Jobs: %d (total: %d, hasMore: %v)\n", len(jobs.Jobs), jobs.Total, jobs.HasMore)
+		data, _ := json.MarshalIndent(jobs.Jobs, "  ", "  ")
+		fmt.Printf("  %s\n", data)
 	}
 
-	// Add a cron job.
+	// Add a cron job using systemEvent payload (required for main agent).
 	fmt.Println("\n--- Add Cron Job ---")
 	addResult, err := client.CronAdd(ctx, protocol.CronAddParams{
 		Name:       "daily-summary",
@@ -81,14 +82,23 @@ func main() {
 		SessionTarget: "main",
 		WakeMode:      "now",
 		Payload: protocol.CronPayload{
-			Kind:    "agentTurn",
-			Message: "Generate a daily summary of recent activity.",
+			Kind: "systemEvent",
+			Text: "Generate a daily summary of recent activity.",
 		},
 	})
+
+	// Extract the server-assigned job ID for subsequent operations.
+	var jobID string
 	if err != nil {
 		fmt.Printf("CronAdd: %v\n", err)
 	} else {
 		fmt.Printf("Added: %s\n", formatJSON(addResult))
+		var added struct {
+			ID string `json:"id"`
+		}
+		if json.Unmarshal(addResult, &added) == nil {
+			jobID = added.ID
+		}
 	}
 
 	// Get cron status.
@@ -100,40 +110,53 @@ func main() {
 		fmt.Printf("Status: %s\n", formatJSON(status))
 	}
 
-	// View run history.
+	// View run history (use server-assigned ID, not the name).
 	fmt.Println("\n--- Cron Runs ---")
-	runs, err := client.CronRuns(ctx, protocol.CronRunsParams{
-		JobID: "daily-summary",
-		Limit: intPtr(5),
-	})
-	if err != nil {
-		fmt.Printf("CronRuns: %v\n", err)
+	if jobID == "" {
+		fmt.Println("Skipped (no job ID from CronAdd)")
 	} else {
-		data, _ := json.MarshalIndent(runs, "  ", "  ")
-		fmt.Printf("Runs:\n  %s\n", data)
+		runs, err := client.CronRuns(ctx, protocol.CronRunsParams{
+			ID:    jobID,
+			Limit: intPtr(5),
+		})
+		if err != nil {
+			fmt.Printf("CronRuns: %v\n", err)
+		} else {
+			fmt.Printf("Runs: %d (total: %d)\n", len(runs.Entries), runs.Total)
+			data, _ := json.MarshalIndent(runs.Entries, "  ", "  ")
+			fmt.Printf("  %s\n", data)
+		}
 	}
 
-	// Run a job manually.
+	// Run a job manually (use server-assigned ID).
 	fmt.Println("\n--- Manual Run ---")
-	err = client.CronRun(ctx, protocol.CronRunParams{
-		JobID: "daily-summary",
-		Mode:  "force",
-	})
-	if err != nil {
-		fmt.Printf("CronRun: %v\n", err)
+	if jobID == "" {
+		fmt.Println("Skipped (no job ID from CronAdd)")
 	} else {
-		fmt.Println("Job triggered")
+		err = client.CronRun(ctx, protocol.CronRunParams{
+			ID:   jobID,
+			Mode: "force",
+		})
+		if err != nil {
+			fmt.Printf("CronRun: %v\n", err)
+		} else {
+			fmt.Println("Job triggered")
+		}
 	}
 
-	// Remove the job.
+	// Remove the job (use server-assigned ID).
 	fmt.Println("\n--- Remove Cron Job ---")
-	err = client.CronRemove(ctx, protocol.CronRemoveParams{
-		JobID: "daily-summary",
-	})
-	if err != nil {
-		fmt.Printf("CronRemove: %v\n", err)
+	if jobID == "" {
+		fmt.Println("Skipped (no job ID from CronAdd)")
 	} else {
-		fmt.Println("Job removed")
+		err = client.CronRemove(ctx, protocol.CronRemoveParams{
+			ID: jobID,
+		})
+		if err != nil {
+			fmt.Printf("CronRemove: %v\n", err)
+		} else {
+			fmt.Println("Job removed")
+		}
 	}
 
 	fmt.Println("\n=== Done ===")

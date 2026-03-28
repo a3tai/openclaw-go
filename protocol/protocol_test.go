@@ -1442,15 +1442,66 @@ func TestCronParamsRoundTrip(t *testing.T) {
 }
 
 func TestCronRunLogEntryRoundTrip(t *testing.T) {
+	in := 42
+	out := 10
+	total := 52
 	e := CronRunLogEntry{
 		Ts: 1700000000000, JobID: "j1", Action: "finished",
-		Status: "ok", SessionKey: "main",
+		Status: "ok", SessionKey: "main", JobName: "daily",
+		Model: "gpt-4", Provider: "anthropic",
+		Usage: &CronRunLogUsage{InputTokens: &in, OutputTokens: &out, TotalTokens: &total},
 	}
 	data, _ := json.Marshal(e)
 	var got CronRunLogEntry
 	json.Unmarshal(data, &got)
 	if got.Action != "finished" {
 		t.Errorf("action = %q", got.Action)
+	}
+	if got.JobName != "daily" {
+		t.Errorf("jobName = %q", got.JobName)
+	}
+	if got.Usage == nil || got.Usage.TotalTokens == nil || *got.Usage.TotalTokens != 52 {
+		t.Error("usage not round-tripped")
+	}
+}
+
+func TestCronListResultRoundTrip(t *testing.T) {
+	nextOff := 2
+	r := CronListResult{
+		Jobs: []CronJob{
+			{ID: "j1", Name: "daily", Enabled: true, Schedule: CronSchedule{Kind: "cron", Expr: "0 9 * * *"}, SessionTarget: "main", WakeMode: "now", Payload: CronPayload{Kind: "systemEvent", Text: "hi"}},
+		},
+		Total: 5, Offset: 0, Limit: 1, HasMore: true, NextOffset: &nextOff,
+	}
+	data, _ := json.Marshal(r)
+	var got CronListResult
+	json.Unmarshal(data, &got)
+	if len(got.Jobs) != 1 || got.Jobs[0].ID != "j1" {
+		t.Errorf("jobs not round-tripped: %+v", got.Jobs)
+	}
+	if got.Total != 5 || !got.HasMore {
+		t.Errorf("pagination not round-tripped: total=%d hasMore=%v", got.Total, got.HasMore)
+	}
+	if got.NextOffset == nil || *got.NextOffset != 2 {
+		t.Error("nextOffset not round-tripped")
+	}
+}
+
+func TestCronRunsResultRoundTrip(t *testing.T) {
+	r := CronRunsResult{
+		Entries: []CronRunLogEntry{
+			{Ts: 1000, JobID: "j1", Action: "finished", Status: "ok"},
+		},
+		Total: 10, Offset: 0,
+	}
+	data, _ := json.Marshal(r)
+	var got CronRunsResult
+	json.Unmarshal(data, &got)
+	if len(got.Entries) != 1 || got.Entries[0].JobID != "j1" {
+		t.Errorf("entries not round-tripped: %+v", got.Entries)
+	}
+	if got.Total != 10 {
+		t.Errorf("total not round-tripped: %d", got.Total)
 	}
 }
 

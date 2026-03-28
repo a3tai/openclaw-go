@@ -7,13 +7,13 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
-// CronList lists cron jobs.
-func (c *Client) CronList(ctx context.Context, params protocol.CronListParams) ([]protocol.CronJob, error) {
-	var result []protocol.CronJob
+// CronList lists cron jobs. The server returns a paginated result.
+func (c *Client) CronList(ctx context.Context, params protocol.CronListParams) (*protocol.CronListResult, error) {
+	var result protocol.CronListResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodCronList), params, &result); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return &result, nil
 }
 
 // CronStatus retrieves the cron system status.
@@ -41,11 +41,11 @@ func (c *Client) CronRun(ctx context.Context, params protocol.CronRunParams) err
 	return c.sendRPCVoid(ctx, string(protocol.MethodCronRun), params)
 }
 
-// CronRuns retrieves the run history for a cron job.
-func (c *Client) CronRuns(ctx context.Context, params protocol.CronRunsParams) ([]protocol.CronRunLogEntry, error) {
-	var result []protocol.CronRunLogEntry
+// CronRuns retrieves the run history for cron jobs. The server returns a paginated result.
+func (c *Client) CronRuns(ctx context.Context, params protocol.CronRunsParams) (*protocol.CronRunsResult, error) {
+	var result protocol.CronRunsResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodCronRuns), params, &result); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return &result, nil
 }
