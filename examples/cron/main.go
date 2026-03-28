@@ -1,6 +1,6 @@
 // Command cron demonstrates cron job management via the Gateway.
 //
-// It connects and exercises:
+// It connects with device identity authentication and exercises:
 //   - List cron jobs
 //   - Add a new cron job
 //   - Run a cron job manually
@@ -9,18 +9,20 @@
 //
 // Usage:
 //
-//	go run ./examples/cron
+//	go run ./examples/cron <token> <host> [identity-dir]
 //
-// Requires the mock server: go run ./examples/server
+// The device must be paired with the gateway before scoped operations will
+// work. On first run, the example generates a new Ed25519 keypair. Approve
+// the device on the gateway (e.g. via the Control UI or CLI), then re-run.
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -30,28 +32,27 @@ func strPtr(v string) *string { return &v }
 func intPtr(v int) *int       { return &v }
 
 func main() {
+	cfg := gwconn.ParseArgs("Usage: cron <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Cron Example ===")
 	fmt.Println()
 
-	client := gateway.NewClient(
-		gateway.WithToken("example-token"),
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleOperator),
 		gateway.WithScopes(
-		protocol.ScopeOperatorRead,
-		protocol.ScopeOperatorWrite,
-		protocol.ScopeOperatorAdmin, // required for cron.add, cron.run, cron.remove
-	),
+			protocol.ScopeOperatorRead,
+			protocol.ScopeOperatorWrite,
+			protocol.ScopeOperatorAdmin, // required for cron.add, cron.run, cron.remove
+		),
 	)
 	defer client.Close()
 
-	fmt.Println("Connecting...")
-	if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
-		log.Fatalf("Connect: %v", err)
-	}
-	fmt.Println("Connected")
+	cfg.Connect(ctx, client)
 	fmt.Println()
 
 	// List cron jobs.

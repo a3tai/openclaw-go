@@ -1,6 +1,6 @@
 // Command sessions demonstrates session management via the Gateway.
 //
-// It connects and exercises the session lifecycle:
+// It connects with device identity and exercises the session lifecycle:
 //   - List sessions
 //   - Preview sessions
 //   - Patch session settings
@@ -8,49 +8,45 @@
 //
 // Usage:
 //
-//	go run ./examples/sessions
-//
-// Requires the mock server: go run ./examples/server
+//	go run ./examples/sessions <token> <host> [identity-dir]
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
-// Helper functions for pointer types.
 func intPtr(v int) *int       { return &v }
 func strPtr(v string) *string { return &v }
 
 func main() {
+	cfg := gwconn.ParseArgs("Usage: sessions <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Sessions Example ===")
 	fmt.Println()
 
-	client := gateway.NewClient(
-		gateway.WithToken("example-token"),
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleOperator),
 		gateway.WithScopes(
-		protocol.ScopeOperatorRead,
-		protocol.ScopeOperatorWrite,
-		protocol.ScopeOperatorAdmin, // required for sessions.patch, sessions.reset
-	),
+			protocol.ScopeOperatorRead,
+			protocol.ScopeOperatorWrite,
+			protocol.ScopeOperatorAdmin, // required for sessions.patch, sessions.reset
+		),
 	)
 	defer client.Close()
 
-	fmt.Println("Connecting...")
-	if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
-		log.Fatalf("Connect: %v", err)
-	}
-	fmt.Println("Connected")
+	cfg.Connect(ctx, client)
 	fmt.Println()
 
 	// List sessions.
