@@ -155,6 +155,10 @@ const (
 	EventExecFinished EventName = "exec.finished"
 	// EventExecDenied is emitted when command execution is denied.
 	EventExecDenied EventName = "exec.denied"
+	// EventPluginApprovalRequested is emitted when a plugin action needs approval.
+	EventPluginApprovalRequested EventName = "plugin.approval.requested"
+	// EventPluginApprovalResolved is emitted when a plugin approval is resolved.
+	EventPluginApprovalResolved EventName = "plugin.approval.resolved"
 )
 
 // MethodName identifies a gateway RPC method name.
@@ -176,6 +180,7 @@ const (
 	MethodAgentsUpdate    MethodName = "agents.update"
 
 	// Browser and channel integration.
+	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
 	MethodChannelsStatus MethodName = "channels.status"
@@ -219,6 +224,11 @@ const (
 	MethodExecApprovalsNodeGet MethodName = "exec.approvals.node.get"
 	MethodExecApprovalsNodeSet MethodName = "exec.approvals.node.set"
 	MethodExecApprovalsSet     MethodName = "exec.approvals.set"
+
+	// Plugin approvals.
+	MethodPluginApprovalRequest      MethodName = "plugin.approval.request"
+	MethodPluginApprovalWaitDecision MethodName = "plugin.approval.waitDecision"
+	MethodPluginApprovalResolve      MethodName = "plugin.approval.resolve"
 
 	// Gateway status and logs.
 	MethodGatewayIdentityGet MethodName = "gateway.identity.get"
@@ -2227,4 +2237,76 @@ type WebLoginStartParams struct {
 type WebLoginWaitParams struct {
 	TimeoutMs *int   `json:"timeoutMs,omitempty"`
 	AccountID string `json:"accountId,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// plugin.approval types
+// ---------------------------------------------------------------------------
+
+// PluginApprovalRequestParams are the params for "plugin.approval.request".
+type PluginApprovalRequestParams struct {
+	PluginID             *string `json:"pluginId,omitempty"`
+	Title                string  `json:"title"`
+	Description          string  `json:"description"`
+	Severity             *string `json:"severity,omitempty"` // "info", "warning", "critical"
+	ToolName             *string `json:"toolName,omitempty"`
+	ToolCallID           *string `json:"toolCallId,omitempty"`
+	AgentID              *string `json:"agentId,omitempty"`
+	SessionKey           *string `json:"sessionKey,omitempty"`
+	TurnSourceChannel    *string `json:"turnSourceChannel,omitempty"`
+	TurnSourceTo         *string `json:"turnSourceTo,omitempty"`
+	TurnSourceAccountID  *string `json:"turnSourceAccountId,omitempty"`
+	TurnSourceThreadID   any     `json:"turnSourceThreadId,omitempty"` // string or number
+	TimeoutMs            *int    `json:"timeoutMs,omitempty"`
+	TwoPhase             *bool   `json:"twoPhase,omitempty"`
+}
+
+// PluginApprovalRequestResult is the result of "plugin.approval.request".
+type PluginApprovalRequestResult struct {
+	ID          string  `json:"id"`
+	Status      string  `json:"status,omitempty"` // "accepted" (twoPhase first response)
+	Decision    *string `json:"decision"`
+	CreatedAtMs int64   `json:"createdAtMs"`
+	ExpiresAtMs int64   `json:"expiresAtMs"`
+}
+
+// PluginApprovalWaitDecisionParams are the params for "plugin.approval.waitDecision".
+type PluginApprovalWaitDecisionParams struct {
+	ID string `json:"id"`
+}
+
+// PluginApprovalWaitDecisionResult is the result of "plugin.approval.waitDecision".
+type PluginApprovalWaitDecisionResult struct {
+	ID          string  `json:"id"`
+	Decision    *string `json:"decision"` // "allow-once", "allow-always", "deny", or null
+	CreatedAtMs *int64  `json:"createdAtMs,omitempty"`
+	ExpiresAtMs *int64  `json:"expiresAtMs,omitempty"`
+}
+
+// PluginApprovalResolveParams are the params for "plugin.approval.resolve".
+type PluginApprovalResolveParams struct {
+	ID       string `json:"id"`
+	Decision string `json:"decision"` // "allow-once", "allow-always", "deny"
+}
+
+// PluginApprovalResolveResult is the result of "plugin.approval.resolve".
+type PluginApprovalResolveResult struct {
+	OK bool `json:"ok"`
+}
+
+// PluginApprovalRequestedEvent is the payload of a "plugin.approval.requested" event.
+type PluginApprovalRequestedEvent struct {
+	ID          string                      `json:"id"`
+	Request     PluginApprovalRequestParams `json:"request"`
+	CreatedAtMs int64                       `json:"createdAtMs"`
+	ExpiresAtMs int64                       `json:"expiresAtMs"`
+}
+
+// PluginApprovalResolvedEvent is the payload of a "plugin.approval.resolved" event.
+type PluginApprovalResolvedEvent struct {
+	ID         string                       `json:"id"`
+	Decision   string                       `json:"decision"`
+	ResolvedBy *string                      `json:"resolvedBy,omitempty"`
+	Ts         int64                        `json:"ts"`
+	Request    *PluginApprovalRequestParams `json:"request,omitempty"`
 }
