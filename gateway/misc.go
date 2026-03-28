@@ -22,6 +22,9 @@ func (c *Client) PushTest(ctx context.Context, params protocol.PushTestParams) (
 }
 
 // BrowserRequest makes a browser request via the gateway.
+//
+// Deprecated: browser.request is not present in upstream OpenClaw's BASE_METHODS
+// and is a deprecation candidate. Avoid using this in new code.
 func (c *Client) BrowserRequest(ctx context.Context, params any) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodBrowserRequest), params)
 }
