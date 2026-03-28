@@ -7,13 +7,14 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
-// ChatSend sends a chat message and returns the chat event response.
-func (c *Client) ChatSend(ctx context.Context, params protocol.ChatSendParams) (*protocol.ChatEvent, error) {
-	var ev protocol.ChatEvent
-	if err := c.sendRPCTyped(ctx, string(protocol.MethodChatSend), params, &ev); err != nil {
+// ChatSend sends a chat message and returns the initial ack.
+// Streaming content arrives via "chat" events on the event handler.
+func (c *Client) ChatSend(ctx context.Context, params protocol.ChatSendParams) (*protocol.ChatSendResult, error) {
+	var result protocol.ChatSendResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodChatSend), params, &result); err != nil {
 		return nil, err
 	}
-	return &ev, nil
+	return &result, nil
 }
 
 // ChatHistory retrieves chat history for a session.

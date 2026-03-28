@@ -734,7 +734,16 @@ type ChatInjectParams struct {
 	Label      string `json:"label,omitempty"`
 }
 
-// ChatEvent is the payload of a "chat" event.
+// ChatSendResult is the RPC response from "chat.send".
+// This is the initial ack — streaming content arrives via "chat" events.
+type ChatSendResult struct {
+	RunID          string `json:"runId"`
+	Status         string `json:"status"`                         // "started"
+	MessageSeq     *int   `json:"messageSeq,omitempty"`           // sequence number if applicable
+	InterruptedRun *bool  `json:"interruptedActiveRun,omitempty"` // true if a prior run was interrupted
+}
+
+// ChatEvent is the payload of a "chat" event (received via the event stream).
 type ChatEvent struct {
 	RunID        string          `json:"runId"`
 	SessionKey   string          `json:"sessionKey"`
@@ -1482,7 +1491,23 @@ type CronJob struct {
 
 // CronListParams are the params for "cron.list".
 type CronListParams struct {
-	IncludeDisabled *bool `json:"includeDisabled,omitempty"`
+	IncludeDisabled *bool  `json:"includeDisabled,omitempty"`
+	Limit           *int   `json:"limit,omitempty"`
+	Offset          *int   `json:"offset,omitempty"`
+	Query           string `json:"query,omitempty"`
+	Enabled         string `json:"enabled,omitempty"` // "all", "enabled", "disabled"
+	SortBy          string `json:"sortBy,omitempty"`  // "nextRunAtMs", "updatedAtMs", "name"
+	SortDir         string `json:"sortDir,omitempty"` // "asc", "desc"
+}
+
+// CronListResult is the paginated result of "cron.list".
+type CronListResult struct {
+	Jobs       []CronJob `json:"jobs"`
+	Total      int       `json:"total"`
+	Offset     int       `json:"offset"`
+	Limit      int       `json:"limit"`
+	HasMore    bool      `json:"hasMore"`
+	NextOffset *int      `json:"nextOffset"`
 }
 
 // CronAddParams are the params for "cron.add".
@@ -1538,24 +1563,55 @@ type CronRunParams struct {
 
 // CronRunsParams are the params for "cron.runs".
 type CronRunsParams struct {
-	ID    string `json:"id,omitempty"`
-	JobID string `json:"jobId,omitempty"`
-	Limit *int   `json:"limit,omitempty"`
+	Scope            string   `json:"scope,omitempty"` // "job" or "all"
+	ID               string   `json:"id,omitempty"`
+	JobID            string   `json:"jobId,omitempty"`
+	Limit            *int     `json:"limit,omitempty"`
+	Offset           *int     `json:"offset,omitempty"`
+	Statuses         []string `json:"statuses,omitempty"`         // ["ok","error","skipped"]
+	Status           string   `json:"status,omitempty"`           // "all","ok","error","skipped"
+	DeliveryStatuses []string `json:"deliveryStatuses,omitempty"` // delivery status filters
+	DeliveryStatus   string   `json:"deliveryStatus,omitempty"`
+	Query            string   `json:"query,omitempty"`
+	SortDir          string   `json:"sortDir,omitempty"` // "asc", "desc"
 }
 
 // CronRunLogEntry is a single entry in the cron run log.
 type CronRunLogEntry struct {
-	Ts          int64  `json:"ts"`
-	JobID       string `json:"jobId"`
-	Action      string `json:"action"` // "finished"
-	Status      string `json:"status,omitempty"`
-	Error       string `json:"error,omitempty"`
-	Summary     string `json:"summary,omitempty"`
-	SessionID   string `json:"sessionId,omitempty"`
-	SessionKey  string `json:"sessionKey,omitempty"`
-	RunAtMs     *int64 `json:"runAtMs,omitempty"`
-	DurationMs  *int64 `json:"durationMs,omitempty"`
-	NextRunAtMs *int64 `json:"nextRunAtMs,omitempty"`
+	Ts             int64            `json:"ts"`
+	JobID          string           `json:"jobId"`
+	Action         string           `json:"action"` // "finished"
+	Status         string           `json:"status,omitempty"`
+	Error          string           `json:"error,omitempty"`
+	Summary        string           `json:"summary,omitempty"`
+	Delivered      *bool            `json:"delivered,omitempty"`
+	DeliveryStatus string           `json:"deliveryStatus,omitempty"`
+	DeliveryError  string           `json:"deliveryError,omitempty"`
+	SessionID      string           `json:"sessionId,omitempty"`
+	SessionKey     string           `json:"sessionKey,omitempty"`
+	RunAtMs        *int64           `json:"runAtMs,omitempty"`
+	DurationMs     *int64           `json:"durationMs,omitempty"`
+	NextRunAtMs    *int64           `json:"nextRunAtMs,omitempty"`
+	Model          string           `json:"model,omitempty"`
+	Provider       string           `json:"provider,omitempty"`
+	Usage          *CronRunLogUsage `json:"usage,omitempty"`
+	JobName        string           `json:"jobName,omitempty"`
+}
+
+// CronRunLogUsage contains token usage for a cron run.
+type CronRunLogUsage struct {
+	InputTokens      *int `json:"input_tokens,omitempty"`
+	OutputTokens     *int `json:"output_tokens,omitempty"`
+	TotalTokens      *int `json:"total_tokens,omitempty"`
+	CacheReadTokens  *int `json:"cache_read_tokens,omitempty"`
+	CacheWriteTokens *int `json:"cache_write_tokens,omitempty"`
+}
+
+// CronRunsResult is the paginated result of "cron.runs".
+type CronRunsResult struct {
+	Entries []CronRunLogEntry `json:"entries"`
+	Total   int               `json:"total"`
+	Offset  int               `json:"offset"`
 }
 
 // ---------------------------------------------------------------------------

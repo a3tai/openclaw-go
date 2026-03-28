@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+func intPtr(v int) *int { return &v }
+
 // testMethod is a helper that tests a convenience method against a mock gateway.
 // It sets up a mock, connects, and exercises success/error/no-detail paths.
 type testMethod struct {
@@ -119,14 +121,14 @@ func (tm *testMethod) run() {
 // --- Chat methods ---
 
 func TestChatSend(t *testing.T) {
-	// Test with typed response
+	// Test with typed response matching real server shape.
 	mg, wsURL, cleanup := startMockGateway(t)
 	defer cleanup()
 
 	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
 		if req.Method == "chat.send" {
-			ev := protocol.ChatEvent{RunID: "run-1", SessionKey: "main", Seq: 0, State: "final"}
-			respData, _ := protocol.MarshalResponse(req.ID, ev)
+			result := protocol.ChatSendResult{RunID: "run-1", Status: "started"}
+			respData, _ := protocol.MarshalResponse(req.ID, result)
 			conn.WriteMessage(websocket.TextMessage, respData)
 		}
 	}
@@ -141,14 +143,17 @@ func TestChatSend(t *testing.T) {
 		t.Fatalf("Connect: %v", err)
 	}
 
-	ev, err := client.ChatSend(ctx, protocol.ChatSendParams{
+	result, err := client.ChatSend(ctx, protocol.ChatSendParams{
 		SessionKey: "main", Message: "hello", IdempotencyKey: "k1",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ev.RunID != "run-1" {
-		t.Errorf("runId = %q", ev.RunID)
+	if result.RunID != "run-1" {
+		t.Errorf("runId = %q", result.RunID)
+	}
+	if result.Status != "started" {
+		t.Errorf("status = %q, want started", result.Status)
 	}
 
 	// Test error paths
@@ -813,7 +818,7 @@ func TestDeviceTokenRevoke(t *testing.T) {
 // --- Cron methods ---
 
 func TestCronList(t *testing.T) {
-	tm := &testMethod{t: t, method: "cron.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+	tm := &testMethod{t: t, method: "cron.list", successPayload: json.RawMessage(`{"jobs":[],"total":0,"offset":0,"limit":50,"hasMore":false,"nextOffset":null}`), success: func(c *Client, ctx context.Context) error {
 		r, err := c.CronList(ctx, protocol.CronListParams{})
 		if err != nil {
 			return err
@@ -824,6 +829,56 @@ func TestCronList(t *testing.T) {
 		return nil
 	}}
 	tm.run()
+}
+
+func TestCronListPaginated(t *testing.T) {
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "cron.list" {
+			page := protocol.CronListResult{
+				Jobs: []protocol.CronJob{
+					{ID: "j1", Name: "daily", Enabled: true, Schedule: protocol.CronSchedule{Kind: "cron", Expr: "0 9 * * *"}, SessionTarget: "main", WakeMode: "now", Payload: protocol.CronPayload{Kind: "systemEvent", Text: "hi"}},
+					{ID: "j2", Name: "weekly", Enabled: false, Schedule: protocol.CronSchedule{Kind: "cron", Expr: "0 0 * * 0"}, SessionTarget: "main", WakeMode: "now", Payload: protocol.CronPayload{Kind: "systemEvent", Text: "hi"}},
+				},
+				Total:      5,
+				Offset:     0,
+				Limit:      2,
+				HasMore:    true,
+				NextOffset: intPtr(2),
+			}
+			respData, _ := protocol.MarshalResponse(req.ID, page)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+	ctx := context.Background()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	r, err := client.CronList(ctx, protocol.CronListParams{})
+	if err != nil {
+		t.Fatalf("CronList: %v", err)
+	}
+	if len(r.Jobs) != 2 {
+		t.Fatalf("expected 2 jobs, got %d", len(r.Jobs))
+	}
+	if r.Jobs[0].ID != "j1" || r.Jobs[1].ID != "j2" {
+		t.Errorf("unexpected job IDs: %s, %s", r.Jobs[0].ID, r.Jobs[1].ID)
+	}
+	if r.Total != 5 {
+		t.Errorf("expected total=5, got %d", r.Total)
+	}
+	if !r.HasMore {
+		t.Error("expected hasMore=true")
+	}
+	if r.NextOffset == nil || *r.NextOffset != 2 {
+		t.Error("expected nextOffset=2")
+	}
 }
 
 func TestCronStatus(t *testing.T) {
@@ -868,7 +923,7 @@ func TestCronRun(t *testing.T) {
 }
 
 func TestCronRuns(t *testing.T) {
-	tm := &testMethod{t: t, method: "cron.runs", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+	tm := &testMethod{t: t, method: "cron.runs", successPayload: json.RawMessage(`{"entries":[],"total":0,"offset":0}`), success: func(c *Client, ctx context.Context) error {
 		r, err := c.CronRuns(ctx, protocol.CronRunsParams{ID: "j1"})
 		if err != nil {
 			return err
@@ -879,6 +934,50 @@ func TestCronRuns(t *testing.T) {
 		return nil
 	}}
 	tm.run()
+}
+
+func TestCronRunsPaginated(t *testing.T) {
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "cron.runs" {
+			page := protocol.CronRunsResult{
+				Entries: []protocol.CronRunLogEntry{
+					{Ts: 1000, JobID: "j1", Action: "finished", Status: "ok", Summary: "done", JobName: "daily"},
+					{Ts: 2000, JobID: "j1", Action: "finished", Status: "error", Error: "timeout"},
+				},
+				Total:  10,
+				Offset: 0,
+			}
+			respData, _ := protocol.MarshalResponse(req.ID, page)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+	ctx := context.Background()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	r, err := client.CronRuns(ctx, protocol.CronRunsParams{JobID: "j1"})
+	if err != nil {
+		t.Fatalf("CronRuns: %v", err)
+	}
+	if len(r.Entries) != 2 {
+		t.Fatalf("expected 2 entries, got %d", len(r.Entries))
+	}
+	if r.Entries[0].Status != "ok" || r.Entries[1].Status != "error" {
+		t.Errorf("unexpected statuses: %s, %s", r.Entries[0].Status, r.Entries[1].Status)
+	}
+	if r.Entries[0].JobName != "daily" {
+		t.Errorf("expected jobName=daily, got %s", r.Entries[0].JobName)
+	}
+	if r.Total != 10 {
+		t.Errorf("expected total=10, got %d", r.Total)
+	}
 }
 
 // --- Exec approvals admin ---
