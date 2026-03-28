@@ -9,8 +9,15 @@ Package `gateway` implements a WebSocket client for the OpenClaw Gateway protoco
 ## Creating a Client
 
 ```go
+// Device identity is required for scoped operations on real servers.
+// Without it, the gateway clears self-declared scopes.
+store, _ := identity.NewStore("~/.openclaw-go/identity")
+id, _ := store.LoadOrGenerate()
+deviceToken := store.LoadDeviceToken()
+
 client := gateway.NewClient(
-    gateway.WithToken("my-token"),
+    gateway.WithToken(token),
+    gateway.WithIdentity(id, deviceToken),
     gateway.WithRole(protocol.RoleOperator),
     gateway.WithScopes(protocol.ScopeOperatorRead, protocol.ScopeOperatorWrite),
     gateway.WithOnEvent(func(ev protocol.Event) {
@@ -20,7 +27,7 @@ client := gateway.NewClient(
 defer client.Close()
 
 ctx := context.Background()
-if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
+if err := client.Connect(ctx, "wss://my-gateway.example.com"); err != nil {
     log.Fatal(err)
 }
 
@@ -40,7 +47,8 @@ fmt.Printf("protocol=%d server=%s\n", hello.Protocol, hello.Server.Version)
 | `WithCaps(caps...)` | Node capability categories |
 | `WithCommands(commands...)` | Node command allowlist |
 | `WithPermissions(perms)` | Node permission toggles |
-| `WithDevice(device)` | Device identity for pairing |
+| `WithIdentity(id, deviceToken)` | Device identity for authenticated scoped access (required for real servers) |
+| `WithDevice(device)` | Raw device identity for pairing |
 | `WithLocale(locale)` | Locale string (default: `"en-US"`) |
 | `WithUserAgent(ua)` | User-agent string |
 | `WithTLSConfig(cfg)` | Custom TLS configuration |
@@ -64,7 +72,7 @@ err := client.SendEvent(eventName, payload)
 
 ## RPC Methods
 
-The client provides typed convenience methods for all 96+ gateway RPCs. Each method marshals the params, sends the request, waits for the response, and unmarshals the typed result.
+The client provides typed convenience methods for all 120+ gateway RPCs. Each method marshals the params, sends the request, waits for the response, and unmarshals the typed result. See [gateway-methods.md](gateway-methods.md) for the complete method reference with response shapes.
 
 ### Chat
 

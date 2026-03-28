@@ -1,6 +1,6 @@
 // Command agents demonstrates agent CRUD operations via the Gateway.
 //
-// It connects and exercises:
+// It connects with device identity and exercises:
 //   - List agents
 //   - Create an agent
 //   - Update agent configuration
@@ -9,9 +9,7 @@
 //
 // Usage:
 //
-//	go run ./examples/agents
-//
-// Requires the mock server: go run ./examples/server
+//	go run ./examples/agents <token> <host> [identity-dir]
 package main
 
 import (
@@ -21,6 +19,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -28,24 +27,27 @@ import (
 func boolPtr(v bool) *bool { return &v }
 
 func main() {
+	cfg := gwconn.ParseArgs("Usage: agents <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Agents CRUD Example ===")
 	fmt.Println()
 
-	client := gateway.NewClient(
-		gateway.WithToken("example-token"),
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleOperator),
-		gateway.WithScopes(protocol.ScopeOperatorRead, protocol.ScopeOperatorWrite),
+		gateway.WithScopes(
+			protocol.ScopeOperatorRead,
+			protocol.ScopeOperatorWrite,
+			protocol.ScopeOperatorAdmin, // required for agents.create, agents.update, agents.delete
+		),
 	)
 	defer client.Close()
 
-	fmt.Println("Connecting...")
-	if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
-		log.Fatalf("Connect: %v", err)
-	}
-	fmt.Println("Connected")
+	if err := cfg.Connect(ctx, client); err != nil { log.Fatal(err) }
 	fmt.Println()
 
 	// List agents.

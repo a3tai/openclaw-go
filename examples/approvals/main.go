@@ -1,16 +1,14 @@
 // Command approvals demonstrates the exec approval flow via the Gateway.
 //
 // When an agent wants to execute a command, the gateway can require operator
-// approval. This example:
+// approval. This example connects with device identity and:
 //   - Listens for exec.approval.requested events
 //   - Auto-approves safe commands, rejects dangerous ones
 //   - Shows the exec approvals admin API
 //
 // Usage:
 //
-//	go run ./examples/approvals
-//
-// Requires the mock server: go run ./examples/server
+//	go run ./examples/approvals <token> <host> [identity-dir]
 package main
 
 import (
@@ -21,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -32,14 +31,17 @@ func strPtr(v string) *string { return &v }
 func intPtr(v int) *int       { return &v }
 
 func main() {
+	cfg := gwconn.ParseArgs("Usage: approvals <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Exec Approvals Example ===")
 	fmt.Println()
 
-	client := gateway.NewClient(
-		gateway.WithToken("example-token"),
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleOperator),
 		gateway.WithScopes(
 			protocol.ScopeOperatorRead,
@@ -76,11 +78,7 @@ func main() {
 	)
 	defer client.Close()
 
-	fmt.Println("Connecting...")
-	if err := client.Connect(ctx, "ws://localhost:18789/ws"); err != nil {
-		log.Fatalf("Connect: %v", err)
-	}
-	fmt.Println("Connected")
+	if err := cfg.Connect(ctx, client); err != nil { log.Fatal(err) }
 	fmt.Println()
 
 	// --- Resolve approvals ---

@@ -7,8 +7,9 @@ import (
 )
 
 // Presence fetches the current presence entries from the gateway.
-func (c *Client) Presence(ctx context.Context) (map[string]protocol.PresenceEntry, error) {
-	var entries map[string]protocol.PresenceEntry
+// The server returns a flat array of presence entries.
+func (c *Client) Presence(ctx context.Context) ([]protocol.PresenceEntry, error) {
+	var entries []protocol.PresenceEntry
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodSystemPresence), nil, &entries); err != nil {
 		return nil, err
 	}

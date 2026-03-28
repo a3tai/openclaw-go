@@ -4,11 +4,13 @@
 //  2. OpenAI-compatible Chat Completions (non-streaming and streaming)
 //  3. Tools Invoke HTTP API
 //
-// It expects the mock server to be running (go run ./examples/server).
-//
 // Usage:
 //
-//	go run ./examples/client
+//	go run ./examples/client <token> <host> [identity-dir]
+//
+// The host URL is used for both WebSocket (gateway) and HTTP (chat/tools) APIs.
+// For WebSocket, the scheme is converted to ws/wss automatically.
+// For HTTP, the scheme is converted to http/https automatically.
 package main
 
 import (
@@ -17,48 +19,52 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/a3tai/openclaw-go/chatcompletions"
+	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/protocol"
 	"github.com/a3tai/openclaw-go/toolsinvoke"
 )
 
-const (
-	wsURL   = "ws://localhost:18789/ws"
-	httpURL = "http://localhost:18789"
-)
-
 func main() {
+	cfg := gwconn.ParseArgs("Usage: client <token> <host> [identity-dir]")
+	cfg.PrintIdentityInfo()
+
+	// Derive an HTTP URL from the WebSocket URL for the REST APIs.
+	httpURL := cfg.WSURL
+	httpURL = strings.Replace(httpURL, "wss://", "https://", 1)
+	httpURL = strings.Replace(httpURL, "ws://", "http://", 1)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	fmt.Println()
 	fmt.Println("=== OpenClaw Go Client Example ===")
 	fmt.Println()
 
 	// 1. Gateway WebSocket API
 	fmt.Println("--- 1. WebSocket Gateway ---")
-	demonstrateGateway(ctx)
+	demonstrateGateway(ctx, cfg)
 	fmt.Println()
 
 	// 2. Chat Completions API
 	fmt.Println("--- 2. Chat Completions ---")
-	demonstrateChatCompletions(ctx)
+	demonstrateChatCompletions(ctx, httpURL, cfg.Token)
 	fmt.Println()
 
 	// 3. Tools Invoke API
 	fmt.Println("--- 3. Tools Invoke ---")
-	demonstrateToolsInvoke(ctx)
+	demonstrateToolsInvoke(ctx, httpURL, cfg.Token)
 	fmt.Println()
 
 	fmt.Println("=== Done ===")
 }
 
-func demonstrateGateway(ctx context.Context) {
-	// Create a client with operator role and event handler.
-	client := gateway.NewClient(
-		gateway.WithToken("example-token"),
+func demonstrateGateway(ctx context.Context, cfg *gwconn.Config) {
+	client := cfg.NewClient(
 		gateway.WithRole(protocol.RoleOperator),
 		gateway.WithScopes(
 			protocol.ScopeOperatorRead,
@@ -74,24 +80,21 @@ func demonstrateGateway(ctx context.Context) {
 	)
 	defer client.Close()
 
-	// Connect to the gateway.
-	fmt.Println("  Connecting to gateway...")
-	if err := client.Connect(ctx, wsURL); err != nil {
-		log.Fatalf("  Connect: %v", err)
-	}
+	if err := cfg.Connect(ctx, client); err != nil { log.Fatal(err) }
 
 	hello := client.Hello()
-	fmt.Printf("  Connected! Protocol: %d, TickInterval: %dms\n",
+	fmt.Printf("  Protocol: %d, TickInterval: %dms\n",
 		hello.Protocol, hello.Policy.TickIntervalMs)
 
 	// Fetch presence.
 	fmt.Println("  Fetching presence...")
 	presence, err := client.Presence(ctx)
 	if err != nil {
-		log.Fatalf("  Presence: %v", err)
-	}
-	for id, entry := range presence {
-		fmt.Printf("  Presence: %s -> roles=%v\n", id, entry.Roles)
+		fmt.Printf("  Presence: %v\n", err)
+	} else {
+		for _, entry := range presence {
+			fmt.Printf("  Presence: %s -> roles=%v\n", entry.DeviceID, entry.Roles)
+		}
 	}
 
 	// Resolve an exec approval.
@@ -101,9 +104,10 @@ func demonstrateGateway(ctx context.Context) {
 		Decision: "approved",
 	})
 	if err != nil {
-		log.Fatalf("  ExecApprovalResolve: %v", err)
+		fmt.Printf("  ExecApprovalResolve: %v\n", err)
+	} else {
+		fmt.Println("  Approval resolved successfully")
 	}
-	fmt.Println("  Approval resolved successfully")
 
 	// Send a custom event.
 	fmt.Println("  Sending event...")
@@ -112,15 +116,16 @@ func demonstrateGateway(ctx context.Context) {
 		RunID:      "run-example",
 	})
 	if err != nil {
-		log.Fatalf("  SendEvent: %v", err)
+		fmt.Printf("  SendEvent: %v\n", err)
+	} else {
+		fmt.Println("  Event sent successfully")
 	}
-	fmt.Println("  Event sent successfully")
 }
 
-func demonstrateChatCompletions(ctx context.Context) {
+func demonstrateChatCompletions(ctx context.Context, httpURL, token string) {
 	client := &chatcompletions.Client{
 		BaseURL:    httpURL,
-		Token:      "example-token",
+		Token:      token,
 		AgentID:    "main",
 		SessionKey: "example-session",
 	}
@@ -134,7 +139,8 @@ func demonstrateChatCompletions(ctx context.Context) {
 		},
 	})
 	if err != nil {
-		log.Fatalf("  Create: %v", err)
+		fmt.Printf("  Create: %v\n", err)
+		return
 	}
 	fmt.Printf("  Response: %s\n", resp.Choices[0].Message.Content)
 	if resp.Usage != nil {
@@ -151,7 +157,8 @@ func demonstrateChatCompletions(ctx context.Context) {
 		},
 	})
 	if err != nil {
-		log.Fatalf("  CreateStream: %v", err)
+		fmt.Printf("  CreateStream: %v\n", err)
+		return
 	}
 	defer stream.Close()
 
@@ -171,10 +178,10 @@ func demonstrateChatCompletions(ctx context.Context) {
 	fmt.Println()
 }
 
-func demonstrateToolsInvoke(ctx context.Context) {
+func demonstrateToolsInvoke(ctx context.Context, httpURL, token string) {
 	client := &toolsinvoke.Client{
 		BaseURL:        httpURL,
-		Token:          "example-token",
+		Token:          token,
 		MessageChannel: "cli",
 	}
 
@@ -185,7 +192,8 @@ func demonstrateToolsInvoke(ctx context.Context) {
 		Action: "json",
 	})
 	if err != nil {
-		log.Fatalf("  Invoke: %v", err)
+		fmt.Printf("  Invoke: %v\n", err)
+		return
 	}
 	fmt.Printf("  OK: %v, Result: %s\n", resp.OK, string(resp.Result))
 
@@ -211,7 +219,8 @@ func demonstrateToolsInvoke(ctx context.Context) {
 		DryRun:     true,
 	})
 	if err != nil {
-		log.Fatalf("  Invoke: %v", err)
+		fmt.Printf("  Invoke: %v\n", err)
+		return
 	}
 
 	var result json.RawMessage

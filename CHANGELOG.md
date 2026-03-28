@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- `ChatSend` now returns `(*ChatSendResult, error)` instead of `(*ChatEvent, error)`. The RPC response is an ack `{runId, status}`, not a chat event. Streaming content arrives via the event handler. Callers must update: `result.Status` instead of `result.State`, and `ChatEvent` is now only for event stream payloads.
+- `Presence` now returns `([]PresenceEntry, error)` instead of `(map[string]PresenceEntry, error)`. The upstream server returns a flat array, not a keyed map. Callers must iterate the slice instead of indexing by key.
+- `CronList` now returns `(*CronListResult, error)` instead of `([]CronJob, error)`. The server returns a paginated object `{jobs, total, offset, limit, hasMore, nextOffset}`. Access jobs via `result.Jobs`.
+- `CronRuns` now returns `(*CronRunsResult, error)` instead of `([]CronRunLogEntry, error)`. The server returns a paginated object `{entries, total, offset}`. Access entries via `result.Entries`.
+
+### Added
+
+- `ChatSendResult` type for the `chat.send` RPC ack response
+- `CronListResult` and `CronRunsResult` paginated result types
+- `CronRunLogUsage` type for per-run token usage tracking
+- Extended `CronListParams` with `Limit`, `Offset`, `Query`, `Enabled`, `SortBy`, `SortDir`
+- Extended `CronRunsParams` with `Scope`, `Offset`, `Statuses`, `DeliveryStatuses`, `Query`, `SortDir`
+- Extended `CronRunLogEntry` with `Delivered`, `DeliveryStatus`, `Model`, `Provider`, `Usage`, `JobName`
+- `PluginApprovalRequest`, `PluginApprovalResolve`, `PluginApprovalWaitDecision` methods and types
+- `examples/internal/gwconn` shared helper for device identity auth in examples
+- `docs/gateway-methods.md` comprehensive method reference (122 methods)
+- `WithIdentity(id, deviceToken)` documented in gateway options
+
+### Fixed
+
+- All gateway examples now use device identity auth (`WithIdentity`) for real server compatibility. Without it, the upstream server clears self-declared scopes.
+- All gateway examples accept CLI args (`<token> <host> [identity-dir]`) instead of hardcoded values
+- Cron example uses `systemEvent` payload kind (required for main agent)
+- Cron example captures server-assigned job UUID for subsequent operations
+- CI E2E tests pass required args to example binaries
+
+### Deprecated
+
+- `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
+
 ## [v2026.3.24] - 2026-03-26
 
 Sync to upstream openclaw v2026.3.24. 1539 upstream files changed; 1 RPC method added (`tools.effective`); 30 methods touched.

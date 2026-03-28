@@ -88,10 +88,10 @@ jobs:
           exit 1
 
       - name: Run example client end-to-end
-        run: timeout 90s go run ./examples/client
+        run: timeout 90s go run ./examples/client example-token ws://localhost:18789/ws /tmp/openclaw-identity
 
       - name: Run example chat flow end-to-end
-        run: timeout 60s go run ./examples/chat
+        run: timeout 60s go run ./examples/chat example-token ws://localhost:18789/ws /tmp/openclaw-identity
 
       - name: Show server log on failure
         if: failure()
