@@ -487,8 +487,9 @@ func TestSendRequest(t *testing.T) {
 
 	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
 		if req.Method == "system-presence" {
-			entries := map[string]protocol.PresenceEntry{
-				"dev-1": {DeviceID: "dev-1", Roles: []string{"operator"}, Ts: 1},
+			// Real server returns a flat array of presence entries.
+			entries := []protocol.PresenceEntry{
+				{DeviceID: "dev-1", Roles: []string{"operator"}, Ts: 1},
 			}
 			respData, _ := protocol.MarshalResponse(req.ID, entries)
 			conn.WriteMessage(websocket.TextMessage, respData)
@@ -512,12 +513,8 @@ func TestSendRequest(t *testing.T) {
 	if len(presence) != 1 {
 		t.Fatalf("presence len = %d, want 1", len(presence))
 	}
-	entry, ok := presence["dev-1"]
-	if !ok {
-		t.Fatal("dev-1 not found")
-	}
-	if entry.DeviceID != "dev-1" {
-		t.Errorf("deviceId = %q, want %q", entry.DeviceID, "dev-1")
+	if presence[0].DeviceID != "dev-1" {
+		t.Errorf("deviceId = %q, want %q", presence[0].DeviceID, "dev-1")
 	}
 }
 

@@ -92,8 +92,8 @@ func demonstrateGateway(ctx context.Context, cfg *gwconn.Config) {
 	if err != nil {
 		fmt.Printf("  Presence: %v\n", err)
 	} else {
-		for id, entry := range presence {
-			fmt.Printf("  Presence: %s -> roles=%v\n", id, entry.Roles)
+		for _, entry := range presence {
+			fmt.Printf("  Presence: %s -> roles=%v\n", entry.DeviceID, entry.Roles)
 		}
 	}
 

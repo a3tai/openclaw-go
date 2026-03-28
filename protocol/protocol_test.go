@@ -924,6 +924,19 @@ func TestChatInjectParamsRoundTrip(t *testing.T) {
 	}
 }
 
+func TestChatSendResultRoundTrip(t *testing.T) {
+	r := ChatSendResult{RunID: "run-1", Status: "started"}
+	data, _ := json.Marshal(r)
+	var got ChatSendResult
+	json.Unmarshal(data, &got)
+	if got.RunID != "run-1" {
+		t.Errorf("runId = %q", got.RunID)
+	}
+	if got.Status != "started" {
+		t.Errorf("status = %q", got.Status)
+	}
+}
+
 func TestChatEventRoundTrip(t *testing.T) {
 	e := ChatEvent{
 		RunID:      "run-1",

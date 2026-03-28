@@ -121,14 +121,14 @@ func (tm *testMethod) run() {
 // --- Chat methods ---
 
 func TestChatSend(t *testing.T) {
-	// Test with typed response
+	// Test with typed response matching real server shape.
 	mg, wsURL, cleanup := startMockGateway(t)
 	defer cleanup()
 
 	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
 		if req.Method == "chat.send" {
-			ev := protocol.ChatEvent{RunID: "run-1", SessionKey: "main", Seq: 0, State: "final"}
-			respData, _ := protocol.MarshalResponse(req.ID, ev)
+			result := protocol.ChatSendResult{RunID: "run-1", Status: "started"}
+			respData, _ := protocol.MarshalResponse(req.ID, result)
 			conn.WriteMessage(websocket.TextMessage, respData)
 		}
 	}
@@ -143,14 +143,17 @@ func TestChatSend(t *testing.T) {
 		t.Fatalf("Connect: %v", err)
 	}
 
-	ev, err := client.ChatSend(ctx, protocol.ChatSendParams{
+	result, err := client.ChatSend(ctx, protocol.ChatSendParams{
 		SessionKey: "main", Message: "hello", IdempotencyKey: "k1",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ev.RunID != "run-1" {
-		t.Errorf("runId = %q", ev.RunID)
+	if result.RunID != "run-1" {
+		t.Errorf("runId = %q", result.RunID)
+	}
+	if result.Status != "started" {
+		t.Errorf("status = %q, want started", result.Status)
 	}
 
 	// Test error paths

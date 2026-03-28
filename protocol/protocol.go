@@ -724,7 +724,16 @@ type ChatInjectParams struct {
 	Label      string `json:"label,omitempty"`
 }
 
-// ChatEvent is the payload of a "chat" event.
+// ChatSendResult is the RPC response from "chat.send".
+// This is the initial ack — streaming content arrives via "chat" events.
+type ChatSendResult struct {
+	RunID          string `json:"runId"`
+	Status         string `json:"status"`                         // "started"
+	MessageSeq     *int   `json:"messageSeq,omitempty"`           // sequence number if applicable
+	InterruptedRun *bool  `json:"interruptedActiveRun,omitempty"` // true if a prior run was interrupted
+}
+
+// ChatEvent is the payload of a "chat" event (received via the event stream).
 type ChatEvent struct {
 	RunID        string          `json:"runId"`
 	SessionKey   string          `json:"sessionKey"`
