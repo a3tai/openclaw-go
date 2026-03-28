@@ -15,6 +15,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/a3tai/openclaw-go/examples/internal/gwconn"
@@ -45,7 +46,7 @@ func main() {
 	)
 	defer client.Close()
 
-	cfg.Connect(ctx, client)
+	if err := cfg.Connect(ctx, client); err != nil { log.Fatal(err) }
 	fmt.Println()
 
 	// Get config.

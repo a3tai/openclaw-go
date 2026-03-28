@@ -80,7 +80,7 @@ func demonstrateGateway(ctx context.Context, cfg *gwconn.Config) {
 	)
 	defer client.Close()
 
-	cfg.Connect(ctx, client)
+	if err := cfg.Connect(ctx, client); err != nil { log.Fatal(err) }
 
 	hello := client.Hello()
 	fmt.Printf("  Protocol: %d, TickInterval: %dms\n",

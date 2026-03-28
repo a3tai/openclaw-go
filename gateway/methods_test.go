@@ -962,7 +962,7 @@ func TestCronRunsPaginated(t *testing.T) {
 		t.Fatalf("Connect: %v", err)
 	}
 
-	r, err := client.CronRuns(ctx, protocol.CronRunsParams{JobID: "j1"})
+	r, err := client.CronRuns(ctx, protocol.CronRunsParams{ID: "j1"})
 	if err != nil {
 		t.Fatalf("CronRuns: %v", err)
 	}

@@ -15,6 +15,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -77,7 +78,7 @@ func main() {
 	)
 	defer client.Close()
 
-	cfg.Connect(ctx, client)
+	if err := cfg.Connect(ctx, client); err != nil { log.Fatal(err) }
 	fmt.Println()
 
 	// --- Resolve approvals ---

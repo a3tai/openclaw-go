@@ -1491,6 +1491,7 @@ type CronJob struct {
 
 // CronListParams are the params for "cron.list".
 type CronListParams struct {
+	// Deprecated: use Enabled instead.
 	IncludeDisabled *bool  `json:"includeDisabled,omitempty"`
 	Limit           *int   `json:"limit,omitempty"`
 	Offset          *int   `json:"offset,omitempty"`
@@ -1562,16 +1563,18 @@ type CronRunParams struct {
 }
 
 // CronRunsParams are the params for "cron.runs".
+// Use ID for the server-assigned job UUID. JobID is a wire-compat alias.
+// When both Statuses and Status are set, the server uses Statuses.
 type CronRunsParams struct {
 	Scope            string   `json:"scope,omitempty"` // "job" or "all"
 	ID               string   `json:"id,omitempty"`
-	JobID            string   `json:"jobId,omitempty"`
+	JobID            string   `json:"jobId,omitempty"` // alias for ID
 	Limit            *int     `json:"limit,omitempty"`
 	Offset           *int     `json:"offset,omitempty"`
-	Statuses         []string `json:"statuses,omitempty"`         // ["ok","error","skipped"]
-	Status           string   `json:"status,omitempty"`           // "all","ok","error","skipped"
-	DeliveryStatuses []string `json:"deliveryStatuses,omitempty"` // delivery status filters
-	DeliveryStatus   string   `json:"deliveryStatus,omitempty"`
+	Statuses         []string `json:"statuses,omitempty"`         // ["ok","error","skipped"]; takes precedence over Status
+	Status           string   `json:"status,omitempty"`           // convenience alias: "all","ok","error","skipped"
+	DeliveryStatuses []string `json:"deliveryStatuses,omitempty"` // takes precedence over DeliveryStatus
+	DeliveryStatus   string   `json:"deliveryStatus,omitempty"`   // convenience alias
 	Query            string   `json:"query,omitempty"`
 	SortDir          string   `json:"sortDir,omitempty"` // "asc", "desc"
 }

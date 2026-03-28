@@ -19,7 +19,6 @@ import (
 
 	"github.com/a3tai/openclaw-go/gateway"
 	"github.com/a3tai/openclaw-go/identity"
-	"github.com/a3tai/openclaw-go/protocol"
 )
 
 // Config holds parsed CLI args and resolved connection parameters.
@@ -61,18 +60,18 @@ func ParseArgs(programUsage string) *Config {
 		os.Exit(1)
 	}
 
+	// Require a scheme to avoid silently connecting to the wrong host.
+	if host.Scheme == "" || host.Hostname() == "" {
+		fmt.Println("Error: host must include a scheme (e.g. wss://mygateway.example.com)")
+		os.Exit(1)
+	}
+
 	// Normalize the URL scheme for WebSocket.
-	if host.Hostname() == "" {
-		host.Host = "localhost:18789"
-	}
-	if host.Scheme == "" || host.Scheme == "http" {
+	switch host.Scheme {
+	case "http":
 		host.Scheme = "ws"
-	}
-	if host.Scheme == "https" || host.Scheme == "wss" {
+	case "https":
 		host.Scheme = "wss"
-		if host.Port() == "80" {
-			host.Host = fmt.Sprintf("%s:%s", host.Hostname(), "443")
-		}
 	}
 
 	// Resolve identity directory.
@@ -157,21 +156,12 @@ func (c *Config) SaveDeviceToken(client *gateway.Client) {
 
 // Connect dials the gateway and performs the full handshake. It also
 // saves any device token issued in the hello-ok response.
-func (c *Config) Connect(ctx context.Context, client *gateway.Client) {
+func (c *Config) Connect(ctx context.Context, client *gateway.Client) error {
 	fmt.Printf("Connecting to %s...\n", c.WSURL)
 	if err := client.Connect(ctx, c.WSURL); err != nil {
-		log.Fatalf("Connect: %v", err)
+		return fmt.Errorf("connect: %w", err)
 	}
 	fmt.Println("Connected")
 	c.SaveDeviceToken(client)
+	return nil
 }
-
-// Scopes is a convenience re-export so examples don't need to import protocol
-// just for scope constants.
-var (
-	ScopeRead      = protocol.ScopeOperatorRead
-	ScopeWrite     = protocol.ScopeOperatorWrite
-	ScopeAdmin     = protocol.ScopeOperatorAdmin
-	ScopeApprovals = protocol.ScopeOperatorApprovals
-	ScopePairing   = protocol.ScopeOperatorPairing
-)
