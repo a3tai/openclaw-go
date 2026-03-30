@@ -1055,6 +1055,24 @@ func TestExecApprovalResolveMethod(t *testing.T) {
 	tm.run()
 }
 
+// --- Plugin Approvals ---
+
+func TestPluginApprovalRequestMethod(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugin.approval.request", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginApprovalRequest(ctx, protocol.PluginApprovalRequestParams{Title: "Allow tool", Description: "Plugin wants to run a tool"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPluginApprovalResolveMethod(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugin.approval.resolve", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginApprovalResolve(ctx, protocol.PluginApprovalResolveParams{ID: "p1", Decision: "allow-once"})
+		return err
+	}}
+	tm.run()
+}
+
 // --- Skills ---
 
 func TestSkillsStatus(t *testing.T) {
