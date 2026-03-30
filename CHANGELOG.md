@@ -39,6 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.3.28] - 2026-03-29
+
+Sync to upstream openclaw v2026.3.28. No new gateway RPC methods in this release; protocol parity maintained. The `plugin.approval.*` methods added in the v2026.3.24 sync cycle cover the new upstream plugin approval hook surface.
+
+### Changed
+
+- No wire-protocol changes required. This release consists of provider integrations (xAI Responses API, MiniMax image-01), plugin SDK hooks (`requireApproval` in `before_tool_call`), channel fixes, and numerous bug fixes in the upstream gateway. The Go SDK has full parity for this version.
+
 ## [v2026.3.24] - 2026-03-26
 
 Sync to upstream openclaw v2026.3.24. 1539 upstream files changed; 1 RPC method added (`tools.effective`); 30 methods touched.
