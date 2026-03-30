@@ -24,7 +24,8 @@ jobs:
         github.event.pull_request.merged == true &&
         (
           contains(github.event.pull_request.labels.*.name, 'release-sync') ||
-          contains(github.event.pull_request.labels.*.name, 'upstream-release')
+          contains(github.event.pull_request.labels.*.name, 'upstream-release') ||
+          startsWith(github.event.pull_request.title, 'chore: sync upstream openclaw v')
         )
       )
     runs-on: ubuntu-latest
