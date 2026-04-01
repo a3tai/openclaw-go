@@ -39,6 +39,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.3.31] - 2026-04-01
+
+Sync to upstream openclaw v2026.3.31. No new gateway RPC methods in this release; 39 methods touched across 16 changed server-method files. Protocol type parity updated for schema changes.
+
+### Added
+
+- `AgentSummaryModel` protocol type — optional model override (`primary`, `fallbacks`) exposed on `AgentSummary`
+- `AgentSummary.Workspace` and `AgentSummary.Model` fields (upstream `agents-models-skills.ts` schema update)
+- `SkillsInstallParams.DangerouslyForceUnsafeInstall` optional boolean field (upstream skills schema update)
+
 ## [v2026.3.28] - 2026-03-29
 
 Sync to upstream openclaw v2026.3.28. No new gateway RPC methods in this release; protocol parity maintained. The `plugin.approval.*` methods added in the v2026.3.24 sync cycle cover the new upstream plugin approval hook surface.
