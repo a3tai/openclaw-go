@@ -1273,11 +1273,19 @@ type AgentIdentity struct {
 	AvatarURL string `json:"avatarUrl,omitempty"`
 }
 
+// AgentSummaryModel is the optional model override for an agent.
+type AgentSummaryModel struct {
+	Primary   string   `json:"primary,omitempty"`
+	Fallbacks []string `json:"fallbacks,omitempty"`
+}
+
 // AgentSummary is a summary of an agent.
 type AgentSummary struct {
-	ID       string         `json:"id"`
-	Name     string         `json:"name,omitempty"`
-	Identity *AgentIdentity `json:"identity,omitempty"`
+	ID        string             `json:"id"`
+	Name      string             `json:"name,omitempty"`
+	Identity  *AgentIdentity     `json:"identity,omitempty"`
+	Workspace string             `json:"workspace,omitempty"`
+	Model     *AgentSummaryModel `json:"model,omitempty"`
 }
 
 // AgentsListResult is the result of "agents.list".
@@ -1773,9 +1781,10 @@ type SkillsBinsResult struct {
 
 // SkillsInstallParams are the params for "skills.install".
 type SkillsInstallParams struct {
-	Name      string `json:"name"`
-	InstallID string `json:"installId"`
-	TimeoutMs *int   `json:"timeoutMs,omitempty"`
+	Name                          string `json:"name"`
+	InstallID                     string `json:"installId"`
+	DangerouslyForceUnsafeInstall *bool  `json:"dangerouslyForceUnsafeInstall,omitempty"`
+	TimeoutMs                     *int   `json:"timeoutMs,omitempty"`
 }
 
 // SkillsUpdateParams are the params for "skills.update".
