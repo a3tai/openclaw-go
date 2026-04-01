@@ -719,6 +719,7 @@ type ChatSendParams struct {
 type ChatHistoryParams struct {
 	SessionKey string `json:"sessionKey"`
 	Limit      *int   `json:"limit,omitempty"`
+	MaxChars   *int   `json:"maxChars,omitempty"`
 }
 
 // ChatAbortParams are the params for "chat.abort".
@@ -1453,10 +1454,7 @@ type CronPayload struct {
 	Thinking                   string `json:"thinking,omitempty"`
 	TimeoutSeconds             *int   `json:"timeoutSeconds,omitempty"`
 	AllowUnsafeExternalContent *bool  `json:"allowUnsafeExternalContent,omitempty"`
-	Deliver                    *bool  `json:"deliver,omitempty"`
-	Channel                    string `json:"channel,omitempty"`
-	To                         string `json:"to,omitempty"`
-	BestEffortDeliver          *bool  `json:"bestEffortDeliver,omitempty"`
+	LightContext               *bool  `json:"lightContext,omitempty"`
 }
 
 // CronDelivery is the delivery configuration for a cron job.
