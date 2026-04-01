@@ -39,6 +39,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.1] - 2026-04-01
+
+Sync to upstream openclaw v2026.4.1. No new gateway RPC methods in this release; 23 methods touched across changed server-method files. Protocol type parity updated for cron and chat-history schema changes.
+
+### Breaking Changes
+
+- `CronPayload.Deliver`, `CronPayload.Channel`, `CronPayload.To`, `CronPayload.BestEffortDeliver` removed — the upstream schema dropped these fields from the `agentTurn` payload kind (server enforces `additionalProperties: false`). Remove these fields from any `CronPayload{Kind: "agentTurn", ...}` literals.
+
+### Added
+
+- `ChatHistoryParams.MaxChars` optional int field — limits history response size in characters (upstream `maxChars`, max 500,000)
+- `CronPayload.LightContext` optional bool field — upstream parity for `agentTurn` payload
+
 ## [v2026.3.31] - 2026-04-01
 
 Sync to upstream openclaw v2026.3.31. No new gateway RPC methods in this release; 39 methods touched across 16 changed server-method files. Protocol type parity updated for schema changes.
