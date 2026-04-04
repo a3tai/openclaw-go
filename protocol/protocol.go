@@ -643,6 +643,7 @@ type ExecApprovalsAgent struct {
 type ExecApprovalsAllowlistEntry struct {
 	ID               string `json:"id,omitempty"`
 	Pattern          string `json:"pattern"`
+	ArgPattern       string `json:"argPattern,omitempty"`
 	LastUsedAt       *int64 `json:"lastUsedAt,omitempty"`
 	LastUsedCommand  string `json:"lastUsedCommand,omitempty"`
 	LastResolvedPath string `json:"lastResolvedPath,omitempty"`
@@ -1447,14 +1448,15 @@ type CronSchedule struct {
 
 // CronPayload is the payload for a cron job (union: systemEvent, agentTurn).
 type CronPayload struct {
-	Kind                       string `json:"kind"` // "systemEvent" or "agentTurn"
-	Text                       string `json:"text,omitempty"`
-	Message                    string `json:"message,omitempty"`
-	Model                      string `json:"model,omitempty"`
-	Thinking                   string `json:"thinking,omitempty"`
-	TimeoutSeconds             *int   `json:"timeoutSeconds,omitempty"`
-	AllowUnsafeExternalContent *bool  `json:"allowUnsafeExternalContent,omitempty"`
-	LightContext               *bool  `json:"lightContext,omitempty"`
+	Kind                       string   `json:"kind"` // "systemEvent" or "agentTurn"
+	Text                       string   `json:"text,omitempty"`
+	Message                    string   `json:"message,omitempty"`
+	Model                      string   `json:"model,omitempty"`
+	Thinking                   string   `json:"thinking,omitempty"`
+	TimeoutSeconds             *int     `json:"timeoutSeconds,omitempty"`
+	AllowUnsafeExternalContent *bool    `json:"allowUnsafeExternalContent,omitempty"`
+	LightContext               *bool    `json:"lightContext,omitempty"`
+	ToolsAllow                 []string `json:"toolsAllow,omitempty"`
 }
 
 // CronDelivery is the delivery configuration for a cron job.

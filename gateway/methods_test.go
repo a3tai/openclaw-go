@@ -1065,6 +1065,14 @@ func TestPluginApprovalRequestMethod(t *testing.T) {
 	tm.run()
 }
 
+func TestPluginApprovalWaitDecisionMethod(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugin.approval.waitDecision", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginApprovalWaitDecision(ctx, protocol.PluginApprovalWaitDecisionParams{ID: "p1"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestPluginApprovalResolveMethod(t *testing.T) {
 	tm := &testMethod{t: t, method: "plugin.approval.resolve", success: func(c *Client, ctx context.Context) error {
 		_, err := c.PluginApprovalResolve(ctx, protocol.PluginApprovalResolveParams{ID: "p1", Decision: "allow-once"})
