@@ -663,6 +663,7 @@ type ExecApprovalsAgent struct {
 type ExecApprovalsAllowlistEntry struct {
 	ID               string `json:"id,omitempty"`
 	Pattern          string `json:"pattern"`
+	ArgPattern       string `json:"argPattern,omitempty"`
 	LastUsedAt       *int64 `json:"lastUsedAt,omitempty"`
 	LastUsedCommand  string `json:"lastUsedCommand,omitempty"`
 	LastResolvedPath string `json:"lastResolvedPath,omitempty"`
