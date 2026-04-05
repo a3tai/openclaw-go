@@ -1864,9 +1864,9 @@ type SkillsDetailMetadata struct {
 
 // SkillsDetailOwner is the owner info in "skills.detail" result.
 type SkillsDetailOwner struct {
-	Handle      string `json:"handle,omitempty"`
-	DisplayName string `json:"displayName,omitempty"`
-	Image       string `json:"image,omitempty"`
+	Handle      *string `json:"handle,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	Image       *string `json:"image,omitempty"`
 }
 
 // SkillsDetailResult is the result of "skills.detail".
