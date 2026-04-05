@@ -16,6 +16,16 @@ func (c *Client) ExecApprovalResolve(ctx context.Context, params protocol.ExecAp
 	return &result, nil
 }
 
+// ExecApprovalGet retrieves details about a pending exec approval by ID.
+// Requires the operator.approvals scope.
+func (c *Client) ExecApprovalGet(ctx context.Context, params protocol.ExecApprovalGetParams) (*protocol.ExecApprovalGetResult, error) {
+	var result protocol.ExecApprovalGetResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalGet), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // ExecApprovalRequest submits a new exec approval request.
 func (c *Client) ExecApprovalRequest(ctx context.Context, params protocol.ExecApprovalRequestParams) (*protocol.ExecApprovalRequestResult, error) {
 	var result protocol.ExecApprovalRequestResult

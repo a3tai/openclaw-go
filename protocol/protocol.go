@@ -218,6 +218,7 @@ const (
 
 	// Diagnostics and execution approvals.
 	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
+	MethodExecApprovalGet      MethodName = "exec.approval.get"
 	MethodExecApprovalRequest  MethodName = "exec.approval.request"
 	MethodExecApprovalResolve  MethodName = "exec.approval.resolve"
 	MethodExecApprovalsGet     MethodName = "exec.approvals.get"
@@ -552,6 +553,23 @@ type PresenceEntry struct {
 // ---------------------------------------------------------------------------
 // Exec approvals
 // ---------------------------------------------------------------------------
+
+// ExecApprovalGetParams are the params for "exec.approval.get".
+type ExecApprovalGetParams struct {
+	ID string `json:"id"`
+}
+
+// ExecApprovalGetResult is the result of "exec.approval.get".
+type ExecApprovalGetResult struct {
+	ID               string   `json:"id"`
+	CommandText      string   `json:"commandText"`
+	CommandPreview   *string  `json:"commandPreview,omitempty"`
+	AllowedDecisions []string `json:"allowedDecisions"`
+	Host             *string  `json:"host,omitempty"`
+	NodeID           *string  `json:"nodeId,omitempty"`
+	AgentID          *string  `json:"agentId,omitempty"`
+	ExpiresAtMs      int64    `json:"expiresAtMs"`
+}
 
 // ExecApprovalRequestParams are the params for "exec.approval.request".
 type ExecApprovalRequestParams struct {

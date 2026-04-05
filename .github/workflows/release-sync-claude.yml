@@ -83,7 +83,13 @@ jobs:
           # Tags are mutable; this ensures we clone the exact commit the tag pointed
           # to when the tracking issue was created, not a potentially moved tag.
           TAG="${{ steps.meta.outputs.version }}"
+          # Fetch tags explicitly — the clone may not have them all
+          git -C /tmp/openclaw fetch --tags --quiet
           TAG_SHA=$(git -C /tmp/openclaw rev-list -n1 "refs/tags/${TAG}" 2>/dev/null || true)
+          if [ -z "$TAG_SHA" ]; then
+            # Fallback: use ls-remote to check and resolve the tag
+            TAG_SHA=$(git ls-remote https://github.com/openclaw/openclaw "refs/tags/${TAG}" | awk '{print $1}' | head -1)
+          fi
           if [ -z "$TAG_SHA" ]; then
             echo "::error::Tag ${TAG} not found in upstream openclaw repo."
             exit 1
