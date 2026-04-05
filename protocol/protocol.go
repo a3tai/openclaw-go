@@ -283,7 +283,9 @@ const (
 	// Runtime controls and skills.
 	MethodSetHeartbeats MethodName = "set-heartbeats"
 	MethodSkillsBins    MethodName = "skills.bins"
+	MethodSkillsDetail  MethodName = "skills.detail"
 	MethodSkillsInstall MethodName = "skills.install"
+	MethodSkillsSearch  MethodName = "skills.search"
 	MethodSkillsStatus  MethodName = "skills.status"
 	MethodSkillsUpdate  MethodName = "skills.update"
 
@@ -1791,6 +1793,70 @@ type SkillsUpdateParams struct {
 	Enabled  *bool             `json:"enabled,omitempty"`
 	APIKey   string            `json:"apiKey,omitempty"`
 	Env      map[string]string `json:"env,omitempty"`
+}
+
+// SkillsSearchParams are the params for "skills.search".
+type SkillsSearchParams struct {
+	Query string `json:"query,omitempty"`
+	Limit *int   `json:"limit,omitempty"`
+}
+
+// SkillsSearchItem is a single result from "skills.search".
+type SkillsSearchItem struct {
+	Score       float64 `json:"score"`
+	Slug        string  `json:"slug"`
+	DisplayName string  `json:"displayName"`
+	Summary     string  `json:"summary,omitempty"`
+	Version     string  `json:"version,omitempty"`
+	UpdatedAt   *int64  `json:"updatedAt,omitempty"`
+}
+
+// SkillsSearchResult is the result of "skills.search".
+type SkillsSearchResult struct {
+	Results []SkillsSearchItem `json:"results"`
+}
+
+// SkillsDetailParams are the params for "skills.detail".
+type SkillsDetailParams struct {
+	Slug string `json:"slug"`
+}
+
+// SkillsDetailSkill is the skill object in "skills.detail" result.
+type SkillsDetailSkill struct {
+	Slug        string            `json:"slug"`
+	DisplayName string            `json:"displayName"`
+	Summary     string            `json:"summary,omitempty"`
+	Tags        map[string]string `json:"tags,omitempty"`
+	CreatedAt   int64             `json:"createdAt"`
+	UpdatedAt   int64             `json:"updatedAt"`
+}
+
+// SkillsDetailVersion is the latest version info in "skills.detail" result.
+type SkillsDetailVersion struct {
+	Version   string `json:"version"`
+	CreatedAt int64  `json:"createdAt"`
+	Changelog string `json:"changelog,omitempty"`
+}
+
+// SkillsDetailMetadata is the metadata in "skills.detail" result.
+type SkillsDetailMetadata struct {
+	OS      []string `json:"os,omitempty"`
+	Systems []string `json:"systems,omitempty"`
+}
+
+// SkillsDetailOwner is the owner info in "skills.detail" result.
+type SkillsDetailOwner struct {
+	Handle      string `json:"handle,omitempty"`
+	DisplayName string `json:"displayName,omitempty"`
+	Image       string `json:"image,omitempty"`
+}
+
+// SkillsDetailResult is the result of "skills.detail".
+type SkillsDetailResult struct {
+	Skill         *SkillsDetailSkill   `json:"skill"`
+	LatestVersion *SkillsDetailVersion `json:"latestVersion,omitempty"`
+	Metadata      *SkillsDetailMetadata `json:"metadata,omitempty"`
+	Owner         *SkillsDetailOwner   `json:"owner,omitempty"`
 }
 
 // ToolsCatalogParams are the params for "tools.catalog".

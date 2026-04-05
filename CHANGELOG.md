@@ -39,6 +39,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.2] - 2026-04-04
+
+Sync to upstream openclaw v2026.4.2. No new gateway RPC methods in this release; 25 methods touched across changed server-method files. Protocol type parity updated for cron and exec-approvals schema changes.
+
+### Added
+
+- `CronPayload.ToolsAllow` optional `[]string` field — restricts which tools the agent may use during an `agentTurn` cron job (upstream `toolsAllow`, `string[]`)
+- `ExecApprovalsAllowlistEntry.ArgPattern` optional string field — argument-level pattern for exec approval allowlist entries (upstream `argPattern`)
+- Test coverage for `plugin.approval.waitDecision` in `gateway/methods_test.go`
+
 ## [v2026.4.1] - 2026-04-01
 
 Sync to upstream openclaw v2026.4.1. No new gateway RPC methods in this release; 23 methods touched across changed server-method files. Protocol type parity updated for cron and chat-history schema changes.

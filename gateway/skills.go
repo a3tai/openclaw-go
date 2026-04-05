@@ -30,3 +30,21 @@ func (c *Client) SkillsInstall(ctx context.Context, params protocol.SkillsInstal
 func (c *Client) SkillsUpdate(ctx context.Context, params protocol.SkillsUpdateParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodSkillsUpdate), params)
 }
+
+// SkillsSearch searches for skills on ClawHub.
+func (c *Client) SkillsSearch(ctx context.Context, params protocol.SkillsSearchParams) (*protocol.SkillsSearchResult, error) {
+	var result protocol.SkillsSearchResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsSearch), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// SkillsDetail retrieves detailed information about a skill from ClawHub.
+func (c *Client) SkillsDetail(ctx context.Context, params protocol.SkillsDetailParams) (*protocol.SkillsDetailResult, error) {
+	var result protocol.SkillsDetailResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsDetail), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
