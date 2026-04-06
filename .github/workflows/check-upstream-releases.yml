@@ -8,11 +8,6 @@ on:
 permissions:
   contents: read
   issues: write
-  actions: write
-
-env:
-  RESEND_FROM: ${{ secrets.RESEND_FROM_EMAIL }}
-  RESEND_TO: ${{ secrets.RESEND_TO_EMAIL }}
 
 jobs:
   check-releases:
@@ -20,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create tracking issues for untracked upstream releases
-        id: check-releases
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
@@ -86,10 +80,13 @@ jobs:
                 continue;
               }
 
-              const excerpt = (release.body || "").trim();
+              const excerpt = (release.body || "")
+                .split(/\r?\n/)
+                .slice(0, 100)
+                .join("\n");
 
               const body = [
-                "## Release Notes",
+                "## Release Notes (first 100 lines)",
                 "",
                 `Upstream version: \`${version}\``,
                 `Release URL: ${release.html_url}`,
@@ -110,7 +107,7 @@ jobs:
                 "- [ ] Merge PR, tag matching upstream version, and publish release",
               ].join("\n");
 
-              const newIssue = await github.rest.issues.create({
+              await github.rest.issues.create({
                 owner: repoOwner,
                 repo: repoName,
                 title: issueTitle,
@@ -118,40 +115,9 @@ jobs:
                 labels: ["upstream-release"],
               });
 
-              try {
-                await github.rest.actions.createWorkflowDispatch({
-                  owner: repoOwner,
-                  repo: repoName,
-                  workflow_id: "release-sync-claude.yml",
-                  ref: "main",
-                  inputs: { issue_number: String(newIssue.data.number) },
-                });
-                core.info(`Dispatched release-sync for issue #${newIssue.data.number} (${version})`);
-              } catch (err) {
-                core.warning(`Failed to dispatch release-sync for ${version}: ${err.message}`);
-              }
-
               existingTitles.add(issueTitle);
               created += 1;
               core.info(`Created tracking issue: ${issueTitle}`);
-              core.setOutput('new_version', version);
-              core.setOutput('issue_url', newIssue.data.html_url);
             }
 
-            core.info(`Done. Created ${created} issue(s)`);
-            core.setOutput('created_count', String(created));
-
-      - name: Notify — new upstream release detected
-        id: notify-check
-        if: steps.check-releases.outputs.created_count != '0' && steps.check-releases.outputs.created_count != ''
-        env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        run: |
-          curl -s -X POST https://api.resend.com/emails \
-            -H "Authorization: Bearer $RESEND_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$(printf '{"from":"%s","to":"%s","subject":"[openclaw-go] New upstream release: %s","text":"A new upstream openclaw release has been detected and the sync workflow has been triggered.\n\nVersion: %s\nTracking issue: %s\n\nThe sync PR will be created automatically. You will receive another notification when it is ready for review."}' \
-              "$RESEND_FROM" "$RESEND_TO" \
-              "${{ steps.check-releases.outputs.new_version }}" \
-              "${{ steps.check-releases.outputs.new_version }}" \
-              "${{ steps.check-releases.outputs.issue_url }}")"
+            core.info(`Done. Created ${created} issue(s).`);
