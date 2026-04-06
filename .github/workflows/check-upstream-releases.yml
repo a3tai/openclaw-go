@@ -113,8 +113,6 @@ jobs:
                 labels: ["upstream-release"],
               });
 
-              // Auto-trigger the release sync workflow so it runs without
-              // requiring a manual workflow_dispatch.
               try {
                 await github.rest.actions.createWorkflowDispatch({
                   owner: repoOwner,
