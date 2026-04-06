@@ -1516,6 +1516,189 @@ func TestTTSSetProvider(t *testing.T) {
 	tm.run()
 }
 
+// --- skills.search ---
+
+func TestSkillsSearch(t *testing.T) {
+	// Typed round-trip: verify the response fields decode correctly.
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "skills.search" {
+			result := protocol.SkillsSearchResult{
+				Results: []protocol.SkillsSearchItem{
+					{Score: 0.95, Slug: "my-skill", DisplayName: "My Skill", Summary: "does stuff", Version: "1.0.0"},
+				},
+			}
+			respData, _ := protocol.MarshalResponse(req.ID, result)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	result, err := client.SkillsSearch(ctx, protocol.SkillsSearchParams{Query: "my-skill"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(result.Results))
+	}
+	if result.Results[0].Slug != "my-skill" {
+		t.Errorf("slug = %q, want my-skill", result.Results[0].Slug)
+	}
+	if result.Results[0].Score != 0.95 {
+		t.Errorf("score = %v, want 0.95", result.Results[0].Score)
+	}
+
+	// Error paths.
+	tm := &testMethod{t: t, method: "skills.search", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SkillsSearch(ctx, protocol.SkillsSearchParams{Query: "foo"})
+		return err
+	}}
+	tm.run()
+}
+
+// --- skills.detail ---
+
+func TestSkillsDetail(t *testing.T) {
+	// Typed round-trip: verify nullable fields decode correctly.
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	handle := "author-handle"
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "skills.detail" {
+			result := protocol.SkillsDetailResult{
+				Skill: &protocol.SkillsDetailSkill{
+					Slug:        "my-skill",
+					DisplayName: "My Skill",
+					CreatedAt:   1700000000,
+					UpdatedAt:   1700000001,
+				},
+				LatestVersion: &protocol.SkillsDetailVersion{
+					Version:   "1.2.3",
+					CreatedAt: 1700000001,
+				},
+				Owner: &protocol.SkillsDetailOwner{Handle: &handle},
+			}
+			respData, _ := protocol.MarshalResponse(req.ID, result)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	result, err := client.SkillsDetail(ctx, protocol.SkillsDetailParams{Slug: "my-skill"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Skill == nil || result.Skill.Slug != "my-skill" {
+		t.Errorf("skill.slug = %v, want my-skill", result.Skill)
+	}
+	if result.LatestVersion == nil || result.LatestVersion.Version != "1.2.3" {
+		t.Errorf("latestVersion.version = %v, want 1.2.3", result.LatestVersion)
+	}
+	if result.Owner == nil || result.Owner.Handle == nil || *result.Owner.Handle != "author-handle" {
+		t.Errorf("owner.handle = %v, want author-handle", result.Owner)
+	}
+
+	// Null skill field — server returns null for unknown slug.
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "skills.detail" {
+			respData, _ := protocol.MarshalResponse(req.ID, protocol.SkillsDetailResult{Skill: nil})
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+	nullResult, err := client.SkillsDetail(ctx, protocol.SkillsDetailParams{Slug: "unknown"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nullResult.Skill != nil {
+		t.Errorf("expected nil skill for unknown slug, got %v", nullResult.Skill)
+	}
+
+	// Error paths.
+	tm := &testMethod{t: t, method: "skills.detail", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SkillsDetail(ctx, protocol.SkillsDetailParams{Slug: "foo"})
+		return err
+	}}
+	tm.run()
+}
+
+// --- exec.approval.get ---
+
+func TestExecApprovalGet(t *testing.T) {
+	// Typed round-trip: verify response fields decode correctly.
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	agentID := "agent-123"
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "exec.approval.get" {
+			result := protocol.ExecApprovalGetResult{
+				ID:               "approval-abc",
+				CommandText:      "rm -rf /tmp/test",
+				AllowedDecisions: []string{"allow", "deny"},
+				AgentID:          &agentID,
+				ExpiresAtMs:      9999999999,
+			}
+			respData, _ := protocol.MarshalResponse(req.ID, result)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	result, err := client.ExecApprovalGet(ctx, protocol.ExecApprovalGetParams{ID: "approval-abc"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.ID != "approval-abc" {
+		t.Errorf("id = %q, want approval-abc", result.ID)
+	}
+	if result.CommandText != "rm -rf /tmp/test" {
+		t.Errorf("commandText = %q", result.CommandText)
+	}
+	if len(result.AllowedDecisions) != 2 {
+		t.Errorf("allowedDecisions = %v, want [allow deny]", result.AllowedDecisions)
+	}
+	if result.AgentID == nil || *result.AgentID != "agent-123" {
+		t.Errorf("agentId = %v, want agent-123", result.AgentID)
+	}
+
+	// Error paths.
+	tm := &testMethod{t: t, method: "exec.approval.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ExecApprovalGet(ctx, protocol.ExecApprovalGetParams{ID: "approval-abc"})
+		return err
+	}}
+	tm.run()
+}
+
 // --- exec.approval.waitDecision ---
 
 func TestExecApprovalWaitDecision(t *testing.T) {

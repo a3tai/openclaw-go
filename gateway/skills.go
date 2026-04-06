@@ -31,7 +31,9 @@ func (c *Client) SkillsUpdate(ctx context.Context, params protocol.SkillsUpdateP
 	return c.sendRPCVoid(ctx, string(protocol.MethodSkillsUpdate), params)
 }
 
-// SkillsSearch searches for skills on ClawHub.
+// SkillsSearch searches for skills on ClawHub by query string.
+// Requires the operator.read scope.
+// Query and Limit are both optional; Limit is capped at 100 by the server.
 func (c *Client) SkillsSearch(ctx context.Context, params protocol.SkillsSearchParams) (*protocol.SkillsSearchResult, error) {
 	var result protocol.SkillsSearchResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsSearch), params, &result); err != nil {
@@ -40,7 +42,9 @@ func (c *Client) SkillsSearch(ctx context.Context, params protocol.SkillsSearchP
 	return &result, nil
 }
 
-// SkillsDetail retrieves detailed information about a skill from ClawHub.
+// SkillsDetail retrieves full metadata for a skill from ClawHub by slug.
+// Requires the operator.read scope.
+// The Skill field in the result is nil when no skill matches the slug.
 func (c *Client) SkillsDetail(ctx context.Context, params protocol.SkillsDetailParams) (*protocol.SkillsDetailResult, error) {
 	var result protocol.SkillsDetailResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsDetail), params, &result); err != nil {

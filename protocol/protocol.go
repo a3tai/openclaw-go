@@ -556,10 +556,13 @@ type PresenceEntry struct {
 
 // ExecApprovalGetParams are the params for "exec.approval.get".
 type ExecApprovalGetParams struct {
+	// ID is the approval request ID returned by exec.approval.request.
 	ID string `json:"id"`
 }
 
 // ExecApprovalGetResult is the result of "exec.approval.get".
+// Host, NodeID, AgentID, and CommandPreview may be nil when not applicable
+// to the approval context.
 type ExecApprovalGetResult struct {
 	ID               string   `json:"id"`
 	CommandText      string   `json:"commandText"`
@@ -660,9 +663,11 @@ type ExecApprovalsAgent struct {
 }
 
 // ExecApprovalsAllowlistEntry is a single entry in the exec approvals allowlist.
+// ArgPattern optionally constrains which argument patterns are allowed for the entry.
 type ExecApprovalsAllowlistEntry struct {
 	ID               string `json:"id,omitempty"`
 	Pattern          string `json:"pattern"`
+	ArgPattern       string `json:"argPattern,omitempty"`
 	LastUsedAt       *int64 `json:"lastUsedAt,omitempty"`
 	LastUsedCommand  string `json:"lastUsedCommand,omitempty"`
 	LastResolvedPath string `json:"lastResolvedPath,omitempty"`
@@ -1814,6 +1819,7 @@ type SkillsUpdateParams struct {
 }
 
 // SkillsSearchParams are the params for "skills.search".
+// Both Query and Limit are optional. Limit is capped at 100 by the server.
 type SkillsSearchParams struct {
 	Query string `json:"query,omitempty"`
 	Limit *int   `json:"limit,omitempty"`
@@ -1864,17 +1870,19 @@ type SkillsDetailMetadata struct {
 
 // SkillsDetailOwner is the owner info in "skills.detail" result.
 type SkillsDetailOwner struct {
-	Handle      string `json:"handle,omitempty"`
-	DisplayName string `json:"displayName,omitempty"`
-	Image       string `json:"image,omitempty"`
+	Handle      *string `json:"handle,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	Image       *string `json:"image,omitempty"`
 }
 
 // SkillsDetailResult is the result of "skills.detail".
+// Skill is nil when no skill matches the requested slug.
+// LatestVersion, Metadata, and Owner may be nil when not available.
 type SkillsDetailResult struct {
-	Skill         *SkillsDetailSkill   `json:"skill"`
-	LatestVersion *SkillsDetailVersion `json:"latestVersion,omitempty"`
+	Skill         *SkillsDetailSkill    `json:"skill"`
+	LatestVersion *SkillsDetailVersion  `json:"latestVersion,omitempty"`
 	Metadata      *SkillsDetailMetadata `json:"metadata,omitempty"`
-	Owner         *SkillsDetailOwner   `json:"owner,omitempty"`
+	Owner         *SkillsDetailOwner    `json:"owner,omitempty"`
 }
 
 // ToolsCatalogParams are the params for "tools.catalog".

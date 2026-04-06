@@ -39,15 +39,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
-## [v2026.4.2] - 2026-04-04
+## [v2026.4.2] - 2026-04-03
 
-Sync to upstream openclaw v2026.4.2. No new gateway RPC methods in this release; 25 methods touched across changed server-method files. Protocol type parity updated for cron and exec-approvals schema changes.
+Sync to upstream openclaw v2026.4.2. Two new gateway RPC methods for ClawHub skill discovery.
 
 ### Added
 
-- `CronPayload.ToolsAllow` optional `[]string` field — restricts which tools the agent may use during an `agentTurn` cron job (upstream `toolsAllow`, `string[]`)
-- `ExecApprovalsAllowlistEntry.ArgPattern` optional string field — argument-level pattern for exec approval allowlist entries (upstream `argPattern`)
-- Test coverage for `plugin.approval.waitDecision` in `gateway/methods_test.go`
+- `SkillsSearch(ctx, SkillsSearchParams) (*SkillsSearchResult, error)` — search ClawHub for skills by query string and optional limit
+- `SkillsDetail(ctx, SkillsDetailParams) (*SkillsDetailResult, error)` — fetch full detail for a skill by slug, including latest version, metadata, and owner
+- `SkillsSearchParams`, `SkillsSearchItem`, `SkillsSearchResult` protocol types
+- `SkillsDetailParams`, `SkillsDetailResult`, `SkillsDetailSkill`, `SkillsDetailVersion`, `SkillsDetailMetadata`, `SkillsDetailOwner` protocol types
+- `MethodSkillsSearch` and `MethodSkillsDetail` method name constants
 
 ## [v2026.4.1] - 2026-04-01
 
