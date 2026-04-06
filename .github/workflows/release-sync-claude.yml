@@ -177,7 +177,9 @@ jobs:
 
       - name: Run Claude Code release sync
         run: |
+          # --max-turns caps the run to avoid unbounded API spend.
           claude --dangerously-skip-permissions \
+            --max-turns 30 \
             "$(cat /tmp/release-sync-prompt.md)"
 
       - name: Validate — go test
@@ -259,6 +261,22 @@ jobs:
               ].join('\n'),
             });
 
+      - name: Notify — sync PR created
+        if: steps.cpr.outputs.pr_url != ''
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM_EMAIL }}
+          RESEND_TO: ${{ secrets.RESEND_TO_EMAIL }}
+        run: |
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(printf '{"from":"%s","to":"%s","subject":"[openclaw-go] Sync PR ready: %s","text":"A new release sync PR is ready for review.\n\nVersion: %s\nPR: %s\n\nPlease review and complete the release gate checklist before merging."}' \
+              "$RESEND_FROM" "$RESEND_TO" \
+              "${{ steps.meta.outputs.version }}" \
+              "${{ steps.meta.outputs.version }}" \
+              "${{ steps.cpr.outputs.pr_url }}")"
+
       - name: Comment on failure
         if: failure() && steps.meta.outputs.issue_number != ''
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
@@ -274,3 +292,20 @@ jobs:
                 `Run: ${runUrl}`,
               ].join('\n'),
             });
+
+      - name: Notify — sync failed
+        if: failure()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM_EMAIL }}
+          RESEND_TO: ${{ secrets.RESEND_TO_EMAIL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(printf '{"from":"%s","to":"%s","subject":"[openclaw-go] Sync FAILED: %s","text":"The release sync workflow failed and needs manual attention.\n\nVersion: %s\nRun: %s\n\nCheck the run logs for details."}' \
+              "$RESEND_FROM" "$RESEND_TO" \
+              "${{ steps.meta.outputs.version }}" \
+              "${{ steps.meta.outputs.version }}" \
+              "$RUN_URL")"
