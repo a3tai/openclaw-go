@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
   issues: write
+  actions: write
 
 jobs:
   check-releases:
@@ -80,13 +81,10 @@ jobs:
                 continue;
               }
 
-              const excerpt = (release.body || "")
-                .split(/\r?\n/)
-                .slice(0, 100)
-                .join("\n");
+              const excerpt = (release.body || "").trim();
 
               const body = [
-                "## Release Notes (first 100 lines)",
+                "## Release Notes",
                 "",
                 `Upstream version: \`${version}\``,
                 `Release URL: ${release.html_url}`,
@@ -107,13 +105,28 @@ jobs:
                 "- [ ] Merge PR, tag matching upstream version, and publish release",
               ].join("\n");
 
-              await github.rest.issues.create({
+              const newIssue = await github.rest.issues.create({
                 owner: repoOwner,
                 repo: repoName,
                 title: issueTitle,
                 body,
                 labels: ["upstream-release"],
               });
+
+              // Auto-trigger the release sync workflow so it runs without
+              // requiring a manual workflow_dispatch.
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: repoOwner,
+                  repo: repoName,
+                  workflow_id: "release-sync-claude.yml",
+                  ref: "main",
+                  inputs: { issue_number: String(newIssue.data.number) },
+                });
+                core.info(`Dispatched release-sync for issue #${newIssue.data.number} (${version})`);
+              } catch (err) {
+                core.warning(`Failed to dispatch release-sync for ${version}: ${err.message}`);
+              }
 
               existingTitles.add(issueTitle);
               created += 1;
