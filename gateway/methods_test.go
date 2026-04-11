@@ -365,6 +365,38 @@ func TestSessionsCompact(t *testing.T) {
 	tm.run()
 }
 
+func TestSessionsCompactionList(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionList(ctx, protocol.SessionsCompactionListParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionGet(ctx, protocol.SessionsCompactionGetParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionBranch(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.branch", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionBranch(ctx, protocol.SessionsCompactionBranchParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionRestore(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.restore", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionRestore(ctx, protocol.SessionsCompactionRestoreParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestSessionsUsage(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.usage", success: func(c *Client, ctx context.Context) error {
 		_, err := c.SessionsUsage(ctx, protocol.SessionsUsageParams{Key: "main"})
@@ -1055,6 +1087,14 @@ func TestExecApprovalResolveMethod(t *testing.T) {
 	tm.run()
 }
 
+func TestExecApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "exec.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.ExecApprovalList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 // --- Plugin Approvals ---
 
 func TestPluginApprovalRequestMethod(t *testing.T) {
@@ -1076,6 +1116,14 @@ func TestPluginApprovalWaitDecisionMethod(t *testing.T) {
 func TestPluginApprovalResolveMethod(t *testing.T) {
 	tm := &testMethod{t: t, method: "plugin.approval.resolve", success: func(c *Client, ctx context.Context) error {
 		_, err := c.PluginApprovalResolve(ctx, protocol.PluginApprovalResolveParams{ID: "p1", Decision: "allow-once"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPluginApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugin.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginApprovalList(ctx)
 		return err
 	}}
 	tm.run()
@@ -1335,9 +1383,25 @@ func TestGatewayIdentityGet(t *testing.T) {
 	tm.run()
 }
 
+func TestSystemPresence(t *testing.T) {
+	tm := &testMethod{t: t, method: "system-presence", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.Presence(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 func TestDoctorMemoryStatus(t *testing.T) {
 	tm := &testMethod{t: t, method: "doctor.memory.status", success: func(c *Client, ctx context.Context) error {
 		_, err := c.DoctorMemoryStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.dreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryDreamDiary(ctx)
 		return err
 	}}
 	tm.run()

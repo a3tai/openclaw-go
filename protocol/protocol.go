@@ -217,16 +217,19 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
-	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
-	MethodExecApprovalGet      MethodName = "exec.approval.get"
-	MethodExecApprovalRequest  MethodName = "exec.approval.request"
-	MethodExecApprovalResolve  MethodName = "exec.approval.resolve"
-	MethodExecApprovalsGet     MethodName = "exec.approvals.get"
-	MethodExecApprovalsNodeGet MethodName = "exec.approvals.node.get"
-	MethodExecApprovalsNodeSet MethodName = "exec.approvals.node.set"
-	MethodExecApprovalsSet     MethodName = "exec.approvals.set"
+	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
+	MethodDoctorMemoryStatus     MethodName = "doctor.memory.status"
+	MethodExecApprovalGet        MethodName = "exec.approval.get"
+	MethodExecApprovalList       MethodName = "exec.approval.list"
+	MethodExecApprovalRequest    MethodName = "exec.approval.request"
+	MethodExecApprovalResolve    MethodName = "exec.approval.resolve"
+	MethodExecApprovalsGet       MethodName = "exec.approvals.get"
+	MethodExecApprovalsNodeGet   MethodName = "exec.approvals.node.get"
+	MethodExecApprovalsNodeSet   MethodName = "exec.approvals.node.set"
+	MethodExecApprovalsSet       MethodName = "exec.approvals.set"
 
 	// Plugin approvals.
+	MethodPluginApprovalList         MethodName = "plugin.approval.list"
 	MethodPluginApprovalRequest      MethodName = "plugin.approval.request"
 	MethodPluginApprovalWaitDecision MethodName = "plugin.approval.waitDecision"
 	MethodPluginApprovalResolve      MethodName = "plugin.approval.resolve"
@@ -261,25 +264,29 @@ const (
 	MethodSecretsResolve MethodName = "secrets.resolve"
 
 	// Session lifecycle, messaging, and usage analytics.
-	MethodSessionsAbort               MethodName = "sessions.abort"
-	MethodSessionsCompact             MethodName = "sessions.compact"
-	MethodSessionsCreate              MethodName = "sessions.create"
-	MethodSessionsDelete              MethodName = "sessions.delete"
-	MethodSessionsGet                 MethodName = "sessions.get"
-	MethodSessionsList                MethodName = "sessions.list"
-	MethodSessionsMessagesSubscribe   MethodName = "sessions.messages.subscribe"
-	MethodSessionsMessagesUnsubscribe MethodName = "sessions.messages.unsubscribe"
-	MethodSessionsPatch               MethodName = "sessions.patch"
-	MethodSessionsPreview             MethodName = "sessions.preview"
-	MethodSessionsReset               MethodName = "sessions.reset"
-	MethodSessionsResolve             MethodName = "sessions.resolve"
-	MethodSessionsSend                MethodName = "sessions.send"
-	MethodSessionsSteer               MethodName = "sessions.steer"
-	MethodSessionsSubscribe           MethodName = "sessions.subscribe"
-	MethodSessionsUnsubscribe         MethodName = "sessions.unsubscribe"
-	MethodSessionsUsage               MethodName = "sessions.usage"
-	MethodSessionsUsageLogs           MethodName = "sessions.usage.logs"
-	MethodSessionsUsageTimeseries     MethodName = "sessions.usage.timeseries"
+	MethodSessionsAbort                MethodName = "sessions.abort"
+	MethodSessionsCompact              MethodName = "sessions.compact"
+	MethodSessionsCompactionBranch     MethodName = "sessions.compaction.branch"
+	MethodSessionsCompactionGet        MethodName = "sessions.compaction.get"
+	MethodSessionsCompactionList       MethodName = "sessions.compaction.list"
+	MethodSessionsCompactionRestore    MethodName = "sessions.compaction.restore"
+	MethodSessionsCreate               MethodName = "sessions.create"
+	MethodSessionsDelete               MethodName = "sessions.delete"
+	MethodSessionsGet                  MethodName = "sessions.get"
+	MethodSessionsList                 MethodName = "sessions.list"
+	MethodSessionsMessagesSubscribe    MethodName = "sessions.messages.subscribe"
+	MethodSessionsMessagesUnsubscribe  MethodName = "sessions.messages.unsubscribe"
+	MethodSessionsPatch                MethodName = "sessions.patch"
+	MethodSessionsPreview              MethodName = "sessions.preview"
+	MethodSessionsReset                MethodName = "sessions.reset"
+	MethodSessionsResolve              MethodName = "sessions.resolve"
+	MethodSessionsSend                 MethodName = "sessions.send"
+	MethodSessionsSteer                MethodName = "sessions.steer"
+	MethodSessionsSubscribe            MethodName = "sessions.subscribe"
+	MethodSessionsUnsubscribe          MethodName = "sessions.unsubscribe"
+	MethodSessionsUsage                MethodName = "sessions.usage"
+	MethodSessionsUsageLogs            MethodName = "sessions.usage.logs"
+	MethodSessionsUsageTimeseries      MethodName = "sessions.usage.timeseries"
 
 	// Runtime controls and skills.
 	MethodSetHeartbeats MethodName = "set-heartbeats"
@@ -2467,4 +2474,132 @@ type PluginApprovalResolvedEvent struct {
 	ResolvedBy *string                      `json:"resolvedBy,omitempty"`
 	Ts         int64                        `json:"ts"`
 	Request    *PluginApprovalRequestParams `json:"request,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// doctor.memory.dreamDiary types
+// ---------------------------------------------------------------------------
+
+// DoctorMemoryDreamDiaryResult is the result for "doctor.memory.dreamDiary".
+// Found indicates whether a dream diary file was located in the agent workspace.
+// Content is only set when Found is true.
+type DoctorMemoryDreamDiaryResult struct {
+	AgentID     string  `json:"agentId"`
+	Found       bool    `json:"found"`
+	Path        string  `json:"path"`
+	Content     *string `json:"content,omitempty"`
+	UpdatedAtMs *int64  `json:"updatedAtMs,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// exec.approval.list types
+// ---------------------------------------------------------------------------
+
+// ExecApprovalListEntry is one pending entry returned by "exec.approval.list".
+type ExecApprovalListEntry struct {
+	ID          string                   `json:"id"`
+	Request     ExecApprovalRequestParams `json:"request"`
+	CreatedAtMs int64                    `json:"createdAtMs"`
+	ExpiresAtMs int64                    `json:"expiresAtMs"`
+}
+
+// ---------------------------------------------------------------------------
+// plugin.approval.list types
+// ---------------------------------------------------------------------------
+
+// PluginApprovalListEntry is one pending entry returned by "plugin.approval.list".
+type PluginApprovalListEntry struct {
+	ID          string                      `json:"id"`
+	Request     PluginApprovalRequestParams `json:"request"`
+	CreatedAtMs int64                       `json:"createdAtMs"`
+	ExpiresAtMs int64                       `json:"expiresAtMs"`
+}
+
+// ---------------------------------------------------------------------------
+// sessions.compaction.* types
+// ---------------------------------------------------------------------------
+
+// SessionCompactionTranscriptRef is a reference to a transcript file at a compaction boundary.
+type SessionCompactionTranscriptRef struct {
+	SessionID   string  `json:"sessionId"`
+	SessionFile *string `json:"sessionFile,omitempty"`
+	LeafID      *string `json:"leafId,omitempty"`
+	EntryID     *string `json:"entryId,omitempty"`
+}
+
+// SessionCompactionCheckpoint is a saved compaction checkpoint for a session.
+type SessionCompactionCheckpoint struct {
+	CheckpointID     string                         `json:"checkpointId"`
+	SessionKey       string                         `json:"sessionKey"`
+	SessionID        string                         `json:"sessionId"`
+	CreatedAt        int64                          `json:"createdAt"`
+	Reason           string                         `json:"reason"`
+	TokensBefore     *int64                         `json:"tokensBefore,omitempty"`
+	TokensAfter      *int64                         `json:"tokensAfter,omitempty"`
+	Summary          *string                        `json:"summary,omitempty"`
+	FirstKeptEntryID *string                        `json:"firstKeptEntryId,omitempty"`
+	PreCompaction    SessionCompactionTranscriptRef `json:"preCompaction"`
+	PostCompaction   SessionCompactionTranscriptRef `json:"postCompaction"`
+}
+
+// SessionsCompactionListParams are the params for "sessions.compaction.list".
+type SessionsCompactionListParams struct {
+	Key string `json:"key"`
+}
+
+// SessionsCompactionListResult is the result of "sessions.compaction.list".
+type SessionsCompactionListResult struct {
+	OK          bool                          `json:"ok"`
+	Key         string                        `json:"key"`
+	Checkpoints []SessionCompactionCheckpoint `json:"checkpoints"`
+}
+
+// SessionsCompactionGetParams are the params for "sessions.compaction.get".
+type SessionsCompactionGetParams struct {
+	Key          string `json:"key"`
+	CheckpointID string `json:"checkpointId"`
+}
+
+// SessionsCompactionGetResult is the result of "sessions.compaction.get".
+type SessionsCompactionGetResult struct {
+	OK         bool                        `json:"ok"`
+	Key        string                      `json:"key"`
+	Checkpoint SessionCompactionCheckpoint `json:"checkpoint"`
+}
+
+// SessionsCompactionBranchParams are the params for "sessions.compaction.branch".
+type SessionsCompactionBranchParams struct {
+	Key          string `json:"key"`
+	CheckpointID string `json:"checkpointId"`
+}
+
+// SessionsCompactionBranchEntry is the minimal session entry returned by "sessions.compaction.branch".
+type SessionsCompactionBranchEntry struct {
+	SessionID string `json:"sessionId"`
+	UpdatedAt int64  `json:"updatedAt"`
+}
+
+// SessionsCompactionBranchResult is the result of "sessions.compaction.branch".
+type SessionsCompactionBranchResult struct {
+	OK         bool                          `json:"ok"`
+	SourceKey  string                        `json:"sourceKey"`
+	Key        string                        `json:"key"`
+	SessionID  string                        `json:"sessionId"`
+	Checkpoint SessionCompactionCheckpoint   `json:"checkpoint"`
+	Entry      SessionsCompactionBranchEntry `json:"entry"`
+}
+
+// SessionsCompactionRestoreParams are the params for "sessions.compaction.restore".
+type SessionsCompactionRestoreParams struct {
+	Key          string `json:"key"`
+	CheckpointID string `json:"checkpointId"`
+}
+
+// SessionsCompactionRestoreResult is the result of "sessions.compaction.restore".
+type SessionsCompactionRestoreResult struct {
+	OK         bool                          `json:"ok"`
+	Key        string                        `json:"key"`
+	SessionID  string                        `json:"sessionId"`
+	Checkpoint SessionCompactionCheckpoint   `json:"checkpoint"`
+	Entry      SessionsCompactionBranchEntry `json:"entry"`
 }
