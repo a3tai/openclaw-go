@@ -57,6 +57,14 @@ Sync to upstream openclaw v2026.4.7. Seven new gateway RPC methods: dream diary 
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.10] - 2026-04-11
+
+Sync to upstream openclaw v2026.4.10. No net new SDK surface beyond methods already accumulated on main; this branch primarily documented `commands.list` alongside the approval list and session compaction APIs.
+
+### Added
+
+- `CommandsList(ctx, CommandsListParams) (*CommandsListResult, error)` and related command catalog protocol types
+
 ## [v2026.4.2] - 2026-04-03
 
 Sync to upstream openclaw v2026.4.2. Two new gateway RPC methods for ClawHub skill discovery.

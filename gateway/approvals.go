@@ -6,6 +6,15 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// ExecApprovalList returns all pending exec approval requests.
+func (c *Client) ExecApprovalList(ctx context.Context) (protocol.ExecApprovalListResult, error) {
+	var result protocol.ExecApprovalListResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalList), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // ExecApprovalResolve resolves a pending exec approval request.
 // Requires the operator.approvals scope.
 func (c *Client) ExecApprovalResolve(ctx context.Context, params protocol.ExecApprovalResolveParams) (*protocol.ExecApprovalResolveResult, error) {

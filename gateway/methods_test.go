@@ -1430,6 +1430,60 @@ func TestMessageAction(t *testing.T) {
 	tm.run()
 }
 
+// --- Exec approval list ---
+
+func TestExecApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "exec.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.ExecApprovalList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+// --- Plugin approval list ---
+
+func TestPluginApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugin.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginApprovalList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+// --- Sessions compaction ---
+
+func TestSessionsCompactionList(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.list", successPayload: json.RawMessage(`{"ok":true,"key":"main","checkpoints":[]}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionList(ctx, protocol.SessionsCompactionListParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.get", successPayload: json.RawMessage(`{"ok":true,"key":"main","checkpoint":{"checkpointId":"cp1","sessionKey":"main","sessionId":"s1","createdAt":1000,"reason":"manual","preCompaction":{"sessionId":"s1"},"postCompaction":{"sessionId":"s1"}}}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionGet(ctx, protocol.SessionsCompactionGetParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionBranch(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.branch", successPayload: json.RawMessage(`{"ok":true,"sourceKey":"main","key":"branch-1","sessionId":"s2","checkpoint":{"checkpointId":"cp1","sessionKey":"main","sessionId":"s1","createdAt":1000,"reason":"manual","preCompaction":{"sessionId":"s1"},"postCompaction":{"sessionId":"s1"}},"entry":{"sessionId":"s2","updatedAt":2000}}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionBranch(ctx, protocol.SessionsCompactionBranchParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionRestore(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.restore", successPayload: json.RawMessage(`{"ok":true,"key":"main","sessionId":"s1","checkpoint":{"checkpointId":"cp1","sessionKey":"main","sessionId":"s1","createdAt":1000,"reason":"manual","preCompaction":{"sessionId":"s1"},"postCompaction":{"sessionId":"s1"}},"entry":{"sessionId":"s1","updatedAt":3000}}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionRestore(ctx, protocol.SessionsCompactionRestoreParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
 // --- Misc ---
 
 func TestUpdateRun(t *testing.T) {

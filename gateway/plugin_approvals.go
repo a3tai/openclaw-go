@@ -6,6 +6,15 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// PluginApprovalList returns all pending plugin approval requests.
+func (c *Client) PluginApprovalList(ctx context.Context) (protocol.PluginApprovalListResult, error) {
+	var result protocol.PluginApprovalListResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodPluginApprovalList), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // PluginApprovalRequest submits a new plugin approval request.
 // The gateway broadcasts a "plugin.approval.requested" event to connected approval clients
 // and waits for a decision. If no approval clients are connected, the decision is nil.

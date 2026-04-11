@@ -2572,6 +2572,8 @@ type ExecApprovalListEntry struct {
 	ExpiresAtMs int64                     `json:"expiresAtMs"`
 }
 
+// ExecApprovalListResult is the result of "exec.approval.list".
+type ExecApprovalListResult []ExecApprovalListEntry
 // ---------------------------------------------------------------------------
 // plugin.approval.list types
 // ---------------------------------------------------------------------------
@@ -2584,9 +2586,22 @@ type PluginApprovalListEntry struct {
 	ExpiresAtMs int64                       `json:"expiresAtMs"`
 }
 
+// PluginApprovalListResult is the result of "plugin.approval.list".
+type PluginApprovalListResult []PluginApprovalListEntry
+
 // ---------------------------------------------------------------------------
 // sessions.compaction.* types
 // ---------------------------------------------------------------------------
+
+// SessionCompactionCheckpointReason describes why a compaction checkpoint was created.
+type SessionCompactionCheckpointReason string
+
+const (
+	SessionCompactionReasonManual        SessionCompactionCheckpointReason = "manual"
+	SessionCompactionReasonAutoThreshold SessionCompactionCheckpointReason = "auto-threshold"
+	SessionCompactionReasonOverflowRetry SessionCompactionCheckpointReason = "overflow-retry"
+	SessionCompactionReasonTimeoutRetry  SessionCompactionCheckpointReason = "timeout-retry"
+)
 
 // SessionCompactionTranscriptRef is a reference to a transcript file at a compaction boundary.
 type SessionCompactionTranscriptRef struct {
@@ -2598,17 +2613,17 @@ type SessionCompactionTranscriptRef struct {
 
 // SessionCompactionCheckpoint is a saved compaction checkpoint for a session.
 type SessionCompactionCheckpoint struct {
-	CheckpointID     string                         `json:"checkpointId"`
-	SessionKey       string                         `json:"sessionKey"`
-	SessionID        string                         `json:"sessionId"`
-	CreatedAt        int64                          `json:"createdAt"`
-	Reason           string                         `json:"reason"`
-	TokensBefore     *int64                         `json:"tokensBefore,omitempty"`
-	TokensAfter      *int64                         `json:"tokensAfter,omitempty"`
-	Summary          *string                        `json:"summary,omitempty"`
-	FirstKeptEntryID *string                        `json:"firstKeptEntryId,omitempty"`
-	PreCompaction    SessionCompactionTranscriptRef `json:"preCompaction"`
-	PostCompaction   SessionCompactionTranscriptRef `json:"postCompaction"`
+	CheckpointID      string                            `json:"checkpointId"`
+	SessionKey        string                            `json:"sessionKey"`
+	SessionID         string                            `json:"sessionId"`
+	CreatedAt         int64                             `json:"createdAt"`
+	Reason            SessionCompactionCheckpointReason `json:"reason"`
+	TokensBefore      *int64                            `json:"tokensBefore,omitempty"`
+	TokensAfter       *int64                            `json:"tokensAfter,omitempty"`
+	Summary           *string                           `json:"summary,omitempty"`
+	FirstKeptEntryID  *string                           `json:"firstKeptEntryId,omitempty"`
+	PreCompaction     SessionCompactionTranscriptRef    `json:"preCompaction"`
+	PostCompaction    SessionCompactionTranscriptRef    `json:"postCompaction"`
 }
 
 // SessionsCompactionListParams are the params for "sessions.compaction.list".
@@ -2665,10 +2680,16 @@ type SessionsCompactionRestoreParams struct {
 }
 
 // SessionsCompactionRestoreResult is the result of "sessions.compaction.restore".
+type SessionsCompactionRestoreEntry struct {
+	SessionID string `json:"sessionId"`
+	UpdatedAt int64  `json:"updatedAt"`
+}
+
+// SessionsCompactionRestoreResult is the result of "sessions.compaction.restore".
 type SessionsCompactionRestoreResult struct {
-	OK         bool                          `json:"ok"`
-	Key        string                        `json:"key"`
-	SessionID  string                        `json:"sessionId"`
-	Checkpoint SessionCompactionCheckpoint   `json:"checkpoint"`
-	Entry      SessionsCompactionBranchEntry `json:"entry"`
+	OK         bool                           `json:"ok"`
+	Key        string                         `json:"key"`
+	SessionID  string                         `json:"sessionId"`
+	Checkpoint SessionCompactionCheckpoint    `json:"checkpoint"`
+	Entry      SessionsCompactionRestoreEntry `json:"entry"`
 }
