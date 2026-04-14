@@ -192,6 +192,9 @@ const (
 	MethodChatInject  MethodName = "chat.inject"
 	MethodChatSend    MethodName = "chat.send"
 
+	// Commands and chat command registry.
+	MethodCommandsList MethodName = "commands.list"
+
 	// Configuration and schema operations.
 	MethodConfigApply        MethodName = "config.apply"
 	MethodConfigGet          MethodName = "config.get"
@@ -221,16 +224,15 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
-	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
-	MethodDoctorMemoryStatus     MethodName = "doctor.memory.status"
-	MethodExecApprovalGet        MethodName = "exec.approval.get"
-	MethodExecApprovalList       MethodName = "exec.approval.list"
-	MethodExecApprovalRequest    MethodName = "exec.approval.request"
-	MethodExecApprovalResolve    MethodName = "exec.approval.resolve"
-	MethodExecApprovalsGet       MethodName = "exec.approvals.get"
-	MethodExecApprovalsNodeGet   MethodName = "exec.approvals.node.get"
-	MethodExecApprovalsNodeSet   MethodName = "exec.approvals.node.set"
-	MethodExecApprovalsSet       MethodName = "exec.approvals.set"
+	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
+	MethodExecApprovalGet      MethodName = "exec.approval.get"
+	MethodExecApprovalList     MethodName = "exec.approval.list"
+	MethodExecApprovalRequest  MethodName = "exec.approval.request"
+	MethodExecApprovalResolve  MethodName = "exec.approval.resolve"
+	MethodExecApprovalsGet     MethodName = "exec.approvals.get"
+	MethodExecApprovalsNodeGet MethodName = "exec.approvals.node.get"
+	MethodExecApprovalsNodeSet MethodName = "exec.approvals.node.set"
+	MethodExecApprovalsSet     MethodName = "exec.approvals.set"
 
 	// Plugin approvals.
 	MethodPluginApprovalList         MethodName = "plugin.approval.list"
@@ -301,7 +303,8 @@ const (
 	MethodSkillsStatus  MethodName = "skills.status"
 	MethodSkillsUpdate  MethodName = "skills.update"
 
-	// System presence/events and voice interactions.
+	// Message actions and system presence/events.
+	MethodMessageAction  MethodName = "message.action"
 	MethodSystemEvent    MethodName = "system-event"
 	MethodSystemPresence MethodName = "system-presence"
 	MethodTalkConfig     MethodName = "talk.config"
@@ -2546,81 +2549,42 @@ type PluginApprovalResolvedEvent struct {
 }
 
 // ---------------------------------------------------------------------------
-// doctor.memory.dreamDiary types
+// commands.list types
 // ---------------------------------------------------------------------------
 
-// DoctorMemoryDreamDiaryResult is the result for "doctor.memory.dreamDiary".
-// Found indicates whether a dream diary file was located in the agent workspace.
-// Content is only set when Found is true.
-type DoctorMemoryDreamDiaryResult struct {
-	AgentID     string  `json:"agentId"`
-	Found       bool    `json:"found"`
-	Path        string  `json:"path"`
-	Content     *string `json:"content,omitempty"`
-	UpdatedAtMs *int64  `json:"updatedAtMs,omitempty"`
+// CommandsListParams are the params for "commands.list".
+type CommandsListParams struct {
+	AgentID     string `json:"agentId,omitempty"`
+	Provider    string `json:"provider,omitempty"`
+	Scope       string `json:"scope,omitempty"`
+	IncludeArgs *bool  `json:"includeArgs,omitempty"`
 }
 
 // ---------------------------------------------------------------------------
-// exec.approval.list types
+// message.action types
 // ---------------------------------------------------------------------------
 
-// ExecApprovalListEntry is one pending entry returned by "exec.approval.list".
-type ExecApprovalListEntry struct {
-	ID          string                    `json:"id"`
-	Request     ExecApprovalRequestParams `json:"request"`
-	CreatedAtMs int64                     `json:"createdAtMs"`
-	ExpiresAtMs int64                     `json:"expiresAtMs"`
+// MessageActionParams are the params for "message.action".
+type MessageActionParams struct {
+	Channel           string         `json:"channel"`
+	Action            string         `json:"action"`
+	Params            map[string]any `json:"params"`
+	IdempotencyKey    string         `json:"idempotencyKey"`
+	AccountID         string         `json:"accountId,omitempty"`
+	RequesterSenderID string         `json:"requesterSenderId,omitempty"`
+	SenderIsOwner     *bool          `json:"senderIsOwner,omitempty"`
+	SessionKey        string         `json:"sessionKey,omitempty"`
+	SessionID         string         `json:"sessionId,omitempty"`
+	AgentID           string         `json:"agentId,omitempty"`
 }
 
 // ---------------------------------------------------------------------------
-// plugin.approval.list types
+// sessions.compaction types
 // ---------------------------------------------------------------------------
-
-// PluginApprovalListEntry is one pending entry returned by "plugin.approval.list".
-type PluginApprovalListEntry struct {
-	ID          string                      `json:"id"`
-	Request     PluginApprovalRequestParams `json:"request"`
-	CreatedAtMs int64                       `json:"createdAtMs"`
-	ExpiresAtMs int64                       `json:"expiresAtMs"`
-}
-
-// ---------------------------------------------------------------------------
-// sessions.compaction.* types
-// ---------------------------------------------------------------------------
-
-// SessionCompactionTranscriptRef is a reference to a transcript file at a compaction boundary.
-type SessionCompactionTranscriptRef struct {
-	SessionID   string  `json:"sessionId"`
-	SessionFile *string `json:"sessionFile,omitempty"`
-	LeafID      *string `json:"leafId,omitempty"`
-	EntryID     *string `json:"entryId,omitempty"`
-}
-
-// SessionCompactionCheckpoint is a saved compaction checkpoint for a session.
-type SessionCompactionCheckpoint struct {
-	CheckpointID     string                         `json:"checkpointId"`
-	SessionKey       string                         `json:"sessionKey"`
-	SessionID        string                         `json:"sessionId"`
-	CreatedAt        int64                          `json:"createdAt"`
-	Reason           string                         `json:"reason"`
-	TokensBefore     *int64                         `json:"tokensBefore,omitempty"`
-	TokensAfter      *int64                         `json:"tokensAfter,omitempty"`
-	Summary          *string                        `json:"summary,omitempty"`
-	FirstKeptEntryID *string                        `json:"firstKeptEntryId,omitempty"`
-	PreCompaction    SessionCompactionTranscriptRef `json:"preCompaction"`
-	PostCompaction   SessionCompactionTranscriptRef `json:"postCompaction"`
-}
 
 // SessionsCompactionListParams are the params for "sessions.compaction.list".
 type SessionsCompactionListParams struct {
 	Key string `json:"key"`
-}
-
-// SessionsCompactionListResult is the result of "sessions.compaction.list".
-type SessionsCompactionListResult struct {
-	OK          bool                          `json:"ok"`
-	Key         string                        `json:"key"`
-	Checkpoints []SessionCompactionCheckpoint `json:"checkpoints"`
 }
 
 // SessionsCompactionGetParams are the params for "sessions.compaction.get".
@@ -2629,46 +2593,14 @@ type SessionsCompactionGetParams struct {
 	CheckpointID string `json:"checkpointId"`
 }
 
-// SessionsCompactionGetResult is the result of "sessions.compaction.get".
-type SessionsCompactionGetResult struct {
-	OK         bool                        `json:"ok"`
-	Key        string                      `json:"key"`
-	Checkpoint SessionCompactionCheckpoint `json:"checkpoint"`
-}
-
 // SessionsCompactionBranchParams are the params for "sessions.compaction.branch".
 type SessionsCompactionBranchParams struct {
 	Key          string `json:"key"`
 	CheckpointID string `json:"checkpointId"`
 }
 
-// SessionsCompactionBranchEntry is the minimal session entry returned by "sessions.compaction.branch".
-type SessionsCompactionBranchEntry struct {
-	SessionID string `json:"sessionId"`
-	UpdatedAt int64  `json:"updatedAt"`
-}
-
-// SessionsCompactionBranchResult is the result of "sessions.compaction.branch".
-type SessionsCompactionBranchResult struct {
-	OK         bool                          `json:"ok"`
-	SourceKey  string                        `json:"sourceKey"`
-	Key        string                        `json:"key"`
-	SessionID  string                        `json:"sessionId"`
-	Checkpoint SessionCompactionCheckpoint   `json:"checkpoint"`
-	Entry      SessionsCompactionBranchEntry `json:"entry"`
-}
-
 // SessionsCompactionRestoreParams are the params for "sessions.compaction.restore".
 type SessionsCompactionRestoreParams struct {
 	Key          string `json:"key"`
 	CheckpointID string `json:"checkpointId"`
-}
-
-// SessionsCompactionRestoreResult is the result of "sessions.compaction.restore".
-type SessionsCompactionRestoreResult struct {
-	OK         bool                          `json:"ok"`
-	Key        string                        `json:"key"`
-	SessionID  string                        `json:"sessionId"`
-	Checkpoint SessionCompactionCheckpoint   `json:"checkpoint"`
-	Entry      SessionsCompactionBranchEntry `json:"entry"`
 }

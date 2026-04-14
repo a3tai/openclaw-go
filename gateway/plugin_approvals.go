@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -39,11 +40,7 @@ func (c *Client) PluginApprovalResolve(ctx context.Context, params protocol.Plug
 	return &result, nil
 }
 
-// PluginApprovalList lists all pending plugin approval requests.
-func (c *Client) PluginApprovalList(ctx context.Context) ([]protocol.PluginApprovalListEntry, error) {
-	var result []protocol.PluginApprovalListEntry
-	if err := c.sendRPCTyped(ctx, string(protocol.MethodPluginApprovalList), struct{}{}, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
+// PluginApprovalList lists pending plugin approval requests.
+func (c *Client) PluginApprovalList(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodPluginApprovalList), struct{}{})
 }

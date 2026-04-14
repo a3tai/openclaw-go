@@ -7,6 +7,11 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// MessageAction performs a message action through a channel.
+func (c *Client) MessageAction(ctx context.Context, params protocol.MessageActionParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodMessageAction), params)
+}
+
 // SendMessage sends a message via the gateway.
 func (c *Client) SendMessage(ctx context.Context, params protocol.SendParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, "send", params)

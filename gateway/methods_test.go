@@ -375,7 +375,7 @@ func TestSessionsCompactionList(t *testing.T) {
 
 func TestSessionsCompactionGet(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.compaction.get", success: func(c *Client, ctx context.Context) error {
-		_, err := c.SessionsCompactionGet(ctx, protocol.SessionsCompactionGetParams{Key: "main", CheckpointID: "cp1"})
+		_, err := c.SessionsCompactionGet(ctx, protocol.SessionsCompactionGetParams{Key: "main", CheckpointID: "cp-1"})
 		return err
 	}}
 	tm.run()
@@ -383,7 +383,7 @@ func TestSessionsCompactionGet(t *testing.T) {
 
 func TestSessionsCompactionBranch(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.compaction.branch", success: func(c *Client, ctx context.Context) error {
-		_, err := c.SessionsCompactionBranch(ctx, protocol.SessionsCompactionBranchParams{Key: "main", CheckpointID: "cp1"})
+		_, err := c.SessionsCompactionBranch(ctx, protocol.SessionsCompactionBranchParams{Key: "main", CheckpointID: "cp-1"})
 		return err
 	}}
 	tm.run()
@@ -391,7 +391,7 @@ func TestSessionsCompactionBranch(t *testing.T) {
 
 func TestSessionsCompactionRestore(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.compaction.restore", success: func(c *Client, ctx context.Context) error {
-		_, err := c.SessionsCompactionRestore(ctx, protocol.SessionsCompactionRestoreParams{Key: "main", CheckpointID: "cp1"})
+		_, err := c.SessionsCompactionRestore(ctx, protocol.SessionsCompactionRestoreParams{Key: "main", CheckpointID: "cp-1"})
 		return err
 	}}
 	tm.run()
@@ -1097,6 +1097,14 @@ func TestExecApprovalList(t *testing.T) {
 
 // --- Plugin Approvals ---
 
+func TestPluginApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugin.approval.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginApprovalList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 func TestPluginApprovalRequestMethod(t *testing.T) {
 	tm := &testMethod{t: t, method: "plugin.approval.request", success: func(c *Client, ctx context.Context) error {
 		_, err := c.PluginApprovalRequest(ctx, protocol.PluginApprovalRequestParams{Title: "Allow tool", Description: "Plugin wants to run a tool"})
@@ -1331,6 +1339,25 @@ func TestWebLoginStart(t *testing.T) {
 func TestWebLoginWait(t *testing.T) {
 	tm := &testMethod{t: t, method: "web.login.wait", success: func(c *Client, ctx context.Context) error {
 		_, err := c.WebLoginWait(ctx, protocol.WebLoginWaitParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestCommandsList(t *testing.T) {
+	tm := &testMethod{t: t, method: "commands.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.CommandsList(ctx, protocol.CommandsListParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestMessageAction(t *testing.T) {
+	tm := &testMethod{t: t, method: "message.action", success: func(c *Client, ctx context.Context) error {
+		_, err := c.MessageAction(ctx, protocol.MessageActionParams{
+			Channel: "slack", Action: "react", Params: map[string]any{"emoji": "+1"},
+			IdempotencyKey: "k1",
+		})
 		return err
 	}}
 	tm.run()
@@ -1724,6 +1751,14 @@ func TestSkillsDetail(t *testing.T) {
 	// Error paths.
 	tm := &testMethod{t: t, method: "skills.detail", success: func(c *Client, ctx context.Context) error {
 		_, err := c.SkillsDetail(ctx, protocol.SkillsDetailParams{Slug: "foo"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestExecApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "exec.approval.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ExecApprovalList(ctx)
 		return err
 	}}
 	tm.run()

@@ -5,23 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v2026.4.7] - 2026-04-11
+## [v2026.4.12] - 2026-04-14
 
-Sync to upstream openclaw v2026.4.7. Seven new gateway RPC methods: dream diary diagnostics, approval list endpoints, and session compaction CRUD.
+Sync to upstream openclaw v2026.4.12. 1200 upstream files changed; 8 new RPC methods added; 29 methods touched across changed server-method files.
 
 ### Added
 
-- `DoctorMemoryDreamDiary(ctx) (*DoctorMemoryDreamDiaryResult, error)` — retrieves the agent's DREAMS.md dream diary file (`doctor.memory.dreamDiary`). Returns `{agentId, found, path, content?, updatedAtMs?}`.
-- `ExecApprovalList(ctx) ([]ExecApprovalListEntry, error)` — lists all pending exec approval requests (`exec.approval.list`)
-- `PluginApprovalList(ctx) ([]PluginApprovalListEntry, error)` — lists all pending plugin approval requests (`plugin.approval.list`)
-- `SessionsCompactionList(ctx, SessionsCompactionListParams) (*SessionsCompactionListResult, error)` — lists compaction checkpoints for a session (`sessions.compaction.list`)
-- `SessionsCompactionGet(ctx, SessionsCompactionGetParams) (*SessionsCompactionGetResult, error)` — retrieves a single compaction checkpoint by ID (`sessions.compaction.get`)
-- `SessionsCompactionBranch(ctx, SessionsCompactionBranchParams) (*SessionsCompactionBranchResult, error)` — creates a new session branched from a compaction checkpoint (`sessions.compaction.branch`)
-- `SessionsCompactionRestore(ctx, SessionsCompactionRestoreParams) (*SessionsCompactionRestoreResult, error)` — restores a session to a compaction checkpoint in-place (`sessions.compaction.restore`)
-- `DoctorMemoryDreamDiaryResult`, `ExecApprovalListEntry`, `PluginApprovalListEntry` protocol types
-- `SessionCompactionCheckpoint`, `SessionCompactionTranscriptRef`, `SessionsCompactionBranchEntry` shared compaction protocol types
-- `SessionsCompactionListParams/Result`, `SessionsCompactionGetParams/Result`, `SessionsCompactionBranchParams/Result`, `SessionsCompactionRestoreParams/Result` protocol types
-- `MethodDoctorMemoryDreamDiary`, `MethodExecApprovalList`, `MethodPluginApprovalList`, `MethodSessionsCompactionList`, `MethodSessionsCompactionGet`, `MethodSessionsCompactionBranch`, `MethodSessionsCompactionRestore` method name constants
+- `CommandsList(ctx, CommandsListParams) (json.RawMessage, error)` — list available commands for an agent (`commands.list`). Params: `AgentID`, `Provider`, `Scope`, `IncludeArgs`.
+- `ExecApprovalList(ctx) (json.RawMessage, error)` — list pending exec approval requests (`exec.approval.list`). Requires `operator.approvals` scope.
+- `MessageAction(ctx, MessageActionParams) (json.RawMessage, error)` — perform a message action through a channel (`message.action`). Required params: `Channel`, `Action`, `Params`, `IdempotencyKey`.
+- `PluginApprovalList(ctx) (json.RawMessage, error)` — list pending plugin approval requests (`plugin.approval.list`). Requires `operator.approvals` scope.
+- `SessionsCompactionList(ctx, SessionsCompactionListParams)` — list compaction checkpoints for a session (`sessions.compaction.list`).
+- `SessionsCompactionGet(ctx, SessionsCompactionGetParams)` — retrieve a single compaction checkpoint (`sessions.compaction.get`).
+- `SessionsCompactionBranch(ctx, SessionsCompactionBranchParams)` — create a new session branched from a compaction checkpoint (`sessions.compaction.branch`).
+- `SessionsCompactionRestore(ctx, SessionsCompactionRestoreParams)` — restore a session to a compaction checkpoint (`sessions.compaction.restore`).
+- `CommandsListParams` protocol type with `AgentID`, `Provider`, `Scope`, `IncludeArgs` fields
+- `MessageActionParams` protocol type with `Channel`, `Action`, `Params`, `IdempotencyKey`, and optional fields
+- `SessionsCompactionListParams`, `SessionsCompactionGetParams`, `SessionsCompactionBranchParams`, `SessionsCompactionRestoreParams` protocol types
+- `MethodCommandsList`, `MethodExecApprovalList`, `MethodMessageAction`, `MethodPluginApprovalList`, `MethodSessionsCompactionBranch`, `MethodSessionsCompactionGet`, `MethodSessionsCompactionList`, `MethodSessionsCompactionRestore` method name constants
 
 ## [Unreleased]
 

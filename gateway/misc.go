@@ -7,6 +7,16 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// CommandsList lists available gateway commands.
+func (c *Client) CommandsList(ctx context.Context, params protocol.CommandsListParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodCommandsList), params)
+}
+
+// MessageAction triggers an action on a message.
+func (c *Client) MessageAction(ctx context.Context, params protocol.MessageActionParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodMessageAction), params)
+}
+
 // UpdateRun triggers a gateway update run.
 func (c *Client) UpdateRun(ctx context.Context, params protocol.UpdateRunParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodUpdateRun), params)

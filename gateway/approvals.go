@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -73,11 +74,7 @@ func (c *Client) ExecApprovalsNodeSet(ctx context.Context, params protocol.ExecA
 	return c.sendRPCVoid(ctx, string(protocol.MethodExecApprovalsNodeSet), params)
 }
 
-// ExecApprovalList lists all pending exec approval requests.
-func (c *Client) ExecApprovalList(ctx context.Context) ([]protocol.ExecApprovalListEntry, error) {
-	var result []protocol.ExecApprovalListEntry
-	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalList), struct{}{}, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
+// ExecApprovalList lists pending exec approval requests.
+func (c *Client) ExecApprovalList(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodExecApprovalList), struct{}{})
 }
