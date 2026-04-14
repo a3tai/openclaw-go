@@ -6,6 +6,16 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// PluginApprovalList lists all pending plugin approval requests.
+// Requires the operator.approvals scope.
+func (c *Client) PluginApprovalList(ctx context.Context) ([]protocol.PluginApprovalListEntry, error) {
+	var result []protocol.PluginApprovalListEntry
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodPluginApprovalList), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // PluginApprovalRequest submits a new plugin approval request.
 // The gateway broadcasts a "plugin.approval.requested" event to connected approval clients
 // and waits for a decision. If no approval clients are connected, the decision is nil.
@@ -37,13 +47,4 @@ func (c *Client) PluginApprovalResolve(ctx context.Context, params protocol.Plug
 		return nil, err
 	}
 	return &result, nil
-}
-
-// PluginApprovalList lists all pending plugin approval requests.
-func (c *Client) PluginApprovalList(ctx context.Context) ([]protocol.PluginApprovalListEntry, error) {
-	var result []protocol.PluginApprovalListEntry
-	if err := c.sendRPCTyped(ctx, string(protocol.MethodPluginApprovalList), struct{}{}, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
 }
