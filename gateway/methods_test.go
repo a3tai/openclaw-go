@@ -1097,6 +1097,14 @@ func TestExecApprovalList(t *testing.T) {
 
 // --- Plugin Approvals ---
 
+func TestPluginApprovalListMethod(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugin.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginApprovalList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 func TestPluginApprovalRequestMethod(t *testing.T) {
 	tm := &testMethod{t: t, method: "plugin.approval.request", success: func(c *Client, ctx context.Context) error {
 		_, err := c.PluginApprovalRequest(ctx, protocol.PluginApprovalRequestParams{Title: "Allow tool", Description: "Plugin wants to run a tool"})
@@ -1416,6 +1424,8 @@ func TestCommandsList(t *testing.T) {
 	}}
 	tm.run()
 }
+
+// --- Message action ---
 
 func TestMessageAction(t *testing.T) {
 	tm := &testMethod{t: t, method: "message.action", successPayload: json.RawMessage(`{"ok":true}`), success: func(c *Client, ctx context.Context) error {
@@ -1781,6 +1791,16 @@ func TestExecApprovalGet(t *testing.T) {
 	// Error paths.
 	tm := &testMethod{t: t, method: "exec.approval.get", success: func(c *Client, ctx context.Context) error {
 		_, err := c.ExecApprovalGet(ctx, protocol.ExecApprovalGetParams{ID: "approval-abc"})
+		return err
+	}}
+	tm.run()
+}
+
+// --- exec.approval.list ---
+
+func TestExecApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "exec.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.ExecApprovalList(ctx)
 		return err
 	}}
 	tm.run()

@@ -6,9 +6,7 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
-// CommandsList retrieves the list of available commands.
-//
-// Scope: operator.read
+// CommandsList lists the commands available on the gateway.
 func (c *Client) CommandsList(ctx context.Context, params protocol.CommandsListParams) (*protocol.CommandsListResult, error) {
 	var result protocol.CommandsListResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodCommandsList), params, &result); err != nil {

@@ -5,23 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v2026.4.7] - 2026-04-11
+## [v2026.4.14] - 2026-04-15
 
-Sync to upstream openclaw v2026.4.7. Seven new gateway RPC methods: dream diary diagnostics, approval list endpoints, and session compaction CRUD.
+Sync to upstream openclaw v2026.4.14. 8 missing gateway RPC methods plus typed command catalog and richer message-action/session-compaction protocol models.
 
 ### Added
 
-- `DoctorMemoryDreamDiary(ctx) (*DoctorMemoryDreamDiaryResult, error)` — retrieves the agent's DREAMS.md dream diary file (`doctor.memory.dreamDiary`). Returns `{agentId, found, path, content?, updatedAtMs?}`.
-- `ExecApprovalList(ctx) ([]ExecApprovalListEntry, error)` — lists all pending exec approval requests (`exec.approval.list`)
-- `PluginApprovalList(ctx) ([]PluginApprovalListEntry, error)` — lists all pending plugin approval requests (`plugin.approval.list`)
-- `SessionsCompactionList(ctx, SessionsCompactionListParams) (*SessionsCompactionListResult, error)` — lists compaction checkpoints for a session (`sessions.compaction.list`)
-- `SessionsCompactionGet(ctx, SessionsCompactionGetParams) (*SessionsCompactionGetResult, error)` — retrieves a single compaction checkpoint by ID (`sessions.compaction.get`)
-- `SessionsCompactionBranch(ctx, SessionsCompactionBranchParams) (*SessionsCompactionBranchResult, error)` — creates a new session branched from a compaction checkpoint (`sessions.compaction.branch`)
-- `SessionsCompactionRestore(ctx, SessionsCompactionRestoreParams) (*SessionsCompactionRestoreResult, error)` — restores a session to a compaction checkpoint in-place (`sessions.compaction.restore`)
-- `DoctorMemoryDreamDiaryResult`, `ExecApprovalListEntry`, `PluginApprovalListEntry` protocol types
-- `SessionCompactionCheckpoint`, `SessionCompactionTranscriptRef`, `SessionsCompactionBranchEntry` shared compaction protocol types
-- `SessionsCompactionListParams/Result`, `SessionsCompactionGetParams/Result`, `SessionsCompactionBranchParams/Result`, `SessionsCompactionRestoreParams/Result` protocol types
-- `MethodDoctorMemoryDreamDiary`, `MethodExecApprovalList`, `MethodPluginApprovalList`, `MethodSessionsCompactionList`, `MethodSessionsCompactionGet`, `MethodSessionsCompactionBranch`, `MethodSessionsCompactionRestore` method name constants
+- `CommandsList(ctx, CommandsListParams) (*CommandsListResult, error)` typed command catalog retrieval for `commands.list`
+- `DoctorMemoryDreamDiary(ctx) (*DoctorMemoryDreamDiaryResult, error)` dream diary retrieval for `doctor.memory.dreamDiary`
+- `ExecApprovalList(ctx) ([]ExecApprovalListEntry, error)` for pending exec approvals
+- `MessageAction(ctx, MessageActionParams) (json.RawMessage, error)` for channel message actions
+- `PluginApprovalList(ctx) ([]PluginApprovalListEntry, error)` for pending plugin approvals
+- `SessionsCompactionList/Get/Branch/Restore` typed checkpoint helpers
+- `CommandsListResult`, `CommandEntry`, `CommandArg`, `CommandArgChoice` protocol types
+- `MessageActionToolContext` and expanded `MessageActionParams` optional context fields
+- `SessionCompactionTranscriptReference`, `SessionCompactionEntryRef`, and refreshed compaction result models
+
 
 ## [Unreleased]
 
@@ -56,6 +55,32 @@ Sync to upstream openclaw v2026.4.7. Seven new gateway RPC methods: dream diary 
 ### Deprecated
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
+
+## [v2026.4.14] - 2026-04-14
+
+Sync to upstream openclaw v2026.4.14. Eight new gateway RPC methods covering commands, approval listing, message actions, and session compaction checkpoints.
+
+### Added
+
+- `CommandsList(ctx, CommandsListParams) (*CommandsListResult, error)` — list commands available on the gateway, optionally filtered by agent, provider, scope, or args inclusion
+- `ExecApprovalList(ctx) ([]ExecApprovalListEntry, error)` — list all currently pending exec approval requests
+- `MessageAction(ctx, MessageActionParams) (json.RawMessage, error)` — dispatch a channel-specific action on a message (e.g. reactions)
+- `PluginApprovalList(ctx) ([]PluginApprovalListEntry, error)` — list all currently pending plugin approval requests
+- `SessionsCompactionList(ctx, SessionsCompactionListParams) (*SessionsCompactionListResult, error)` — list compaction checkpoints for a session
+- `SessionsCompactionGet(ctx, SessionsCompactionGetParams) (*SessionsCompactionGetResult, error)` — retrieve a specific compaction checkpoint by ID
+- `SessionsCompactionBranch(ctx, SessionsCompactionBranchParams) (*SessionsCompactionBranchResult, error)` — create a new session branched from a compaction checkpoint
+- `SessionsCompactionRestore(ctx, SessionsCompactionRestoreParams) (*SessionsCompactionRestoreResult, error)` — restore a session in-place from a compaction checkpoint
+- `CommandsListParams`, `CommandsListResult`, `CommandEntry`, `CommandArg`, `CommandArgChoice` protocol types
+- `ExecApprovalListEntry` protocol type
+- `MessageActionParams`, `MessageActionToolContext` protocol types
+- `PluginApprovalListEntry` protocol type
+- `SessionCompactionCheckpoint`, `SessionCompactionTranscriptReference`, `SessionCompactionEntryRef` protocol types
+- `SessionsCompactionListParams`, `SessionsCompactionListResult` protocol types
+- `SessionsCompactionGetParams`, `SessionsCompactionGetResult` protocol types
+- `SessionsCompactionBranchParams`, `SessionsCompactionBranchResult` protocol types
+- `SessionsCompactionRestoreParams`, `SessionsCompactionRestoreResult` protocol types
+- `MethodCommandsList`, `MethodExecApprovalList`, `MethodMessageAction`, `MethodPluginApprovalList` method name constants
+- `MethodSessionsCompactionList`, `MethodSessionsCompactionGet`, `MethodSessionsCompactionBranch`, `MethodSessionsCompactionRestore` method name constants
 
 ## [v2026.4.2] - 2026-04-03
 

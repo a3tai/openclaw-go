@@ -35,6 +35,16 @@ func (c *Client) ExecApprovalRequest(ctx context.Context, params protocol.ExecAp
 	return &result, nil
 }
 
+// ExecApprovalList lists all pending exec approval requests.
+// Requires the operator.approvals scope.
+func (c *Client) ExecApprovalList(ctx context.Context) ([]protocol.ExecApprovalListEntry, error) {
+	var result []protocol.ExecApprovalListEntry
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalList), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // ExecApprovalWaitDecision waits for a decision on a pending exec approval.
 // Requires the operator.approvals scope.
 func (c *Client) ExecApprovalWaitDecision(ctx context.Context, params protocol.ExecApprovalWaitDecisionParams) (*protocol.ExecApprovalWaitDecisionResult, error) {

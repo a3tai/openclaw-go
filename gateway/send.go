@@ -31,3 +31,8 @@ func (c *Client) SetHeartbeats(ctx context.Context, enabled bool) error {
 func (c *Client) SystemEvent(ctx context.Context, params any) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodSystemEvent), params)
 }
+
+// MessageAction performs a channel-specific action on a message.
+func (c *Client) MessageAction(ctx context.Context, params protocol.MessageActionParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodMessageAction), params)
+}

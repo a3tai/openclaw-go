@@ -220,6 +220,9 @@ const (
 	MethodDeviceTokenRevoke MethodName = "device.token.revoke"
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
+	// Commands.
+	MethodCommandsList MethodName = "commands.list"
+
 	// Diagnostics and execution approvals.
 	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
 	MethodDoctorMemoryStatus     MethodName = "doctor.memory.status"
@@ -231,6 +234,9 @@ const (
 	MethodExecApprovalsNodeGet   MethodName = "exec.approvals.node.get"
 	MethodExecApprovalsNodeSet   MethodName = "exec.approvals.node.set"
 	MethodExecApprovalsSet       MethodName = "exec.approvals.set"
+
+	// Message actions.
+	MethodMessageAction MethodName = "message.action"
 
 	// Plugin approvals.
 	MethodPluginApprovalList         MethodName = "plugin.approval.list"
@@ -267,7 +273,7 @@ const (
 	MethodSecretsReload  MethodName = "secrets.reload"
 	MethodSecretsResolve MethodName = "secrets.resolve"
 
-	// Session lifecycle, messaging, and usage analytics.
+	// Session lifecycle, messaging, compaction, and usage analytics.
 	MethodSessionsAbort               MethodName = "sessions.abort"
 	MethodSessionsCompact             MethodName = "sessions.compact"
 	MethodSessionsCompactionBranch    MethodName = "sessions.compaction.branch"
@@ -2564,7 +2570,7 @@ type DoctorMemoryDreamDiaryResult struct {
 // exec.approval.list types
 // ---------------------------------------------------------------------------
 
-// ExecApprovalListEntry is one pending entry returned by "exec.approval.list".
+// ExecApprovalListEntry is one pending exec approval in an "exec.approval.list" result.
 type ExecApprovalListEntry struct {
 	ID          string                    `json:"id"`
 	Request     ExecApprovalRequestParams `json:"request"`
@@ -2576,99 +2582,10 @@ type ExecApprovalListEntry struct {
 // plugin.approval.list types
 // ---------------------------------------------------------------------------
 
-// PluginApprovalListEntry is one pending entry returned by "plugin.approval.list".
+// PluginApprovalListEntry is one pending plugin approval in a "plugin.approval.list" result.
 type PluginApprovalListEntry struct {
 	ID          string                      `json:"id"`
 	Request     PluginApprovalRequestParams `json:"request"`
 	CreatedAtMs int64                       `json:"createdAtMs"`
 	ExpiresAtMs int64                       `json:"expiresAtMs"`
-}
-
-// ---------------------------------------------------------------------------
-// sessions.compaction.* types
-// ---------------------------------------------------------------------------
-
-// SessionCompactionTranscriptRef is a reference to a transcript file at a compaction boundary.
-type SessionCompactionTranscriptRef struct {
-	SessionID   string  `json:"sessionId"`
-	SessionFile *string `json:"sessionFile,omitempty"`
-	LeafID      *string `json:"leafId,omitempty"`
-	EntryID     *string `json:"entryId,omitempty"`
-}
-
-// SessionCompactionCheckpoint is a saved compaction checkpoint for a session.
-type SessionCompactionCheckpoint struct {
-	CheckpointID     string                         `json:"checkpointId"`
-	SessionKey       string                         `json:"sessionKey"`
-	SessionID        string                         `json:"sessionId"`
-	CreatedAt        int64                          `json:"createdAt"`
-	Reason           string                         `json:"reason"`
-	TokensBefore     *int64                         `json:"tokensBefore,omitempty"`
-	TokensAfter      *int64                         `json:"tokensAfter,omitempty"`
-	Summary          *string                        `json:"summary,omitempty"`
-	FirstKeptEntryID *string                        `json:"firstKeptEntryId,omitempty"`
-	PreCompaction    SessionCompactionTranscriptRef `json:"preCompaction"`
-	PostCompaction   SessionCompactionTranscriptRef `json:"postCompaction"`
-}
-
-// SessionsCompactionListParams are the params for "sessions.compaction.list".
-type SessionsCompactionListParams struct {
-	Key string `json:"key"`
-}
-
-// SessionsCompactionListResult is the result of "sessions.compaction.list".
-type SessionsCompactionListResult struct {
-	OK          bool                          `json:"ok"`
-	Key         string                        `json:"key"`
-	Checkpoints []SessionCompactionCheckpoint `json:"checkpoints"`
-}
-
-// SessionsCompactionGetParams are the params for "sessions.compaction.get".
-type SessionsCompactionGetParams struct {
-	Key          string `json:"key"`
-	CheckpointID string `json:"checkpointId"`
-}
-
-// SessionsCompactionGetResult is the result of "sessions.compaction.get".
-type SessionsCompactionGetResult struct {
-	OK         bool                        `json:"ok"`
-	Key        string                      `json:"key"`
-	Checkpoint SessionCompactionCheckpoint `json:"checkpoint"`
-}
-
-// SessionsCompactionBranchParams are the params for "sessions.compaction.branch".
-type SessionsCompactionBranchParams struct {
-	Key          string `json:"key"`
-	CheckpointID string `json:"checkpointId"`
-}
-
-// SessionsCompactionBranchEntry is the minimal session entry returned by "sessions.compaction.branch".
-type SessionsCompactionBranchEntry struct {
-	SessionID string `json:"sessionId"`
-	UpdatedAt int64  `json:"updatedAt"`
-}
-
-// SessionsCompactionBranchResult is the result of "sessions.compaction.branch".
-type SessionsCompactionBranchResult struct {
-	OK         bool                          `json:"ok"`
-	SourceKey  string                        `json:"sourceKey"`
-	Key        string                        `json:"key"`
-	SessionID  string                        `json:"sessionId"`
-	Checkpoint SessionCompactionCheckpoint   `json:"checkpoint"`
-	Entry      SessionsCompactionBranchEntry `json:"entry"`
-}
-
-// SessionsCompactionRestoreParams are the params for "sessions.compaction.restore".
-type SessionsCompactionRestoreParams struct {
-	Key          string `json:"key"`
-	CheckpointID string `json:"checkpointId"`
-}
-
-// SessionsCompactionRestoreResult is the result of "sessions.compaction.restore".
-type SessionsCompactionRestoreResult struct {
-	OK         bool                          `json:"ok"`
-	Key        string                        `json:"key"`
-	SessionID  string                        `json:"sessionId"`
-	Checkpoint SessionCompactionCheckpoint   `json:"checkpoint"`
-	Entry      SessionsCompactionBranchEntry `json:"entry"`
 }
