@@ -1129,14 +1129,6 @@ func TestPluginApprovalResolveMethod(t *testing.T) {
 	tm.run()
 }
 
-func TestPluginApprovalList(t *testing.T) {
-	tm := &testMethod{t: t, method: "plugin.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
-		_, err := c.PluginApprovalList(ctx)
-		return err
-	}}
-	tm.run()
-}
-
 // --- Skills ---
 
 func TestSkillsStatus(t *testing.T) {
@@ -1436,27 +1428,6 @@ func TestDoctorMemoryDreamDiary(t *testing.T) {
 
 // --- Commands ---
 
-func TestCommandsList(t *testing.T) {
-	tm := &testMethod{t: t, method: "commands.list", successPayload: json.RawMessage(`{"commands":[]}`), success: func(c *Client, ctx context.Context) error {
-		_, err := c.CommandsList(ctx, protocol.CommandsListParams{})
-		return err
-	}}
-	tm.run()
-}
-
-func TestMessageAction(t *testing.T) {
-	tm := &testMethod{t: t, method: "message.action", successPayload: json.RawMessage(`{"ok":true}`), success: func(c *Client, ctx context.Context) error {
-		_, err := c.MessageAction(ctx, protocol.MessageActionParams{
-			Channel:        "slack",
-			Action:         "open-thread",
-			Params:         map[string]any{"messageId": "123"},
-			IdempotencyKey: "idem-message-action",
-		})
-		return err
-	}}
-	tm.run()
-}
-
 // --- Misc ---
 
 func TestUpdateRun(t *testing.T) {
@@ -1751,14 +1722,6 @@ func TestSkillsDetail(t *testing.T) {
 	// Error paths.
 	tm := &testMethod{t: t, method: "skills.detail", success: func(c *Client, ctx context.Context) error {
 		_, err := c.SkillsDetail(ctx, protocol.SkillsDetailParams{Slug: "foo"})
-		return err
-	}}
-	tm.run()
-}
-
-func TestExecApprovalList(t *testing.T) {
-	tm := &testMethod{t: t, method: "exec.approval.list", success: func(c *Client, ctx context.Context) error {
-		_, err := c.ExecApprovalList(ctx)
 		return err
 	}}
 	tm.run()

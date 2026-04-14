@@ -203,9 +203,6 @@ const (
 	MethodConfigSchemaLookup MethodName = "config.schema.lookup"
 	MethodConfigSet          MethodName = "config.set"
 
-	// Command catalog.
-	MethodCommandsList MethodName = "commands.list"
-
 	// Cron management and execution history.
 	MethodCronAdd    MethodName = "cron.add"
 	MethodCronList   MethodName = "cron.list"
@@ -222,6 +219,9 @@ const (
 	MethodDevicePairRemove  MethodName = "device.pair.remove"
 	MethodDeviceTokenRevoke MethodName = "device.token.revoke"
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
+
+	// Diagnostics and execution approvals.
+	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
 
 	// Diagnostics and execution approvals.
 	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
@@ -303,8 +303,7 @@ const (
 	MethodSkillsStatus  MethodName = "skills.status"
 	MethodSkillsUpdate  MethodName = "skills.update"
 
-	// Message actions and system presence/events.
-	MethodMessageAction  MethodName = "message.action"
+	// System presence/events and voice interactions.
 	MethodSystemEvent    MethodName = "system-event"
 	MethodSystemPresence MethodName = "system-presence"
 	MethodTalkConfig     MethodName = "talk.config"
@@ -2548,40 +2547,6 @@ type PluginApprovalResolvedEvent struct {
 	Request    *PluginApprovalRequestParams `json:"request,omitempty"`
 }
 
-// ---------------------------------------------------------------------------
-// commands.list types
-// ---------------------------------------------------------------------------
-
-// CommandsListParams are the params for "commands.list".
-type CommandsListParams struct {
-	AgentID     string `json:"agentId,omitempty"`
-	Provider    string `json:"provider,omitempty"`
-	Scope       string `json:"scope,omitempty"`
-	IncludeArgs *bool  `json:"includeArgs,omitempty"`
-}
-
-// ---------------------------------------------------------------------------
-// message.action types
-// ---------------------------------------------------------------------------
-
-// MessageActionParams are the params for "message.action".
-type MessageActionParams struct {
-	Channel           string         `json:"channel"`
-	Action            string         `json:"action"`
-	Params            map[string]any `json:"params"`
-	IdempotencyKey    string         `json:"idempotencyKey"`
-	AccountID         string         `json:"accountId,omitempty"`
-	RequesterSenderID string         `json:"requesterSenderId,omitempty"`
-	SenderIsOwner     *bool          `json:"senderIsOwner,omitempty"`
-	SessionKey        string         `json:"sessionKey,omitempty"`
-	SessionID         string         `json:"sessionId,omitempty"`
-	AgentID           string         `json:"agentId,omitempty"`
-}
-
-// ---------------------------------------------------------------------------
-// sessions.compaction types
-// ---------------------------------------------------------------------------
-
 // SessionsCompactionListParams are the params for "sessions.compaction.list".
 type SessionsCompactionListParams struct {
 	Key string `json:"key"`
@@ -2603,4 +2568,19 @@ type SessionsCompactionBranchParams struct {
 type SessionsCompactionRestoreParams struct {
 	Key          string `json:"key"`
 	CheckpointID string `json:"checkpointId"`
+}
+
+// ---------------------------------------------------------------------------
+// doctor.memory.dreamDiary types
+// ---------------------------------------------------------------------------
+
+// DoctorMemoryDreamDiaryResult is the result for "doctor.memory.dreamDiary".
+// Found indicates whether a dream diary file was located in the agent workspace.
+// Content is only set when Found is true.
+type DoctorMemoryDreamDiaryResult struct {
+	AgentID     string  `json:"agentId"`
+	Found       bool    `json:"found"`
+	Path        string  `json:"path"`
+	Content     *string `json:"content,omitempty"`
+	UpdatedAtMs *int64  `json:"updatedAtMs,omitempty"`
 }
