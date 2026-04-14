@@ -6,6 +6,16 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// ExecApprovalList lists all pending exec approval requests.
+// Requires the operator.approvals scope.
+func (c *Client) ExecApprovalList(ctx context.Context) ([]protocol.ExecApprovalListEntry, error) {
+	var result []protocol.ExecApprovalListEntry
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalList), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // ExecApprovalResolve resolves a pending exec approval request.
 // Requires the operator.approvals scope.
 func (c *Client) ExecApprovalResolve(ctx context.Context, params protocol.ExecApprovalResolveParams) (*protocol.ExecApprovalResolveResult, error) {
@@ -71,13 +81,4 @@ func (c *Client) ExecApprovalsNodeGet(ctx context.Context, params protocol.ExecA
 // ExecApprovalsNodeSet updates exec approvals for a specific node.
 func (c *Client) ExecApprovalsNodeSet(ctx context.Context, params protocol.ExecApprovalsNodeSetParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodExecApprovalsNodeSet), params)
-}
-
-// ExecApprovalList lists all pending exec approval requests.
-func (c *Client) ExecApprovalList(ctx context.Context) ([]protocol.ExecApprovalListEntry, error) {
-	var result []protocol.ExecApprovalListEntry
-	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalList), struct{}{}, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
 }

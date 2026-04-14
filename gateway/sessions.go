@@ -112,7 +112,7 @@ func (c *Client) SessionsCompactionList(ctx context.Context, params protocol.Ses
 	return &result, nil
 }
 
-// SessionsCompactionGet retrieves a single compaction checkpoint by ID.
+// SessionsCompactionGet retrieves a specific compaction checkpoint by ID.
 func (c *Client) SessionsCompactionGet(ctx context.Context, params protocol.SessionsCompactionGetParams) (*protocol.SessionsCompactionGetResult, error) {
 	var result protocol.SessionsCompactionGetResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodSessionsCompactionGet), params, &result); err != nil {
@@ -130,7 +130,7 @@ func (c *Client) SessionsCompactionBranch(ctx context.Context, params protocol.S
 	return &result, nil
 }
 
-// SessionsCompactionRestore restores a session to a compaction checkpoint.
+// SessionsCompactionRestore restores a session to the state at a compaction checkpoint.
 func (c *Client) SessionsCompactionRestore(ctx context.Context, params protocol.SessionsCompactionRestoreParams) (*protocol.SessionsCompactionRestoreResult, error) {
 	var result protocol.SessionsCompactionRestoreResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodSessionsCompactionRestore), params, &result); err != nil {
