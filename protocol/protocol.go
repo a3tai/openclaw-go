@@ -184,6 +184,7 @@ const (
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
 	MethodChannelsStatus MethodName = "channels.status"
+	MethodMessageAction  MethodName = "message.action"
 
 	// Chat request/stream controls.
 	MethodChatAbort   MethodName = "chat.abort"
@@ -198,6 +199,9 @@ const (
 	MethodConfigSchema       MethodName = "config.schema"
 	MethodConfigSchemaLookup MethodName = "config.schema.lookup"
 	MethodConfigSet          MethodName = "config.set"
+
+	// Command catalog.
+	MethodCommandsList MethodName = "commands.list"
 
 	// Cron management and execution history.
 	MethodCronAdd    MethodName = "cron.add"
@@ -264,29 +268,29 @@ const (
 	MethodSecretsResolve MethodName = "secrets.resolve"
 
 	// Session lifecycle, messaging, and usage analytics.
-	MethodSessionsAbort                MethodName = "sessions.abort"
-	MethodSessionsCompact              MethodName = "sessions.compact"
-	MethodSessionsCompactionBranch     MethodName = "sessions.compaction.branch"
-	MethodSessionsCompactionGet        MethodName = "sessions.compaction.get"
-	MethodSessionsCompactionList       MethodName = "sessions.compaction.list"
-	MethodSessionsCompactionRestore    MethodName = "sessions.compaction.restore"
-	MethodSessionsCreate               MethodName = "sessions.create"
-	MethodSessionsDelete               MethodName = "sessions.delete"
-	MethodSessionsGet                  MethodName = "sessions.get"
-	MethodSessionsList                 MethodName = "sessions.list"
-	MethodSessionsMessagesSubscribe    MethodName = "sessions.messages.subscribe"
-	MethodSessionsMessagesUnsubscribe  MethodName = "sessions.messages.unsubscribe"
-	MethodSessionsPatch                MethodName = "sessions.patch"
-	MethodSessionsPreview              MethodName = "sessions.preview"
-	MethodSessionsReset                MethodName = "sessions.reset"
-	MethodSessionsResolve              MethodName = "sessions.resolve"
-	MethodSessionsSend                 MethodName = "sessions.send"
-	MethodSessionsSteer                MethodName = "sessions.steer"
-	MethodSessionsSubscribe            MethodName = "sessions.subscribe"
-	MethodSessionsUnsubscribe          MethodName = "sessions.unsubscribe"
-	MethodSessionsUsage                MethodName = "sessions.usage"
-	MethodSessionsUsageLogs            MethodName = "sessions.usage.logs"
-	MethodSessionsUsageTimeseries      MethodName = "sessions.usage.timeseries"
+	MethodSessionsAbort               MethodName = "sessions.abort"
+	MethodSessionsCompact             MethodName = "sessions.compact"
+	MethodSessionsCompactionBranch    MethodName = "sessions.compaction.branch"
+	MethodSessionsCompactionGet       MethodName = "sessions.compaction.get"
+	MethodSessionsCompactionList      MethodName = "sessions.compaction.list"
+	MethodSessionsCompactionRestore   MethodName = "sessions.compaction.restore"
+	MethodSessionsCreate              MethodName = "sessions.create"
+	MethodSessionsDelete              MethodName = "sessions.delete"
+	MethodSessionsGet                 MethodName = "sessions.get"
+	MethodSessionsList                MethodName = "sessions.list"
+	MethodSessionsMessagesSubscribe   MethodName = "sessions.messages.subscribe"
+	MethodSessionsMessagesUnsubscribe MethodName = "sessions.messages.unsubscribe"
+	MethodSessionsPatch               MethodName = "sessions.patch"
+	MethodSessionsPreview             MethodName = "sessions.preview"
+	MethodSessionsReset               MethodName = "sessions.reset"
+	MethodSessionsResolve             MethodName = "sessions.resolve"
+	MethodSessionsSend                MethodName = "sessions.send"
+	MethodSessionsSteer               MethodName = "sessions.steer"
+	MethodSessionsSubscribe           MethodName = "sessions.subscribe"
+	MethodSessionsUnsubscribe         MethodName = "sessions.unsubscribe"
+	MethodSessionsUsage               MethodName = "sessions.usage"
+	MethodSessionsUsageLogs           MethodName = "sessions.usage.logs"
+	MethodSessionsUsageTimeseries     MethodName = "sessions.usage.timeseries"
 
 	// Runtime controls and skills.
 	MethodSetHeartbeats MethodName = "set-heartbeats"
@@ -2037,6 +2041,71 @@ type PollParams struct {
 	IdempotencyKey  string   `json:"idempotencyKey"`
 }
 
+// MessageActionToolContext identifies the current channel context for plugin-dispatched actions.
+type MessageActionToolContext struct {
+	CurrentChannelID       *string `json:"currentChannelId,omitempty"`
+	CurrentChannelProvider *string `json:"currentChannelProvider,omitempty"`
+	CurrentThreadTS        *string `json:"currentThreadTs,omitempty"`
+	CurrentMessageID       any     `json:"currentMessageId,omitempty"`
+}
+
+// MessageActionParams are the params for "message.action".
+type MessageActionParams struct {
+	Channel           string                    `json:"channel"`
+	Action            string                    `json:"action"`
+	Params            map[string]any            `json:"params"`
+	AccountID         *string                   `json:"accountId,omitempty"`
+	RequesterSenderID *string                   `json:"requesterSenderId,omitempty"`
+	SenderIsOwner     *bool                     `json:"senderIsOwner,omitempty"`
+	SessionKey        *string                   `json:"sessionKey,omitempty"`
+	SessionID         *string                   `json:"sessionId,omitempty"`
+	AgentID           *string                   `json:"agentId,omitempty"`
+	ToolContext       *MessageActionToolContext `json:"toolContext,omitempty"`
+	IdempotencyKey    string                    `json:"idempotencyKey"`
+}
+
+// CommandArgChoice is a fixed value allowed for a command argument.
+type CommandArgChoice struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
+
+// CommandArg describes a single command argument.
+type CommandArg struct {
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Type        string             `json:"type"`
+	Required    *bool              `json:"required,omitempty"`
+	Choices     []CommandArgChoice `json:"choices,omitempty"`
+	Dynamic     *bool              `json:"dynamic,omitempty"`
+}
+
+// CommandEntry describes an available command.
+type CommandEntry struct {
+	Name        string       `json:"name"`
+	NativeName  *string      `json:"nativeName,omitempty"`
+	TextAliases []string     `json:"textAliases,omitempty"`
+	Description string       `json:"description"`
+	Category    *string      `json:"category,omitempty"`
+	Source      string       `json:"source"`
+	Scope       string       `json:"scope"`
+	AcceptsArgs bool         `json:"acceptsArgs"`
+	Args        []CommandArg `json:"args,omitempty"`
+}
+
+// CommandsListParams are the params for "commands.list".
+type CommandsListParams struct {
+	AgentID     *string `json:"agentId,omitempty"`
+	Provider    *string `json:"provider,omitempty"`
+	Scope       *string `json:"scope,omitempty"`
+	IncludeArgs *bool   `json:"includeArgs,omitempty"`
+}
+
+// CommandsListResult is the result of "commands.list".
+type CommandsListResult struct {
+	Commands []CommandEntry `json:"commands"`
+}
+
 // WakeParams are the params for "wake".
 type WakeParams struct {
 	Mode string `json:"mode"` // "now" or "next-heartbeat"
@@ -2497,10 +2566,10 @@ type DoctorMemoryDreamDiaryResult struct {
 
 // ExecApprovalListEntry is one pending entry returned by "exec.approval.list".
 type ExecApprovalListEntry struct {
-	ID          string                   `json:"id"`
+	ID          string                    `json:"id"`
 	Request     ExecApprovalRequestParams `json:"request"`
-	CreatedAtMs int64                    `json:"createdAtMs"`
-	ExpiresAtMs int64                    `json:"expiresAtMs"`
+	CreatedAtMs int64                     `json:"createdAtMs"`
+	ExpiresAtMs int64                     `json:"expiresAtMs"`
 }
 
 // ---------------------------------------------------------------------------

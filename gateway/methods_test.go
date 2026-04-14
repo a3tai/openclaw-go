@@ -1407,6 +1407,29 @@ func TestDoctorMemoryDreamDiary(t *testing.T) {
 	tm.run()
 }
 
+// --- Commands ---
+
+func TestCommandsList(t *testing.T) {
+	tm := &testMethod{t: t, method: "commands.list", successPayload: json.RawMessage(`{"commands":[]}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.CommandsList(ctx, protocol.CommandsListParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestMessageAction(t *testing.T) {
+	tm := &testMethod{t: t, method: "message.action", successPayload: json.RawMessage(`{"ok":true}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.MessageAction(ctx, protocol.MessageActionParams{
+			Channel:        "slack",
+			Action:         "open-thread",
+			Params:         map[string]any{"messageId": "123"},
+			IdempotencyKey: "idem-message-action",
+		})
+		return err
+	}}
+	tm.run()
+}
+
 // --- Misc ---
 
 func TestUpdateRun(t *testing.T) {
