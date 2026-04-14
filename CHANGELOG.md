@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2026.4.7] - 2026-04-11
+
+Sync to upstream openclaw v2026.4.7. Seven new gateway RPC methods: dream diary diagnostics, approval list endpoints, and session compaction CRUD.
+
+### Added
+
+- `DoctorMemoryDreamDiary(ctx) (*DoctorMemoryDreamDiaryResult, error)` — retrieves the agent's DREAMS.md dream diary file (`doctor.memory.dreamDiary`). Returns `{agentId, found, path, content?, updatedAtMs?}`.
+- `ExecApprovalList(ctx) ([]ExecApprovalListEntry, error)` — lists all pending exec approval requests (`exec.approval.list`)
+- `PluginApprovalList(ctx) ([]PluginApprovalListEntry, error)` — lists all pending plugin approval requests (`plugin.approval.list`)
+- `SessionsCompactionList(ctx, SessionsCompactionListParams) (*SessionsCompactionListResult, error)` — lists compaction checkpoints for a session (`sessions.compaction.list`)
+- `SessionsCompactionGet(ctx, SessionsCompactionGetParams) (*SessionsCompactionGetResult, error)` — retrieves a single compaction checkpoint by ID (`sessions.compaction.get`)
+- `SessionsCompactionBranch(ctx, SessionsCompactionBranchParams) (*SessionsCompactionBranchResult, error)` — creates a new session branched from a compaction checkpoint (`sessions.compaction.branch`)
+- `SessionsCompactionRestore(ctx, SessionsCompactionRestoreParams) (*SessionsCompactionRestoreResult, error)` — restores a session to a compaction checkpoint in-place (`sessions.compaction.restore`)
+- `DoctorMemoryDreamDiaryResult`, `ExecApprovalListEntry`, `PluginApprovalListEntry` protocol types
+- `SessionCompactionCheckpoint`, `SessionCompactionTranscriptRef`, `SessionsCompactionBranchEntry` shared compaction protocol types
+- `SessionsCompactionListParams/Result`, `SessionsCompactionGetParams/Result`, `SessionsCompactionBranchParams/Result`, `SessionsCompactionRestoreParams/Result` protocol types
+- `MethodDoctorMemoryDreamDiary`, `MethodExecApprovalList`, `MethodPluginApprovalList`, `MethodSessionsCompactionList`, `MethodSessionsCompactionGet`, `MethodSessionsCompactionBranch`, `MethodSessionsCompactionRestore` method name constants
+
 ## [Unreleased]
 
 ### Breaking Changes
