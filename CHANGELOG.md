@@ -39,6 +39,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.11] - 2026-04-14
+
+Sync to upstream openclaw v2026.4.11. New doctor memory dream diary gateway RPC methods added; previously accumulated release-train methods remain covered by earlier downstream releases.
+
+### Added
+
+- `DoctorMemoryDreamDiary(ctx) (*DoctorMemoryDreamDiaryResult, error)` — retrieve the agent's DREAMS.md dream diary file
+- `DoctorMemoryBackfillDreamDiary(ctx) (json.RawMessage, error)` — trigger backfill of the agent's dream diary
+- `DoctorMemoryResetDreamDiary(ctx) error` — reset the agent's dream diary
+- `DoctorMemoryResetGroundedShortTerm(ctx) error` — reset the grounded short-term memory store
+- `DoctorMemoryDreamDiaryResult` protocol type
+- `MethodDoctorMemoryDreamDiary`, `MethodDoctorMemoryBackfillDreamDiary`, `MethodDoctorMemoryResetDreamDiary`, `MethodDoctorMemoryResetGroundedShortTerm` method name constants
+
 ## [v2026.4.10] - 2026-04-11
 
 Sync to upstream openclaw v2026.4.10. No net new SDK surface beyond methods already accumulated on main; this release documents `commands.list` alongside the approval list and session compaction APIs.

@@ -1794,6 +1794,8 @@ func TestExecApprovalWaitDecision(t *testing.T) {
 	tm.run()
 }
 
+// --- doctor.memory extended ---
+
 // --- sendRPCTyped unmarshal error ---
 
 func TestSendRPCTypedUnmarshalError(t *testing.T) {
