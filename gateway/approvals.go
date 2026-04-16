@@ -83,10 +83,3 @@ func (c *Client) ExecApprovalsNodeSet(ctx context.Context, params protocol.ExecA
 }
 
 // ExecApprovalList lists all pending exec approval requests.
-func (c *Client) ExecApprovalList(ctx context.Context) ([]protocol.ExecApprovalListEntry, error) {
-	var result []protocol.ExecApprovalListEntry
-	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalList), struct{}{}, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
-}
