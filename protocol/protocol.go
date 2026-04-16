@@ -220,9 +220,6 @@ const (
 	MethodDeviceTokenRevoke MethodName = "device.token.revoke"
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
-	// Commands.
-	MethodCommandsList MethodName = "commands.list"
-
 	// Diagnostics and execution approvals.
 	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
 	MethodDoctorMemoryStatus     MethodName = "doctor.memory.status"
@@ -234,9 +231,6 @@ const (
 	MethodExecApprovalsNodeGet   MethodName = "exec.approvals.node.get"
 	MethodExecApprovalsNodeSet   MethodName = "exec.approvals.node.set"
 	MethodExecApprovalsSet       MethodName = "exec.approvals.set"
-
-	// Message actions.
-	MethodMessageAction MethodName = "message.action"
 
 	// Plugin approvals.
 	MethodPluginApprovalList         MethodName = "plugin.approval.list"
@@ -2588,4 +2582,65 @@ type PluginApprovalListEntry struct {
 	Request     PluginApprovalRequestParams `json:"request"`
 	CreatedAtMs int64                       `json:"createdAtMs"`
 	ExpiresAtMs int64                       `json:"expiresAtMs"`
+}
+
+// ---------------------------------------------------------------------------
+// sessions.compaction types
+// ---------------------------------------------------------------------------
+
+// SessionsCompactionListParams are the params for "sessions.compaction.list".
+type SessionsCompactionListParams struct {
+	Key string `json:"key"`
+}
+
+// SessionsCompactionCheckpoint is a single compaction checkpoint entry.
+type SessionsCompactionCheckpoint struct {
+	ID          string  `json:"id"`
+	CreatedAtMs int64   `json:"createdAtMs"`
+	Summary     *string `json:"summary,omitempty"`
+}
+
+// SessionsCompactionListResult is the result for "sessions.compaction.list".
+type SessionsCompactionListResult struct {
+	OK          bool                           `json:"ok"`
+	Key         string                         `json:"key"`
+	Checkpoints []SessionsCompactionCheckpoint `json:"checkpoints"`
+}
+
+// SessionsCompactionGetParams are the params for "sessions.compaction.get".
+type SessionsCompactionGetParams struct {
+	Key          string `json:"key"`
+	CheckpointID string `json:"checkpointId"`
+}
+
+// SessionsCompactionGetResult is the result for "sessions.compaction.get".
+type SessionsCompactionGetResult struct {
+	OK         bool                          `json:"ok"`
+	Key        string                        `json:"key"`
+	Checkpoint SessionsCompactionCheckpoint  `json:"checkpoint"`
+}
+
+// SessionsCompactionBranchParams are the params for "sessions.compaction.branch".
+type SessionsCompactionBranchParams struct {
+	Key          string  `json:"key"`
+	CheckpointID string  `json:"checkpointId"`
+	NewKey       *string `json:"newKey,omitempty"`
+}
+
+// SessionsCompactionBranchResult is the result for "sessions.compaction.branch".
+type SessionsCompactionBranchResult struct {
+	OK  bool   `json:"ok"`
+	Key string `json:"key"`
+}
+
+// SessionsCompactionRestoreParams are the params for "sessions.compaction.restore".
+type SessionsCompactionRestoreParams struct {
+	Key          string `json:"key"`
+	CheckpointID string `json:"checkpointId"`
+}
+
+// SessionsCompactionRestoreResult is the result for "sessions.compaction.restore".
+type SessionsCompactionRestoreResult struct {
+	OK  bool   `json:"ok"`
+	Key string `json:"key"`
 }

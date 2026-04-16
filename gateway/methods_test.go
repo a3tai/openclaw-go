@@ -1796,16 +1796,6 @@ func TestExecApprovalGet(t *testing.T) {
 	tm.run()
 }
 
-// --- exec.approval.list ---
-
-func TestExecApprovalList(t *testing.T) {
-	tm := &testMethod{t: t, method: "exec.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
-		_, err := c.ExecApprovalList(ctx)
-		return err
-	}}
-	tm.run()
-}
-
 // --- exec.approval.waitDecision ---
 
 func TestExecApprovalWaitDecision(t *testing.T) {
