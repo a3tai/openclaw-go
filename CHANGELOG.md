@@ -42,6 +42,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.15] - 2026-04-16
+
+Sync to upstream openclaw v2026.4.15. Adds dream diary maintenance operations and model auth status.
+
+### Added
+
+- `DoctorMemoryBackfillDreamDiary(ctx) (*DoctorMemoryDreamActionResult, error)` — backfills the DREAMS.md dream diary from existing daily memory files (`doctor.memory.backfillDreamDiary`)
+- `DoctorMemoryResetDreamDiary(ctx) (*DoctorMemoryDreamActionResult, error)` — removes backfilled entries from the dream diary (`doctor.memory.resetDreamDiary`)
+- `DoctorMemoryResetGroundedShortTerm(ctx) (*DoctorMemoryDreamActionResult, error)` — removes grounded short-term memory candidates from the dreaming store (`doctor.memory.resetGroundedShortTerm`)
+- `DoctorMemoryRepairDreamingArtifacts(ctx) (*DoctorMemoryDreamActionResult, error)` — repairs corrupted dreaming artifacts (`doctor.memory.repairDreamingArtifacts`)
+- `DoctorMemoryDedupeDreamDiary(ctx) (*DoctorMemoryDreamActionResult, error)` — removes duplicate entries from the dream diary (`doctor.memory.dedupeDreamDiary`)
+- `ModelsAuthStatus(ctx) (*ModelsAuthStatusResult, error)` — returns authentication health status for all configured model providers (`models.authStatus`)
+- `DoctorMemoryDreamActionResult` shared protocol type for dream diary action responses
+- `ModelsAuthStatusResult`, `ModelsAuthStatusProvider`, `ModelsAuthStatusProfile`, `ModelsAuthExpiry` protocol types
+- `MethodDoctorMemoryRepairDreamingArtifacts`, `MethodDoctorMemoryDedupeDreamDiary`, `MethodModelsAuthStatus` method name constants
+
 ## [v2026.4.11] - 2026-04-14
 
 Sync to upstream openclaw v2026.4.11. New doctor memory dream diary gateway RPC methods added; previously accumulated release-train methods remain covered by earlier downstream releases.

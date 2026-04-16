@@ -1434,6 +1434,81 @@ func TestDoctorMemoryStatus(t *testing.T) {
 	tm.run()
 }
 
+func TestDoctorMemoryBackfillDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.backfillDreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryBackfillDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryResetDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.resetDreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryResetDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryResetGroundedShortTerm(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.resetGroundedShortTerm", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryResetGroundedShortTerm(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryRepairDreamingArtifacts(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.repairDreamingArtifacts", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryRepairDreamingArtifacts(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryDedupeDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.dedupeDreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryDedupeDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestModelsAuthStatus(t *testing.T) {
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "models.authStatus" {
+			r := protocol.ModelsAuthStatusResult{Ts: 1000, Providers: []protocol.ModelsAuthStatusProvider{}}
+			respData, _ := protocol.MarshalResponse(req.ID, r)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := client.ModelsAuthStatus(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Ts != 1000 {
+		t.Errorf("ts = %d, want 1000", r.Ts)
+	}
+
+	tm := &testMethod{t: t, method: "models.authStatus", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ModelsAuthStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 // --- Commands ---
 
 func TestCommandsList(t *testing.T) {
@@ -1458,12 +1533,6 @@ func TestMessageAction(t *testing.T) {
 }
 
 // --- Exec approval list ---
-
-
-
-
-
-
 
 func TestUpdateRun(t *testing.T) {
 	tm := &testMethod{t: t, method: "update.run", success: func(c *Client, ctx context.Context) error {

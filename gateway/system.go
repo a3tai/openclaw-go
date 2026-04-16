@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -34,17 +33,47 @@ func (c *Client) DoctorMemoryDreamDiary(ctx context.Context) (*protocol.DoctorMe
 	return &result, nil
 }
 
-// DoctorMemoryBackfillDreamDiary triggers a backfill of the agent's dream diary.
-func (c *Client) DoctorMemoryBackfillDreamDiary(ctx context.Context) (json.RawMessage, error) {
-	return c.sendRPC(ctx, string(protocol.MethodDoctorMemoryBackfillDreamDiary), struct{}{})
+// DoctorMemoryBackfillDreamDiary backfills the dream diary from daily memory files.
+func (c *Client) DoctorMemoryBackfillDreamDiary(ctx context.Context) (*protocol.DoctorMemoryDreamActionResult, error) {
+	var result protocol.DoctorMemoryDreamActionResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodDoctorMemoryBackfillDreamDiary), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-// DoctorMemoryResetDreamDiary resets the agent's dream diary.
-func (c *Client) DoctorMemoryResetDreamDiary(ctx context.Context) error {
-	return c.sendRPCVoid(ctx, string(protocol.MethodDoctorMemoryResetDreamDiary), struct{}{})
+// DoctorMemoryResetDreamDiary removes backfilled entries from the dream diary.
+func (c *Client) DoctorMemoryResetDreamDiary(ctx context.Context) (*protocol.DoctorMemoryDreamActionResult, error) {
+	var result protocol.DoctorMemoryDreamActionResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodDoctorMemoryResetDreamDiary), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-// DoctorMemoryResetGroundedShortTerm resets the grounded short-term memory store.
-func (c *Client) DoctorMemoryResetGroundedShortTerm(ctx context.Context) error {
-	return c.sendRPCVoid(ctx, string(protocol.MethodDoctorMemoryResetGroundedShortTerm), struct{}{})
+// DoctorMemoryResetGroundedShortTerm removes grounded short-term memory candidates.
+func (c *Client) DoctorMemoryResetGroundedShortTerm(ctx context.Context) (*protocol.DoctorMemoryDreamActionResult, error) {
+	var result protocol.DoctorMemoryDreamActionResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodDoctorMemoryResetGroundedShortTerm), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// DoctorMemoryRepairDreamingArtifacts repairs corrupted dreaming artifacts.
+func (c *Client) DoctorMemoryRepairDreamingArtifacts(ctx context.Context) (*protocol.DoctorMemoryDreamActionResult, error) {
+	var result protocol.DoctorMemoryDreamActionResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodDoctorMemoryRepairDreamingArtifacts), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// DoctorMemoryDedupeDreamDiary removes duplicate entries from the dream diary.
+func (c *Client) DoctorMemoryDedupeDreamDiary(ctx context.Context) (*protocol.DoctorMemoryDreamActionResult, error) {
+	var result protocol.DoctorMemoryDreamActionResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodDoctorMemoryDedupeDreamDiary), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
