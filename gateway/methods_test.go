@@ -365,6 +365,38 @@ func TestSessionsCompact(t *testing.T) {
 	tm.run()
 }
 
+func TestSessionsCompactionList(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionList(ctx, protocol.SessionsCompactionListParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionGet(ctx, protocol.SessionsCompactionGetParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionBranch(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.branch", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionBranch(ctx, protocol.SessionsCompactionBranchParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCompactionRestore(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.compaction.restore", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCompactionRestore(ctx, protocol.SessionsCompactionRestoreParams{Key: "main", CheckpointID: "cp1"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestSessionsUsage(t *testing.T) {
 	tm := &testMethod{t: t, method: "sessions.usage", success: func(c *Client, ctx context.Context) error {
 		_, err := c.SessionsUsage(ctx, protocol.SessionsUsageParams{Key: "main"})
@@ -1055,6 +1087,14 @@ func TestExecApprovalResolveMethod(t *testing.T) {
 	tm.run()
 }
 
+func TestExecApprovalList(t *testing.T) {
+	tm := &testMethod{t: t, method: "exec.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.ExecApprovalList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 // --- Plugin Approvals ---
 
 func TestPluginApprovalRequestMethod(t *testing.T) {
@@ -1335,6 +1375,30 @@ func TestSystemEvent(t *testing.T) {
 	tm.run()
 }
 
+func TestGatewayIdentityGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "gateway.identity.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.GatewayIdentityGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestSystemPresence(t *testing.T) {
+	tm := &testMethod{t: t, method: "system-presence", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.Presence(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.status", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 // --- Commands ---
 
 func TestCommandsList(t *testing.T) {
@@ -1353,22 +1417,6 @@ func TestMessageAction(t *testing.T) {
 			Params:         map[string]any{"messageId": "123"},
 			IdempotencyKey: "idem-message-action",
 		})
-		return err
-	}}
-	tm.run()
-}
-
-func TestGatewayIdentityGet(t *testing.T) {
-	tm := &testMethod{t: t, method: "gateway.identity.get", success: func(c *Client, ctx context.Context) error {
-		_, err := c.GatewayIdentityGet(ctx)
-		return err
-	}}
-	tm.run()
-}
-
-func TestDoctorMemoryStatus(t *testing.T) {
-	tm := &testMethod{t: t, method: "doctor.memory.status", success: func(c *Client, ctx context.Context) error {
-		_, err := c.DoctorMemoryStatus(ctx)
 		return err
 	}}
 	tm.run()
@@ -1737,56 +1785,6 @@ func TestExecApprovalWaitDecision(t *testing.T) {
 		_, err := c.ExecApprovalWaitDecision(ctx, protocol.ExecApprovalWaitDecisionParams{ID: "approval-1"})
 		return err
 	}}
-	tm.run()
-}
-
-func TestExecApprovalList(t *testing.T) {
-	tm := &testMethod{t: t, method: "exec.approval.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
-		_, err := c.ExecApprovalList(ctx)
-		return err
-	}}
-	tm.run()
-}
-
-// --- Session compaction methods ---
-
-func TestSessionsCompactionList(t *testing.T) {
-	tm := &testMethod{t: t, method: "sessions.compaction.list",
-		successPayload: json.RawMessage(`{"ok":true,"key":"main","checkpoints":[]}`),
-		success: func(c *Client, ctx context.Context) error {
-			_, err := c.SessionsCompactionList(ctx, protocol.SessionsCompactionListParams{Key: "main"})
-			return err
-		}}
-	tm.run()
-}
-
-func TestSessionsCompactionGet(t *testing.T) {
-	tm := &testMethod{t: t, method: "sessions.compaction.get",
-		successPayload: json.RawMessage(`{"ok":true,"key":"main","checkpoint":{"checkpointId":"cp1","sessionKey":"main","sessionId":"s1","createdAt":1000,"reason":"manual","preCompaction":{"sessionId":"s1"},"postCompaction":{"sessionId":"s1"}}}`),
-		success: func(c *Client, ctx context.Context) error {
-			_, err := c.SessionsCompactionGet(ctx, protocol.SessionsCompactionGetParams{Key: "main", CheckpointID: "cp1"})
-			return err
-		}}
-	tm.run()
-}
-
-func TestSessionsCompactionBranch(t *testing.T) {
-	tm := &testMethod{t: t, method: "sessions.compaction.branch",
-		successPayload: json.RawMessage(`{"ok":true,"sourceKey":"main","key":"main-branch","sessionId":"s2","checkpoint":{"checkpointId":"cp1","sessionKey":"main","sessionId":"s1","createdAt":1000,"reason":"manual","preCompaction":{"sessionId":"s1"},"postCompaction":{"sessionId":"s1"}},"entry":{"sessionId":"s2","updatedAt":2000}}`),
-		success: func(c *Client, ctx context.Context) error {
-			_, err := c.SessionsCompactionBranch(ctx, protocol.SessionsCompactionBranchParams{Key: "main", CheckpointID: "cp1"})
-			return err
-		}}
-	tm.run()
-}
-
-func TestSessionsCompactionRestore(t *testing.T) {
-	tm := &testMethod{t: t, method: "sessions.compaction.restore",
-		successPayload: json.RawMessage(`{"ok":true,"key":"main","sessionId":"s3","checkpoint":{"checkpointId":"cp1","sessionKey":"main","sessionId":"s1","createdAt":1000,"reason":"manual","preCompaction":{"sessionId":"s1"},"postCompaction":{"sessionId":"s1"}},"entry":{"sessionId":"s3","updatedAt":3000}}`),
-		success: func(c *Client, ctx context.Context) error {
-			_, err := c.SessionsCompactionRestore(ctx, protocol.SessionsCompactionRestoreParams{Key: "main", CheckpointID: "cp1"})
-			return err
-		}}
 	tm.run()
 }
 
