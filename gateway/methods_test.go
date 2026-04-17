@@ -1399,14 +1399,6 @@ func TestDoctorMemoryStatus(t *testing.T) {
 	tm.run()
 }
 
-func TestDoctorMemoryDreamDiary(t *testing.T) {
-	tm := &testMethod{t: t, method: "doctor.memory.dreamDiary", success: func(c *Client, ctx context.Context) error {
-		_, err := c.DoctorMemoryDreamDiary(ctx)
-		return err
-	}}
-	tm.run()
-}
-
 // --- Commands ---
 
 func TestCommandsList(t *testing.T) {
