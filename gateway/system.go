@@ -23,3 +23,15 @@ func (c *Client) DoctorMemoryStatus(ctx context.Context) (*protocol.DoctorMemory
 	}
 	return &result, nil
 }
+<<<<<<< HEAD
+=======
+
+// DoctorMemoryDreamDiary retrieves the agent's DREAMS.md dream diary file.
+func (c *Client) DoctorMemoryDreamDiary(ctx context.Context) (*protocol.DoctorMemoryDreamDiaryResult, error) {
+	var result protocol.DoctorMemoryDreamDiaryResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodDoctorMemoryDreamDiary), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+>>>>>>> 2b8d3d2 (fix(tests): sync methods_test.go with main)

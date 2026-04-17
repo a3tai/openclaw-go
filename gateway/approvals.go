@@ -82,3 +82,7 @@ func (c *Client) ExecApprovalsNodeGet(ctx context.Context, params protocol.ExecA
 func (c *Client) ExecApprovalsNodeSet(ctx context.Context, params protocol.ExecApprovalsNodeSetParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodExecApprovalsNodeSet), params)
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2b8d3d2 (fix(tests): sync methods_test.go with main)
