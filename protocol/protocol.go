@@ -221,17 +221,6 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
-<<<<<<< HEAD
-	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
-	MethodExecApprovalGet      MethodName = "exec.approval.get"
-	MethodExecApprovalList     MethodName = "exec.approval.list"
-	MethodExecApprovalRequest  MethodName = "exec.approval.request"
-	MethodExecApprovalResolve  MethodName = "exec.approval.resolve"
-	MethodExecApprovalsGet     MethodName = "exec.approvals.get"
-	MethodExecApprovalsNodeGet MethodName = "exec.approvals.node.get"
-	MethodExecApprovalsNodeSet MethodName = "exec.approvals.node.set"
-	MethodExecApprovalsSet     MethodName = "exec.approvals.set"
-=======
 	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
 	MethodDoctorMemoryStatus     MethodName = "doctor.memory.status"
 	MethodExecApprovalGet        MethodName = "exec.approval.get"
@@ -242,7 +231,6 @@ const (
 	MethodExecApprovalsNodeGet   MethodName = "exec.approvals.node.get"
 	MethodExecApprovalsNodeSet   MethodName = "exec.approvals.node.set"
 	MethodExecApprovalsSet       MethodName = "exec.approvals.set"
->>>>>>> 2b8d3d2 (fix(tests): sync methods_test.go with main)
 
 	// Plugin approvals.
 	MethodPluginApprovalList         MethodName = "plugin.approval.list"
@@ -2558,8 +2546,6 @@ type PluginApprovalResolvedEvent struct {
 }
 
 // ---------------------------------------------------------------------------
-<<<<<<< HEAD
-=======
 // doctor.memory.dreamDiary types
 // ---------------------------------------------------------------------------
 
@@ -2575,7 +2561,6 @@ type DoctorMemoryDreamDiaryResult struct {
 }
 
 // ---------------------------------------------------------------------------
->>>>>>> 2b8d3d2 (fix(tests): sync methods_test.go with main)
 // exec.approval.list / plugin.approval.list types
 // ---------------------------------------------------------------------------
 

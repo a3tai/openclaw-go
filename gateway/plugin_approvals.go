@@ -48,7 +48,3 @@ func (c *Client) PluginApprovalResolve(ctx context.Context, params protocol.Plug
 	}
 	return &result, nil
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 2b8d3d2 (fix(tests): sync methods_test.go with main)
