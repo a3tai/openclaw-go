@@ -136,7 +136,14 @@ jobs:
         run: |
           git config user.email "steve@a3t.ai"
           git config user.name "Agent Arlet"
-          git checkout -b "${{ steps.meta.outputs.branch_name }}" 2>/dev/null || git checkout "${{ steps.meta.outputs.branch_name }}"
+          # Always branch from the freshest main so the PR diff is clean
+          # (no spurious removals from stale merge-base)
+          git fetch origin main --depth=1
+          git checkout -b "${{ steps.meta.outputs.branch_name }}" origin/main 2>/dev/null || {
+            # Branch exists — reset it to current main
+            git checkout "${{ steps.meta.outputs.branch_name }}"
+            git reset --hard origin/main
+          }
 
       - name: Build release sync prompt
         run: |
@@ -180,15 +187,28 @@ jobs:
           claude --dangerously-skip-permissions \
             "$(cat /tmp/release-sync-prompt.md)"
 
+      - name: Validate — go build
+        run: go build ./...
+
       - name: Validate — go test
         run: go test ./... -race
 
       - name: Validate — upstream drift check
         run: |
-          python3 scripts/validate_release_sync.py \
+          python3 scripts/upstream_drift_report.py \
+            --upstream-root /tmp/openclaw \
+            --go-root .
+          # Fail if methods are missing (non-zero exit means missing methods)
+          python3 scripts/upstream_drift_report.py \
             --upstream-root /tmp/openclaw \
             --go-root . \
-            --version "${{ steps.meta.outputs.version }}" || true
+            --output /tmp/drift.json
+          MISSING=$(python3 -c "import json; d=json.load(open('/tmp/drift.json')); print(len(d['missing_in_go']))")
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::error::Sync is incomplete — $MISSING methods still missing. Claude Code did not finish."
+            exit 1
+          fi
+          echo "Drift check passed — no missing methods."
 
       - name: Push branch and create PR
         id: cpr
