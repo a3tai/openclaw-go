@@ -1290,6 +1290,41 @@ func TestChannelsStatus(t *testing.T) {
 	tm.run()
 }
 
+func TestChannelsStart(t *testing.T) {
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "channels.start" {
+			r := protocol.ChannelsStartResult{Channel: "slack", AccountID: "default", Started: true}
+			respData, _ := protocol.MarshalResponse(req.ID, r)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := client.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !r.Started {
+		t.Errorf("started = false, want true")
+	}
+
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestChannelsLogout(t *testing.T) {
 	tm := &testMethod{t: t, method: "channels.logout", success: func(c *Client, ctx context.Context) error {
 		return c.ChannelsLogout(ctx, protocol.ChannelsLogoutParams{Channel: "slack"})

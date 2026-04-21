@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ChannelsStart(ctx, ChannelsStartParams) (*ChannelsStartResult, error)` — starts a channel account (`channels.start`)
+- `ChannelsStartParams`, `ChannelsStartResult` protocol types
+- `MethodChannelsStart` method name constant
 - `ChatSendResult` type for the `chat.send` RPC ack response
 - `CronListResult` and `CronRunsResult` paginated result types
 - `CronRunLogUsage` type for per-run token usage tracking

@@ -183,6 +183,7 @@ const (
 	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStart  MethodName = "channels.start"
 	MethodChannelsStatus MethodName = "channels.status"
 	MethodMessageAction  MethodName = "message.action"
 
@@ -1797,6 +1798,19 @@ type ChannelAccountSnapshot struct {
 	Probe                  json.RawMessage `json:"probe,omitempty"`
 	Audit                  json.RawMessage `json:"audit,omitempty"`
 	Application            json.RawMessage `json:"application,omitempty"`
+}
+
+// ChannelsStartParams are the params for "channels.start".
+type ChannelsStartParams struct {
+	Channel   string `json:"channel"`
+	AccountID string `json:"accountId,omitempty"`
+}
+
+// ChannelsStartResult is the result of "channels.start".
+type ChannelsStartResult struct {
+	Channel   string `json:"channel"`
+	AccountID string `json:"accountId"`
+	Started   bool   `json:"started"`
 }
 
 // ChannelsLogoutParams are the params for "channels.logout".

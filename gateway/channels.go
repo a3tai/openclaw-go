@@ -16,6 +16,15 @@ func (c *Client) ChannelsStatus(ctx context.Context, params protocol.ChannelsSta
 	return &result, nil
 }
 
+// ChannelsStart starts a channel account.
+func (c *Client) ChannelsStart(ctx context.Context, params protocol.ChannelsStartParams) (*protocol.ChannelsStartResult, error) {
+	var result protocol.ChannelsStartResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodChannelsStart), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // ChannelsLogout logs out of a channel account.
 func (c *Client) ChannelsLogout(ctx context.Context, params protocol.ChannelsLogoutParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsLogout), params)
