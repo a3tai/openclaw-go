@@ -346,6 +346,10 @@ const (
 	MethodDoctorMemoryRepairDreamingArtifacts MethodName = "doctor.memory.repairDreamingArtifacts"
 )
 
+const (
+	MethodAssistantMediaGet MethodName = "assistant.media.get"
+)
+
 // ---------------------------------------------------------------------------
 // Framing
 // ---------------------------------------------------------------------------
@@ -1817,6 +1821,19 @@ type ChannelsStartResult struct {
 	Channel   string `json:"channel"`
 	AccountID string `json:"accountId"`
 	Started   bool   `json:"started"`
+}
+
+// AssistantMediaGetParams are the params for "assistant.media.get".
+type AssistantMediaGetParams struct {
+	Source string `json:"source"`
+}
+
+// AssistantMediaGetResult is the result of "assistant.media.get".
+type AssistantMediaGetResult struct {
+	Available bool   `json:"available"`
+	Path      string `json:"path,omitempty"`
+	MimeType  string `json:"mimeType,omitempty"`
+	SizeBytes *int64 `json:"sizeBytes,omitempty"`
 }
 
 // ChannelsLogoutParams are the params for "channels.logout".
