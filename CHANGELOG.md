@@ -39,6 +39,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.23] - 2026-04-24
+
+Sync to upstream openclaw v2026.4.23. No new RPC methods upstream; closes three pre-existing coverage gaps.
+
+### Added
+
+- `ChannelsStart(ctx, params) (json.RawMessage, error)` — start a channel account connection flow (`channels.start`)
+- `DiagnosticsStability(ctx, params) (json.RawMessage, error)` — retrieve a gateway stability diagnostics snapshot (`diagnostics.stability`)
+- `AssistantMediaGet(ctx, params) (json.RawMessage, error)` — retrieve assistant-generated media by key (`assistant.media.get`)
+- `MethodChannelsStart`, `MethodDiagnosticsStability`, `MethodAssistantMediaGet` method name constants
+
 ## [v2026.4.8] - 2026-04-11
 
 Sync to upstream openclaw v2026.4.8. Six new gateway RPC methods for approval listing and session compaction checkpoints.
