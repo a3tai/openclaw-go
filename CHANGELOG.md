@@ -39,6 +39,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.24] - 2026-04-25
+
+Sync to upstream openclaw v2026.4.24. One new gateway RPC method for real-time voice sessions; three pre-existing missing methods backfilled.
+
+### Added
+
+- `TalkRealtimeSession(ctx, TalkRealtimeSessionParams) (*TalkRealtimeSessionResult, error)` — create a short-lived client secret for a real-time voice WebSocket session (`talk.realtime.session`, new in v2026.4.24)
+- `ChannelsStart(ctx, ChannelsStartParams) (json.RawMessage, error)` — start a channel connection (`channels.start`, backfilled)
+- `DiagnosticsStability(ctx, params) (json.RawMessage, error)` — retrieve gateway stability diagnostics (`diagnostics.stability`, backfilled)
+- `AssistantMediaGet(ctx, params) (json.RawMessage, error)` — retrieve assistant media assets (`assistant.media.get`, backfilled)
+- `TalkRealtimeSessionParams`, `TalkRealtimeSessionResult` types
+- `ChannelsStartParams` type
+- `MethodTalkRealtimeSession`, `MethodChannelsStart`, `MethodDiagnosticsStability`, `MethodAssistantMediaGet` constants
+
 ## [v2026.4.8] - 2026-04-11
 
 Sync to upstream openclaw v2026.4.8. Six new gateway RPC methods for approval listing and session compaction checkpoints.

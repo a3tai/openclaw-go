@@ -1297,9 +1297,25 @@ func TestChannelsLogout(t *testing.T) {
 	tm.run()
 }
 
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestTalkConfig(t *testing.T) {
 	tm := &testMethod{t: t, method: "talk.config", success: func(c *Client, ctx context.Context) error {
 		_, err := c.TalkConfig(ctx, protocol.TalkConfigParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkRealtimeSession(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.realtime.session", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkRealtimeSession(ctx, protocol.TalkRealtimeSessionParams{})
 		return err
 	}}
 	tm.run()
@@ -1394,6 +1410,22 @@ func TestSystemPresence(t *testing.T) {
 func TestDoctorMemoryStatus(t *testing.T) {
 	tm := &testMethod{t: t, method: "doctor.memory.status", success: func(c *Client, ctx context.Context) error {
 		_, err := c.DoctorMemoryStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx, struct{}{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, struct{}{})
 		return err
 	}}
 	tm.run()

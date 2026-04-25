@@ -2,9 +2,20 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
+
+// AssistantMediaGet retrieves media assets for the assistant.
+func (c *Client) AssistantMediaGet(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodAssistantMediaGet), params)
+}
+
+// DiagnosticsStability retrieves gateway stability diagnostics.
+func (c *Client) DiagnosticsStability(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodDiagnosticsStability), params)
+}
 
 // GatewayIdentityGet retrieves the gateway device identity and public key.
 func (c *Client) GatewayIdentityGet(ctx context.Context) (*protocol.GatewayIdentityResult, error) {
