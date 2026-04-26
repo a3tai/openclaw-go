@@ -96,6 +96,40 @@ func (id *Identity) BuildDeviceIdentity(p SigningParams) *DeviceIdentityProto {
 	}
 }
 
+// NewIdentityFromSeed reconstructs an Identity from a previously persisted
+// Ed25519 private-key seed. It is intended for embedders that store the
+// keypair outside the filesystem (for example, in an OS-level secure
+// enclave or keystore) and need to hand the in-memory Identity to the
+// gateway client without touching disk.
+//
+// seed must be exactly ed25519.SeedSize (32) bytes. The deviceID is
+// re-derived from the public key (SHA-256(pub) hex), matching the on-disk
+// format produced by Store.LoadOrGenerate, so callers can pass any
+// non-empty value or "" to accept the derived ID.
+func NewIdentityFromSeed(seed []byte) (*Identity, error) {
+	if len(seed) != ed25519.SeedSize {
+		return nil, fmt.Errorf("identity: seed must be %d bytes, got %d", ed25519.SeedSize, len(seed))
+	}
+	priv := ed25519.NewKeyFromSeed(seed)
+	pub := priv.Public().(ed25519.PublicKey)
+	h := sha256.Sum256(pub)
+	return &Identity{
+		DeviceID:        fmt.Sprintf("%x", h[:]),
+		PublicKeyB64URL: base64.RawURLEncoding.EncodeToString(pub),
+		privateKey:      priv,
+	}, nil
+}
+
+// Seed returns the Ed25519 private-key seed (32 bytes) so embedders can
+// persist it in their own keystore. The returned slice is a copy; callers
+// should zero it after use.
+func (id *Identity) Seed() []byte {
+	seed := id.privateKey.Seed()
+	out := make([]byte, len(seed))
+	copy(out, seed)
+	return out
+}
+
 // LoadOrGenerate loads the device keypair from disk, generating one if absent.
 func (s *Store) LoadOrGenerate() (*Identity, error) {
 	id, err := s.load()

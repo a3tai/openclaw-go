@@ -74,6 +74,76 @@ func TestBuildDeviceIdentity_V2Payload_SignatureVerifies(t *testing.T) {
 	}
 }
 
+func TestNewIdentityFromSeed_MatchesStoreLoadOrGenerate(t *testing.T) {
+	// Generate via Store, capture the seed, reconstruct via NewIdentityFromSeed,
+	// and confirm the resulting Identity signs identically.
+	tmp := t.TempDir()
+	s, err := NewStore(tmp)
+	if err != nil {
+		t.Fatalf("NewStore: %v", err)
+	}
+	original, err := s.LoadOrGenerate()
+	if err != nil {
+		t.Fatalf("LoadOrGenerate: %v", err)
+	}
+
+	seed := original.Seed()
+	if len(seed) != ed25519.SeedSize {
+		t.Fatalf("Seed len = %d, want %d", len(seed), ed25519.SeedSize)
+	}
+
+	rebuilt, err := NewIdentityFromSeed(seed)
+	if err != nil {
+		t.Fatalf("NewIdentityFromSeed: %v", err)
+	}
+	if rebuilt.DeviceID != original.DeviceID {
+		t.Fatalf("DeviceID = %q, want %q", rebuilt.DeviceID, original.DeviceID)
+	}
+	if rebuilt.PublicKeyB64URL != original.PublicKeyB64URL {
+		t.Fatalf("PublicKeyB64URL = %q, want %q", rebuilt.PublicKeyB64URL, original.PublicKeyB64URL)
+	}
+
+	p := SigningParams{
+		ClientID:   "gateway-client",
+		ClientMode: "backend",
+		Role:       "operator",
+		Scopes:     []string{"operator.read"},
+		Token:      "tok",
+		Nonce:      "nonce",
+	}
+	a := original.BuildDeviceIdentity(p)
+	b := rebuilt.BuildDeviceIdentity(p)
+	if a.ID != b.ID || a.PublicKey != b.PublicKey {
+		t.Fatalf("rebuilt identity diverges from original: %+v vs %+v", a, b)
+	}
+}
+
+func TestNewIdentityFromSeed_RejectsWrongLength(t *testing.T) {
+	if _, err := NewIdentityFromSeed(make([]byte, 16)); err == nil {
+		t.Fatal("expected error for short seed")
+	}
+	if _, err := NewIdentityFromSeed(nil); err == nil {
+		t.Fatal("expected error for nil seed")
+	}
+}
+
+func TestIdentitySeed_ReturnsCopy(t *testing.T) {
+	seed := make([]byte, ed25519.SeedSize)
+	for i := range seed {
+		seed[i] = byte(i)
+	}
+	id, err := NewIdentityFromSeed(seed)
+	if err != nil {
+		t.Fatalf("NewIdentityFromSeed: %v", err)
+	}
+	got := id.Seed()
+	got[0] ^= 0xff
+	again := id.Seed()
+	if again[0] == got[0] {
+		t.Fatalf("Seed() returned shared slice; mutation leaked back")
+	}
+}
+
 func TestStoreLoadOrGenerate_MigratesTruncatedDeviceID(t *testing.T) {
 	tmp := t.TempDir()
 	s, err := NewStore(tmp)
