@@ -39,6 +39,20 @@ func (c *Client) VoiceWakeSet(ctx context.Context, params any) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodVoiceWakeSet), params)
 }
 
+// VoiceWakeRoutingGet retrieves the voice wake routing configuration.
+func (c *Client) VoiceWakeRoutingGet(ctx context.Context) (*protocol.VoiceWakeRoutingGetResult, error) {
+	var result protocol.VoiceWakeRoutingGetResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodVoiceWakeRoutingGet), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// VoiceWakeRoutingSet sets the voice wake routing configuration.
+func (c *Client) VoiceWakeRoutingSet(ctx context.Context, params protocol.VoiceWakeRoutingSetParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodVoiceWakeRoutingSet), params)
+}
+
 // UsageStatus retrieves usage status.
 func (c *Client) UsageStatus(ctx context.Context) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodUsageStatus), struct{}{})
@@ -52,4 +66,36 @@ func (c *Client) UsageCost(ctx context.Context, params any) (json.RawMessage, er
 // Poll creates a poll.
 func (c *Client) Poll(ctx context.Context, params protocol.PollParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, "poll", params)
+}
+
+// AssistantMediaGet retrieves an assistant media resource.
+func (c *Client) AssistantMediaGet(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodAssistantMediaGet), params)
+}
+
+// PushWebSubscribe registers a web push subscription.
+func (c *Client) PushWebSubscribe(ctx context.Context, params protocol.PushWebSubscribeParams) (*protocol.PushWebSubscribeResult, error) {
+	var result protocol.PushWebSubscribeResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodPushWebSubscribe), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// PushWebUnsubscribe removes a web push subscription by endpoint.
+func (c *Client) PushWebUnsubscribe(ctx context.Context, params protocol.PushWebUnsubscribeParams) (*protocol.PushWebUnsubscribeResult, error) {
+	var result protocol.PushWebUnsubscribeResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodPushWebUnsubscribe), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// PushWebTest sends a test web push notification.
+func (c *Client) PushWebTest(ctx context.Context, params protocol.PushWebTestParams) (*protocol.PushWebTestResult, error) {
+	var result protocol.PushWebTestResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodPushWebTest), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }

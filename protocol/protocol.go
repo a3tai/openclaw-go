@@ -183,6 +183,7 @@ const (
 	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStart  MethodName = "channels.start"
 	MethodChannelsStatus MethodName = "channels.status"
 	MethodMessageAction  MethodName = "message.action"
 
@@ -221,12 +222,20 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
-	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
-	MethodExecApprovalGet      MethodName = "exec.approval.get"
+	MethodDiagnosticsStability                MethodName = "diagnostics.stability"
+	MethodDoctorMemoryStatus                  MethodName = "doctor.memory.status"
+	MethodDoctorMemoryDreamDiary              MethodName = "doctor.memory.dreamDiary"
+	MethodDoctorMemoryBackfillDreamDiary      MethodName = "doctor.memory.backfillDreamDiary"
+	MethodDoctorMemoryResetDreamDiary         MethodName = "doctor.memory.resetDreamDiary"
+	MethodDoctorMemoryResetGroundedShortTerm  MethodName = "doctor.memory.resetGroundedShortTerm"
+	MethodDoctorMemoryRepairDreamingArtifacts MethodName = "doctor.memory.repairDreamingArtifacts"
+	MethodDoctorMemoryDedupeDreamDiary        MethodName = "doctor.memory.dedupeDreamDiary"
+	MethodExecApprovalGet                     MethodName = "exec.approval.get"
 	MethodExecApprovalList     MethodName = "exec.approval.list"
 	MethodExecApprovalRequest  MethodName = "exec.approval.request"
-	MethodExecApprovalResolve  MethodName = "exec.approval.resolve"
-	MethodExecApprovalsGet     MethodName = "exec.approvals.get"
+	MethodExecApprovalResolve      MethodName = "exec.approval.resolve"
+	MethodExecApprovalWaitDecision MethodName = "exec.approval.waitDecision"
+	MethodExecApprovalsGet         MethodName = "exec.approvals.get"
 	MethodExecApprovalsNodeGet MethodName = "exec.approvals.node.get"
 	MethodExecApprovalsNodeSet MethodName = "exec.approvals.node.set"
 	MethodExecApprovalsSet     MethodName = "exec.approvals.set"
@@ -241,6 +250,7 @@ const (
 	MethodGatewayIdentityGet MethodName = "gateway.identity.get"
 	MethodLastHeartbeat      MethodName = "last-heartbeat"
 	MethodLogsTail           MethodName = "logs.tail"
+	MethodModelsAuthStatus   MethodName = "models.authStatus"
 	MethodModelsList         MethodName = "models.list"
 
 	// Node RPC and node queue/pairing operations.
@@ -261,10 +271,14 @@ const (
 	MethodNodePendingPull             MethodName = "node.pending.pull"
 	MethodNodeRename                  MethodName = "node.rename"
 
-	// Utility and secrets.
-	MethodPushTest       MethodName = "push.test"
-	MethodSecretsReload  MethodName = "secrets.reload"
-	MethodSecretsResolve MethodName = "secrets.resolve"
+	// Utility, push notifications, and secrets.
+	MethodAssistantMediaGet   MethodName = "assistant.media.get"
+	MethodPushTest            MethodName = "push.test"
+	MethodPushWebSubscribe    MethodName = "push.web.subscribe"
+	MethodPushWebUnsubscribe  MethodName = "push.web.unsubscribe"
+	MethodPushWebTest         MethodName = "push.web.test"
+	MethodSecretsReload       MethodName = "secrets.reload"
+	MethodSecretsResolve      MethodName = "secrets.resolve"
 
 	// Session lifecycle, messaging, and usage analytics.
 	MethodSessionsAbort               MethodName = "sessions.abort"
@@ -303,9 +317,10 @@ const (
 	// System presence/events and voice interactions.
 	MethodSystemEvent    MethodName = "system-event"
 	MethodSystemPresence MethodName = "system-presence"
-	MethodTalkConfig     MethodName = "talk.config"
-	MethodTalkMode       MethodName = "talk.mode"
-	MethodTalkSpeak      MethodName = "talk.speak"
+	MethodTalkConfig          MethodName = "talk.config"
+	MethodTalkMode            MethodName = "talk.mode"
+	MethodTalkRealtimeSession MethodName = "talk.realtime.session"
+	MethodTalkSpeak           MethodName = "talk.speak"
 
 	// Tool and TTS interfaces.
 	MethodToolsCatalog   MethodName = "tools.catalog"
@@ -313,15 +328,19 @@ const (
 	MethodTTSConvert     MethodName = "tts.convert"
 	MethodTTSDisable     MethodName = "tts.disable"
 	MethodTTSEnable      MethodName = "tts.enable"
+	MethodTTSPersonas    MethodName = "tts.personas"
 	MethodTTSProviders   MethodName = "tts.providers"
+	MethodTTSSetPersona  MethodName = "tts.setPersona"
 	MethodTTSStatus      MethodName = "tts.status"
 
 	// Update, usage, and voice wake configuration.
 	MethodUpdateRun    MethodName = "update.run"
 	MethodUsageCost    MethodName = "usage.cost"
 	MethodUsageStatus  MethodName = "usage.status"
-	MethodVoiceWakeGet MethodName = "voicewake.get"
-	MethodVoiceWakeSet MethodName = "voicewake.set"
+	MethodVoiceWakeGet        MethodName = "voicewake.get"
+	MethodVoiceWakeRoutingGet MethodName = "voicewake.routing.get"
+	MethodVoiceWakeRoutingSet MethodName = "voicewake.routing.set"
+	MethodVoiceWakeSet        MethodName = "voicewake.set"
 
 	// Web auth and interactive setup wizard.
 	MethodWebLoginStart MethodName = "web.login.start"
@@ -2667,4 +2686,143 @@ type SessionsCompactionRestoreResult struct {
 	SessionID  string                         `json:"sessionId"`
 	Checkpoint SessionCompactionCheckpoint    `json:"checkpoint"`
 	Entry      SessionsCompactionRestoreEntry `json:"entry"`
+}
+
+// ---------------------------------------------------------------------------
+// channels.start types
+// ---------------------------------------------------------------------------
+
+// ChannelsStartParams are the params for "channels.start".
+type ChannelsStartParams struct {
+	Channel string `json:"channel"`
+}
+
+// ---------------------------------------------------------------------------
+// diagnostics.stability types
+// ---------------------------------------------------------------------------
+
+// DiagnosticsStabilityResult is the result of "diagnostics.stability".
+type DiagnosticsStabilityResult struct {
+	OK     bool            `json:"ok"`
+	Checks json.RawMessage `json:"checks,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// doctor.memory operation types
+// ---------------------------------------------------------------------------
+
+// DoctorMemoryDreamDiaryResult is the result of "doctor.memory.dreamDiary".
+type DoctorMemoryDreamDiaryResult struct {
+	AgentID string          `json:"agentId"`
+	Entries json.RawMessage `json:"entries,omitempty"`
+}
+
+// DoctorMemoryOperationResult is the generic result for doctor.memory mutation operations.
+type DoctorMemoryOperationResult struct {
+	OK      bool   `json:"ok"`
+	Message string `json:"message,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// models.authStatus types
+// ---------------------------------------------------------------------------
+
+// ModelsAuthStatusResult is the result of "models.authStatus".
+type ModelsAuthStatusResult struct {
+	Providers json.RawMessage `json:"providers,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// talk.realtime.session types
+// ---------------------------------------------------------------------------
+
+// TalkRealtimeSessionParams are the params for "talk.realtime.session".
+type TalkRealtimeSessionParams struct {
+	AgentID    string `json:"agentId,omitempty"`
+	SessionKey string `json:"sessionKey,omitempty"`
+}
+
+// TalkRealtimeSessionResult is the result of "talk.realtime.session".
+type TalkRealtimeSessionResult struct {
+	Token     string `json:"token,omitempty"`
+	SessionID string `json:"sessionId,omitempty"`
+	ExpiresAt *int64 `json:"expiresAt,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// tts.personas / tts.setPersona types
+// ---------------------------------------------------------------------------
+
+// TTSPersonaInfo describes a TTS persona.
+type TTSPersonaInfo struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Provider string `json:"provider,omitempty"`
+	Voice    string `json:"voice,omitempty"`
+}
+
+// TTSPersonasResult is the result of "tts.personas".
+type TTSPersonasResult struct {
+	Personas []TTSPersonaInfo `json:"personas"`
+	Active   string           `json:"active,omitempty"`
+}
+
+// TTSSetPersonaParams are the params for "tts.setPersona".
+type TTSSetPersonaParams struct {
+	Persona string `json:"persona"`
+}
+
+// TTSSetPersonaResult is the result of "tts.setPersona".
+type TTSSetPersonaResult struct {
+	Persona string `json:"persona"`
+}
+
+// ---------------------------------------------------------------------------
+// voicewake.routing.get / voicewake.routing.set types
+// ---------------------------------------------------------------------------
+
+// VoiceWakeRoutingGetResult is the result of "voicewake.routing.get".
+type VoiceWakeRoutingGetResult struct {
+	Routing json.RawMessage `json:"routing,omitempty"`
+}
+
+// VoiceWakeRoutingSetParams are the params for "voicewake.routing.set".
+type VoiceWakeRoutingSetParams struct {
+	Routing json.RawMessage `json:"routing"`
+}
+
+// ---------------------------------------------------------------------------
+// push.web.* types
+// ---------------------------------------------------------------------------
+
+// PushWebSubscribeParams are the params for "push.web.subscribe".
+type PushWebSubscribeParams struct {
+	Endpoint string          `json:"endpoint"`
+	Keys     json.RawMessage `json:"keys"`
+}
+
+// PushWebSubscribeResult is the result of "push.web.subscribe".
+type PushWebSubscribeResult struct {
+	SubscriptionID string `json:"subscriptionId"`
+}
+
+// PushWebUnsubscribeParams are the params for "push.web.unsubscribe".
+type PushWebUnsubscribeParams struct {
+	Endpoint string `json:"endpoint"`
+}
+
+// PushWebUnsubscribeResult is the result of "push.web.unsubscribe".
+type PushWebUnsubscribeResult struct {
+	Removed bool `json:"removed"`
+}
+
+// PushWebTestParams are the params for "push.web.test".
+type PushWebTestParams struct {
+	Title string `json:"title,omitempty"`
+	Body  string `json:"body,omitempty"`
+}
+
+// PushWebTestResult is the result of "push.web.test".
+type PushWebTestResult struct {
+	Results json.RawMessage `json:"results,omitempty"`
 }

@@ -51,10 +51,28 @@ func (c *Client) TTSConvert(ctx context.Context, params protocol.TTSConvertParam
 	return &result, nil
 }
 
+// TTSPersonas lists available TTS personas.
+func (c *Client) TTSPersonas(ctx context.Context) (*protocol.TTSPersonasResult, error) {
+	var result protocol.TTSPersonasResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTTSPersonas), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // TTSSetProvider sets the active TTS provider.
 func (c *Client) TTSSetProvider(ctx context.Context, params protocol.TTSSetProviderParams) (*protocol.TTSSetProviderResult, error) {
 	var result protocol.TTSSetProviderResult
 	if err := c.sendRPCTyped(ctx, "tts.setProvider", params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// TTSSetPersona sets the active TTS persona.
+func (c *Client) TTSSetPersona(ctx context.Context, params protocol.TTSSetPersonaParams) (*protocol.TTSSetPersonaResult, error) {
+	var result protocol.TTSSetPersonaResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTTSSetPersona), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil

@@ -16,6 +16,11 @@ func (c *Client) ChannelsStatus(ctx context.Context, params protocol.ChannelsSta
 	return &result, nil
 }
 
+// ChannelsStart starts a channel provider authentication flow.
+func (c *Client) ChannelsStart(ctx context.Context, params protocol.ChannelsStartParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChannelsStart), params)
+}
+
 // ChannelsLogout logs out of a channel account.
 func (c *Client) ChannelsLogout(ctx context.Context, params protocol.ChannelsLogoutParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsLogout), params)
@@ -33,6 +38,15 @@ func (c *Client) TalkConfig(ctx context.Context, params protocol.TalkConfigParam
 // TalkMode sets the talk mode (voice).
 func (c *Client) TalkMode(ctx context.Context, params protocol.TalkModeParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodTalkMode), params)
+}
+
+// TalkRealtimeSession creates or retrieves a realtime talk session token.
+func (c *Client) TalkRealtimeSession(ctx context.Context, params protocol.TalkRealtimeSessionParams) (*protocol.TalkRealtimeSessionResult, error) {
+	var result protocol.TalkRealtimeSessionResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTalkRealtimeSession), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
 // TalkSpeak synthesizes speech audio through the configured talk provider.
