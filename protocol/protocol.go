@@ -179,10 +179,14 @@ const (
 	MethodAgentsList      MethodName = "agents.list"
 	MethodAgentsUpdate    MethodName = "agents.update"
 
+	// Assistant media.
+	MethodAssistantMediaGet MethodName = "assistant.media.get"
+
 	// Browser and channel integration.
 	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStart  MethodName = "channels.start"
 	MethodChannelsStatus MethodName = "channels.status"
 	MethodMessageAction  MethodName = "message.action"
 
@@ -221,6 +225,7 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
+	MethodDiagnosticsStability MethodName = "diagnostics.stability"
 	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
 	MethodExecApprovalGet      MethodName = "exec.approval.get"
 	MethodExecApprovalList     MethodName = "exec.approval.list"
@@ -253,6 +258,7 @@ const (
 	MethodNodePairApprove             MethodName = "node.pair.approve"
 	MethodNodePairList                MethodName = "node.pair.list"
 	MethodNodePairReject              MethodName = "node.pair.reject"
+	MethodNodePairRemove              MethodName = "node.pair.remove"
 	MethodNodePairRequest             MethodName = "node.pair.request"
 	MethodNodePairVerify              MethodName = "node.pair.verify"
 	MethodNodePendingAck              MethodName = "node.pending.ack"
@@ -261,10 +267,13 @@ const (
 	MethodNodePendingPull             MethodName = "node.pending.pull"
 	MethodNodeRename                  MethodName = "node.rename"
 
-	// Utility and secrets.
-	MethodPushTest       MethodName = "push.test"
-	MethodSecretsReload  MethodName = "secrets.reload"
-	MethodSecretsResolve MethodName = "secrets.resolve"
+	// Utility, secrets, and web push.
+	MethodPushTest            MethodName = "push.test"
+	MethodPushWebSubscribe    MethodName = "push.web.subscribe"
+	MethodPushWebTest         MethodName = "push.web.test"
+	MethodPushWebUnsubscribe  MethodName = "push.web.unsubscribe"
+	MethodSecretsReload       MethodName = "secrets.reload"
+	MethodSecretsResolve      MethodName = "secrets.resolve"
 
 	// Session lifecycle, messaging, and usage analytics.
 	MethodSessionsAbort               MethodName = "sessions.abort"
@@ -301,11 +310,12 @@ const (
 	MethodSkillsUpdate  MethodName = "skills.update"
 
 	// System presence/events and voice interactions.
-	MethodSystemEvent    MethodName = "system-event"
-	MethodSystemPresence MethodName = "system-presence"
-	MethodTalkConfig     MethodName = "talk.config"
-	MethodTalkMode       MethodName = "talk.mode"
-	MethodTalkSpeak      MethodName = "talk.speak"
+	MethodSystemEvent          MethodName = "system-event"
+	MethodSystemPresence       MethodName = "system-presence"
+	MethodTalkConfig           MethodName = "talk.config"
+	MethodTalkMode             MethodName = "talk.mode"
+	MethodTalkRealtimeSession  MethodName = "talk.realtime.session"
+	MethodTalkSpeak            MethodName = "talk.speak"
 
 	// Tool and TTS interfaces.
 	MethodToolsCatalog   MethodName = "tools.catalog"
@@ -313,15 +323,19 @@ const (
 	MethodTTSConvert     MethodName = "tts.convert"
 	MethodTTSDisable     MethodName = "tts.disable"
 	MethodTTSEnable      MethodName = "tts.enable"
+	MethodTTSPersonas    MethodName = "tts.personas"
 	MethodTTSProviders   MethodName = "tts.providers"
 	MethodTTSStatus      MethodName = "tts.status"
 
 	// Update, usage, and voice wake configuration.
 	MethodUpdateRun    MethodName = "update.run"
+	MethodUpdateStatus MethodName = "update.status"
 	MethodUsageCost    MethodName = "usage.cost"
 	MethodUsageStatus  MethodName = "usage.status"
-	MethodVoiceWakeGet MethodName = "voicewake.get"
-	MethodVoiceWakeSet MethodName = "voicewake.set"
+	MethodVoiceWakeGet        MethodName = "voicewake.get"
+	MethodVoiceWakeRoutingGet MethodName = "voicewake.routing.get"
+	MethodVoiceWakeRoutingSet MethodName = "voicewake.routing.set"
+	MethodVoiceWakeSet        MethodName = "voicewake.set"
 
 	// Web auth and interactive setup wizard.
 	MethodWebLoginStart MethodName = "web.login.start"
@@ -2667,4 +2681,71 @@ type SessionsCompactionRestoreResult struct {
 	SessionID  string                         `json:"sessionId"`
 	Checkpoint SessionCompactionCheckpoint    `json:"checkpoint"`
 	Entry      SessionsCompactionRestoreEntry `json:"entry"`
+}
+
+// ---------------------------------------------------------------------------
+// v2026.4.26 types
+// ---------------------------------------------------------------------------
+
+// ChannelsStartParams are the params for "channels.start".
+type ChannelsStartParams struct {
+	Channel   string `json:"channel"`
+	AccountID string `json:"accountId,omitempty"`
+}
+
+// DiagnosticsStabilityParams are the params for "diagnostics.stability".
+type DiagnosticsStabilityParams struct {
+	Window string `json:"window,omitempty"`
+	Limit  int    `json:"limit,omitempty"`
+}
+
+// NodePairRemoveParams are the params for "node.pair.remove".
+type NodePairRemoveParams struct {
+	NodeID string `json:"nodeId"`
+}
+
+// PushWebSubscribeParams are the params for "push.web.subscribe".
+type PushWebSubscribeParams struct {
+	Endpoint string            `json:"endpoint"`
+	Keys     map[string]string `json:"keys"`
+}
+
+// PushWebTestParams are the params for "push.web.test".
+type PushWebTestParams struct {
+	Title string `json:"title,omitempty"`
+	Body  string `json:"body,omitempty"`
+}
+
+// PushWebUnsubscribeParams are the params for "push.web.unsubscribe".
+type PushWebUnsubscribeParams struct {
+	Endpoint string `json:"endpoint"`
+}
+
+// TalkRealtimeSessionParams are the params for "talk.realtime.session".
+type TalkRealtimeSessionParams struct {
+	Provider string `json:"provider,omitempty"`
+	Model    string `json:"model,omitempty"`
+	Voice    string `json:"voice,omitempty"`
+}
+
+// TTSPersonasResult is the result of "tts.personas".
+type TTSPersonasResult struct {
+	Active   *string       `json:"active"`
+	Personas []TTSPersona  `json:"personas"`
+}
+
+// TTSPersona describes a single TTS persona.
+type TTSPersona struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
+}
+
+// UpdateStatusResult is the result of "update.status".
+type UpdateStatusResult struct {
+	Sentinel string `json:"sentinel"`
+}
+
+// VoiceWakeRoutingSetParams are the params for "voicewake.routing.set".
+type VoiceWakeRoutingSetParams struct {
+	Config any `json:"config"`
 }

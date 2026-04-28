@@ -39,6 +39,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.26] - 2026-04-28
+
+Sync to upstream openclaw v2026.4.26. Two new RPC methods added upstream; ten previously missing methods backfilled from upstream BASE_METHODS and method-scopes.
+
+### Added
+
+- `NodePairRemove(ctx, NodePairRemoveParams) error` — remove a paired node by ID
+- `UpdateStatus(ctx) (*UpdateStatusResult, error)` — retrieve the current update restart sentinel
+- `ChannelsStart(ctx, ChannelsStartParams) (json.RawMessage, error)` — initiate a channel connection
+- `TTSPersonas(ctx) (*TTSPersonasResult, error)` — list available TTS personas and the active one
+- `TalkRealtimeSession(ctx, TalkRealtimeSessionParams) (json.RawMessage, error)` — create a real-time voice session
+- `DiagnosticsStability(ctx, DiagnosticsStabilityParams) (json.RawMessage, error)` — retrieve gateway stability diagnostics
+- `VoiceWakeRoutingGet(ctx) (json.RawMessage, error)` — retrieve voice wake routing configuration
+- `VoiceWakeRoutingSet(ctx, VoiceWakeRoutingSetParams) error` — set voice wake routing configuration
+- `PushWebSubscribe(ctx, PushWebSubscribeParams) (json.RawMessage, error)` — register a web push subscription
+- `PushWebTest(ctx, PushWebTestParams) (json.RawMessage, error)` — send a test web push notification
+- `PushWebUnsubscribe(ctx, PushWebUnsubscribeParams) error` — remove a web push subscription
+- `AssistantMediaGet(ctx, any) (json.RawMessage, error)` — retrieve assistant media assets
+- `NodePairRemoveParams`, `UpdateStatusResult`, `ChannelsStartParams`, `TTSPersonasResult`, `TTSPersona`, `TalkRealtimeSessionParams`, `DiagnosticsStabilityParams`, `VoiceWakeRoutingSetParams`, `PushWebSubscribeParams`, `PushWebTestParams`, `PushWebUnsubscribeParams` protocol types
+- `MethodNodePairRemove`, `MethodUpdateStatus`, `MethodChannelsStart`, `MethodTTSPersonas`, `MethodTalkRealtimeSession`, `MethodDiagnosticsStability`, `MethodVoiceWakeRoutingGet`, `MethodVoiceWakeRoutingSet`, `MethodPushWebSubscribe`, `MethodPushWebTest`, `MethodPushWebUnsubscribe`, `MethodAssistantMediaGet` method name constants
+
 ## [v2026.4.8] - 2026-04-11
 
 Sync to upstream openclaw v2026.4.8. Six new gateway RPC methods for approval listing and session compaction checkpoints.

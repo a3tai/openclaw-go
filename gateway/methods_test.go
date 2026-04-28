@@ -1788,6 +1788,165 @@ func TestExecApprovalWaitDecision(t *testing.T) {
 	tm.run()
 }
 
+// --- v2026.4.26 new methods ---
+
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx, protocol.DiagnosticsStabilityParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestNodePairRemove(t *testing.T) {
+	tm := &testMethod{t: t, method: "node.pair.remove", success: func(c *Client, ctx context.Context) error {
+		return c.NodePairRemove(ctx, protocol.NodePairRemoveParams{NodeID: "n1"})
+	}}
+	tm.run()
+}
+
+func TestPushWebSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebSubscribe(ctx, protocol.PushWebSubscribeParams{
+			Endpoint: "https://push.example.com/sub",
+			Keys:     map[string]string{"p256dh": "key", "auth": "secret"},
+		})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebTest(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.test", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebTest(ctx, protocol.PushWebTestParams{Title: "Test", Body: "Hello"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		return c.PushWebUnsubscribe(ctx, protocol.PushWebUnsubscribeParams{Endpoint: "https://push.example.com/sub"})
+	}}
+	tm.run()
+}
+
+func TestTalkRealtimeSession(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.realtime.session", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkRealtimeSession(ctx, protocol.TalkRealtimeSessionParams{Provider: "openai"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTTSPersonas(t *testing.T) {
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "tts.personas" {
+			active := "nova"
+			r := protocol.TTSPersonasResult{
+				Active:   &active,
+				Personas: []protocol.TTSPersona{{ID: "nova", Label: "Nova"}},
+			}
+			respData, _ := protocol.MarshalResponse(req.ID, r)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := client.TTSPersonas(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Active == nil || *r.Active != "nova" {
+		t.Errorf("active = %v, want nova", r.Active)
+	}
+	if len(r.Personas) != 1 || r.Personas[0].ID != "nova" {
+		t.Errorf("personas = %v", r.Personas)
+	}
+
+	tm := &testMethod{t: t, method: "tts.personas", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSPersonas(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestUpdateStatus(t *testing.T) {
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onRequest = func(conn *websocket.Conn, req protocol.Request) {
+		if req.Method == "update.status" {
+			r := protocol.UpdateStatusResult{Sentinel: "abc123"}
+			respData, _ := protocol.MarshalResponse(req.ID, r)
+			conn.WriteMessage(websocket.TextMessage, respData)
+		}
+	}
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := client.UpdateStatus(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Sentinel != "abc123" {
+		t.Errorf("sentinel = %q, want abc123", r.Sentinel)
+	}
+
+	tm := &testMethod{t: t, method: "update.status", success: func(c *Client, ctx context.Context) error {
+		_, err := c.UpdateStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.VoiceWakeRoutingGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingSet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.set", success: func(c *Client, ctx context.Context) error {
+		return c.VoiceWakeRoutingSet(ctx, protocol.VoiceWakeRoutingSetParams{Config: map[string]any{"default": "main"}})
+	}}
+	tm.run()
+}
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, map[string]string{"id": "m1"})
+		return err
+	}}
+	tm.run()
+}
+
 // --- sendRPCTyped unmarshal error ---
 
 func TestSendRPCTypedUnmarshalError(t *testing.T) {

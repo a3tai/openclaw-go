@@ -15,6 +15,15 @@ func (c *Client) TTSStatus(ctx context.Context) (*protocol.TTSStatusResult, erro
 	return &result, nil
 }
 
+// TTSPersonas retrieves available TTS personas.
+func (c *Client) TTSPersonas(ctx context.Context) (*protocol.TTSPersonasResult, error) {
+	var result protocol.TTSPersonasResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTTSPersonas), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // TTSProviders retrieves TTS provider information.
 func (c *Client) TTSProviders(ctx context.Context) (*protocol.TTSProvidersResult, error) {
 	var result protocol.TTSProvidersResult
