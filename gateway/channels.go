@@ -7,6 +7,11 @@ import (
 	"github.com/a3tai/openclaw-go/protocol"
 )
 
+// ChannelsStart starts (authenticates/connects) a channel by name.
+func (c *Client) ChannelsStart(ctx context.Context, params protocol.ChannelsStartParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChannelsStart), params)
+}
+
 // ChannelsStatus retrieves the status of all channels.
 func (c *Client) ChannelsStatus(ctx context.Context, params protocol.ChannelsStatusParams) (*protocol.ChannelsStatusResult, error) {
 	var result protocol.ChannelsStatusResult
@@ -19,6 +24,11 @@ func (c *Client) ChannelsStatus(ctx context.Context, params protocol.ChannelsSta
 // ChannelsLogout logs out of a channel account.
 func (c *Client) ChannelsLogout(ctx context.Context, params protocol.ChannelsLogoutParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsLogout), params)
+}
+
+// TalkRealtimeSession establishes a realtime voice session.
+func (c *Client) TalkRealtimeSession(ctx context.Context, params protocol.TalkRealtimeSessionParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkRealtimeSession), params)
 }
 
 // TalkConfig retrieves the talk (voice) configuration.

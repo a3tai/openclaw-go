@@ -39,6 +39,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.27] - 2026-04-30
+
+Sync to upstream openclaw v2026.4.27. Eight previously-unimplemented BASE_METHODS from `server-methods-list.ts` are now covered.
+
+### Added
+
+- `ChannelsStart(ctx, ChannelsStartParams) (json.RawMessage, error)` — start/auth a channel by name
+- `DiagnosticsStability(ctx, any) (json.RawMessage, error)` — retrieve gateway stability diagnostics snapshot
+- `NodePairRemove(ctx, NodePairRemoveParams) error` — remove a previously paired node
+- `TalkRealtimeSession(ctx, TalkRealtimeSessionParams) (json.RawMessage, error)` — establish a realtime voice session
+- `TTSPersonas(ctx) (*TTSPersonasResult, error)` — list available TTS personas with active persona ID
+- `UpdateStatus(ctx) (*UpdateStatusResult, error)` — retrieve current update restart sentinel
+- `VoiceWakeRoutingGet(ctx) (*VoiceWakeRoutingGetResult, error)` — retrieve voice wake routing config
+- `VoiceWakeRoutingSet(ctx, VoiceWakeRoutingSetParams) error` — set voice wake routing config
+- `ChannelsStartParams`, `NodePairRemoveParams`, `TTSPersona`, `TTSPersonasResult`, `UpdateStatusResult`, `VoiceWakeRoutingGetResult`, `VoiceWakeRoutingSetParams` types
+- `AssistantMediaGet(ctx, any) (json.RawMessage, error)` — retrieve assistant media
+- `PushWebSubscribe(ctx, any) (json.RawMessage, error)` — register a web push subscription endpoint
+- `PushWebUnsubscribe(ctx, any) (json.RawMessage, error)` — remove a web push subscription
+- `PushWebTest(ctx, any) (json.RawMessage, error)` — send a test web push notification
+- `MethodChannelsStart`, `MethodDiagnosticsStability`, `MethodNodePairRemove`, `MethodTalkRealtimeSession`, `MethodTTSPersonas`, `MethodUpdateStatus`, `MethodVoiceWakeRoutingGet`, `MethodVoiceWakeRoutingSet`, `MethodAssistantMediaGet`, `MethodPushWebSubscribe`, `MethodPushWebUnsubscribe`, `MethodPushWebTest` constants
+
 ## [v2026.4.8] - 2026-04-11
 
 Sync to upstream openclaw v2026.4.8. Six new gateway RPC methods for approval listing and session compaction checkpoints.
