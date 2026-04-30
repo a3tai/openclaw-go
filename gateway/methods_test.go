@@ -1788,6 +1788,102 @@ func TestExecApprovalWaitDecision(t *testing.T) {
 	tm.run()
 }
 
+// --- v2026.4.27 new methods ---
+
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx, nil)
+		return err
+	}}
+	tm.run()
+}
+
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestNodePairRemove(t *testing.T) {
+	tm := &testMethod{t: t, method: "node.pair.remove", success: func(c *Client, ctx context.Context) error {
+		return c.NodePairRemove(ctx, protocol.NodePairRemoveParams{NodeID: "n1"})
+	}}
+	tm.run()
+}
+
+func TestTalkRealtimeSession(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.realtime.session", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkRealtimeSession(ctx, json.RawMessage(`{}`))
+		return err
+	}}
+	tm.run()
+}
+
+func TestTTSPersonas(t *testing.T) {
+	tm := &testMethod{t: t, method: "tts.personas", successPayload: json.RawMessage(`{"active":null,"personas":[]}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSPersonas(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestUpdateStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "update.status", successPayload: json.RawMessage(`{"sentinel":null}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.UpdateStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.get", successPayload: json.RawMessage(`{"config":{}}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.VoiceWakeRoutingGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingSet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.set", success: func(c *Client, ctx context.Context) error {
+		return c.VoiceWakeRoutingSet(ctx, protocol.VoiceWakeRoutingSetParams{Config: json.RawMessage(`{}`)})
+	}}
+	tm.run()
+}
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, nil)
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebSubscribe(ctx, map[string]string{"endpoint": "https://example.com/push"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebUnsubscribe(ctx, map[string]string{"endpoint": "https://example.com/push"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebTest(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.test", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebTest(ctx, map[string]string{"title": "Test"})
+		return err
+	}}
+	tm.run()
+}
+
 // --- sendRPCTyped unmarshal error ---
 
 func TestSendRPCTypedUnmarshalError(t *testing.T) {

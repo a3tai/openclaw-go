@@ -167,8 +167,9 @@ type MethodName string
 // Known RPC method name constants.
 const (
 	// Agent identity and lifecycle.
-	MethodAgentIdentityGet MethodName = "agent.identity.get"
-	MethodAgentWait        MethodName = "agent.wait"
+	MethodAgentIdentityGet  MethodName = "agent.identity.get"
+	MethodAgentWait         MethodName = "agent.wait"
+	MethodAssistantMediaGet MethodName = "assistant.media.get"
 
 	// Agent management and attached files.
 	MethodAgentsCreate    MethodName = "agents.create"
@@ -183,6 +184,7 @@ const (
 	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStart  MethodName = "channels.start"
 	MethodChannelsStatus MethodName = "channels.status"
 	MethodMessageAction  MethodName = "message.action"
 
@@ -221,6 +223,7 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
+	MethodDiagnosticsStability MethodName = "diagnostics.stability"
 	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
 	MethodExecApprovalGet      MethodName = "exec.approval.get"
 	MethodExecApprovalList     MethodName = "exec.approval.list"
@@ -253,6 +256,7 @@ const (
 	MethodNodePairApprove             MethodName = "node.pair.approve"
 	MethodNodePairList                MethodName = "node.pair.list"
 	MethodNodePairReject              MethodName = "node.pair.reject"
+	MethodNodePairRemove              MethodName = "node.pair.remove"
 	MethodNodePairRequest             MethodName = "node.pair.request"
 	MethodNodePairVerify              MethodName = "node.pair.verify"
 	MethodNodePendingAck              MethodName = "node.pending.ack"
@@ -262,7 +266,10 @@ const (
 	MethodNodeRename                  MethodName = "node.rename"
 
 	// Utility and secrets.
-	MethodPushTest       MethodName = "push.test"
+	MethodPushTest           MethodName = "push.test"
+	MethodPushWebSubscribe   MethodName = "push.web.subscribe"
+	MethodPushWebTest        MethodName = "push.web.test"
+	MethodPushWebUnsubscribe MethodName = "push.web.unsubscribe"
 	MethodSecretsReload  MethodName = "secrets.reload"
 	MethodSecretsResolve MethodName = "secrets.resolve"
 
@@ -301,11 +308,12 @@ const (
 	MethodSkillsUpdate  MethodName = "skills.update"
 
 	// System presence/events and voice interactions.
-	MethodSystemEvent    MethodName = "system-event"
-	MethodSystemPresence MethodName = "system-presence"
-	MethodTalkConfig     MethodName = "talk.config"
-	MethodTalkMode       MethodName = "talk.mode"
-	MethodTalkSpeak      MethodName = "talk.speak"
+	MethodSystemEvent           MethodName = "system-event"
+	MethodSystemPresence        MethodName = "system-presence"
+	MethodTalkConfig            MethodName = "talk.config"
+	MethodTalkMode              MethodName = "talk.mode"
+	MethodTalkRealtimeSession   MethodName = "talk.realtime.session"
+	MethodTalkSpeak             MethodName = "talk.speak"
 
 	// Tool and TTS interfaces.
 	MethodToolsCatalog   MethodName = "tools.catalog"
@@ -313,15 +321,19 @@ const (
 	MethodTTSConvert     MethodName = "tts.convert"
 	MethodTTSDisable     MethodName = "tts.disable"
 	MethodTTSEnable      MethodName = "tts.enable"
+	MethodTTSPersonas    MethodName = "tts.personas"
 	MethodTTSProviders   MethodName = "tts.providers"
 	MethodTTSStatus      MethodName = "tts.status"
 
 	// Update, usage, and voice wake configuration.
-	MethodUpdateRun    MethodName = "update.run"
-	MethodUsageCost    MethodName = "usage.cost"
-	MethodUsageStatus  MethodName = "usage.status"
-	MethodVoiceWakeGet MethodName = "voicewake.get"
-	MethodVoiceWakeSet MethodName = "voicewake.set"
+	MethodUpdateRun          MethodName = "update.run"
+	MethodUpdateStatus       MethodName = "update.status"
+	MethodUsageCost          MethodName = "usage.cost"
+	MethodUsageStatus        MethodName = "usage.status"
+	MethodVoiceWakeGet       MethodName = "voicewake.get"
+	MethodVoiceWakeRoutingGet MethodName = "voicewake.routing.get"
+	MethodVoiceWakeRoutingSet MethodName = "voicewake.routing.set"
+	MethodVoiceWakeSet       MethodName = "voicewake.set"
 
 	// Web auth and interactive setup wizard.
 	MethodWebLoginStart MethodName = "web.login.start"
@@ -1028,6 +1040,11 @@ type NodePairRejectParams struct {
 	RequestID string `json:"requestId"`
 }
 
+// NodePairRemoveParams are the params for "node.pair.remove".
+type NodePairRemoveParams struct {
+	NodeID string `json:"nodeId"`
+}
+
 // NodePairVerifyParams are the params for "node.pair.verify".
 type NodePairVerifyParams struct {
 	NodeID string `json:"nodeId"`
@@ -1705,6 +1722,10 @@ type TalkSpeakResult struct {
 	FileExtension   string `json:"fileExtension,omitempty"`
 }
 
+// TalkRealtimeSessionParams are the params for "talk.realtime.session".
+// The upstream schema is opaque; callers pass arbitrary provider session params.
+type TalkRealtimeSessionParams = json.RawMessage
+
 // TalkConfigData holds the talk configuration sections.
 type TalkConfigData struct {
 	Talk    *TalkConfigTalk    `json:"talk,omitempty"`
@@ -1796,6 +1817,11 @@ type ChannelAccountSnapshot struct {
 type ChannelsLogoutParams struct {
 	Channel   string `json:"channel"`
 	AccountID string `json:"accountId,omitempty"`
+}
+
+// ChannelsStartParams are the params for "channels.start".
+type ChannelsStartParams struct {
+	Channel string `json:"channel"`
 }
 
 // ---------------------------------------------------------------------------
@@ -2123,6 +2149,11 @@ type UpdateRunParams struct {
 	TimeoutMs      *int   `json:"timeoutMs,omitempty"`
 }
 
+// UpdateStatusResult is the result of "update.status".
+type UpdateStatusResult struct {
+	Sentinel *string `json:"sentinel"`
+}
+
 // TickEvent is the payload of a "tick" event.
 type TickEvent struct {
 	Ts int64 `json:"ts"`
@@ -2240,6 +2271,16 @@ type HeartbeatEvent struct {
 // VoicewakeChangedEvent is the payload of a "voicewake.changed" event.
 type VoicewakeChangedEvent struct {
 	Triggers []string `json:"triggers"`
+}
+
+// VoiceWakeRoutingGetResult is the result of "voicewake.routing.get".
+type VoiceWakeRoutingGetResult struct {
+	Config json.RawMessage `json:"config"`
+}
+
+// VoiceWakeRoutingSetParams are the params for "voicewake.routing.set".
+type VoiceWakeRoutingSetParams struct {
+	Config json.RawMessage `json:"config"`
 }
 
 // ---------------------------------------------------------------------------
@@ -2370,6 +2411,18 @@ type TTSSetProviderParams struct {
 // TTSSetProviderResult is the result of "tts.setProvider".
 type TTSSetProviderResult struct {
 	Provider string `json:"provider"`
+}
+
+// TTSPersona describes a single TTS persona.
+type TTSPersona struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
+}
+
+// TTSPersonasResult is the result of "tts.personas".
+type TTSPersonasResult struct {
+	Active   *string      `json:"active"`
+	Personas []TTSPersona `json:"personas"`
 }
 
 // ---------------------------------------------------------------------------
