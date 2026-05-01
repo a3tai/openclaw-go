@@ -16,6 +16,11 @@ func (c *Client) ChannelsStatus(ctx context.Context, params protocol.ChannelsSta
 	return &result, nil
 }
 
+// ChannelsStart starts an OAuth or setup flow for a channel.
+func (c *Client) ChannelsStart(ctx context.Context, params protocol.ChannelsStartParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChannelsStart), params)
+}
+
 // ChannelsLogout logs out of a channel account.
 func (c *Client) ChannelsLogout(ctx context.Context, params protocol.ChannelsLogoutParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsLogout), params)
@@ -52,4 +57,12 @@ func (c *Client) WebLoginStart(ctx context.Context, params protocol.WebLoginStar
 // WebLoginWait waits for completion of an interactive web login flow.
 func (c *Client) WebLoginWait(ctx context.Context, params protocol.WebLoginWaitParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodWebLoginWait), params)
+}
+
+// TalkRealtimeSession creates or retrieves a realtime voice session.
+func (c *Client) TalkRealtimeSession(ctx context.Context, params any) (json.RawMessage, error) {
+	if params == nil {
+		params = struct{}{}
+	}
+	return c.sendRPC(ctx, string(protocol.MethodTalkRealtimeSession), params)
 }

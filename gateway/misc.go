@@ -12,6 +12,11 @@ func (c *Client) UpdateRun(ctx context.Context, params protocol.UpdateRunParams)
 	return c.sendRPC(ctx, string(protocol.MethodUpdateRun), params)
 }
 
+// UpdateStatus retrieves the current update status.
+func (c *Client) UpdateStatus(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodUpdateStatus), struct{}{})
+}
+
 // PushTest sends a test push notification.
 func (c *Client) PushTest(ctx context.Context, params protocol.PushTestParams) (*protocol.PushTestResult, error) {
 	var result protocol.PushTestResult
@@ -37,6 +42,16 @@ func (c *Client) VoiceWakeGet(ctx context.Context) (json.RawMessage, error) {
 // VoiceWakeSet sets the voice wake configuration.
 func (c *Client) VoiceWakeSet(ctx context.Context, params any) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodVoiceWakeSet), params)
+}
+
+// VoiceWakeRoutingGet retrieves the voice wake routing configuration.
+func (c *Client) VoiceWakeRoutingGet(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodVoiceWakeRoutingGet), struct{}{})
+}
+
+// VoiceWakeRoutingSet sets the voice wake routing configuration.
+func (c *Client) VoiceWakeRoutingSet(ctx context.Context, params protocol.VoiceWakeRoutingSetParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodVoiceWakeRoutingSet), params)
 }
 
 // UsageStatus retrieves usage status.

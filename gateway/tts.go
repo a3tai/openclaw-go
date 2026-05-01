@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -13,6 +14,11 @@ func (c *Client) TTSStatus(ctx context.Context) (*protocol.TTSStatusResult, erro
 		return nil, err
 	}
 	return &result, nil
+}
+
+// TTSPersonas retrieves TTS persona presets.
+func (c *Client) TTSPersonas(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTTSPersonas), struct{}{})
 }
 
 // TTSProviders retrieves TTS provider information.
