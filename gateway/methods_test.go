@@ -1422,6 +1422,117 @@ func TestMessageAction(t *testing.T) {
 	tm.run()
 }
 
+// --- Diagnostics ---
+
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx, nil)
+		return err
+	}}
+	tm.run()
+}
+
+// --- Channels start ---
+
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
+// --- TTS personas ---
+
+func TestTTSPersonas(t *testing.T) {
+	tm := &testMethod{t: t, method: "tts.personas", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSPersonas(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+// --- Talk realtime session ---
+
+func TestTalkRealtimeSession(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.realtime.session", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkRealtimeSession(ctx, nil)
+		return err
+	}}
+	tm.run()
+}
+
+// --- Update status ---
+
+func TestUpdateStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "update.status", success: func(c *Client, ctx context.Context) error {
+		_, err := c.UpdateStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+// --- Voice wake routing ---
+
+func TestVoiceWakeRoutingGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.VoiceWakeRoutingGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingSet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.set", success: func(c *Client, ctx context.Context) error {
+		return c.VoiceWakeRoutingSet(ctx, protocol.VoiceWakeRoutingSetParams{Config: []byte(`{}`)})
+	}}
+	tm.run()
+}
+
+// --- Node pair remove ---
+
+func TestNodePairRemove(t *testing.T) {
+	tm := &testMethod{t: t, method: "node.pair.remove", success: func(c *Client, ctx context.Context) error {
+		return c.NodePairRemove(ctx, protocol.NodePairRemoveParams{NodeID: "n1"})
+	}}
+	tm.run()
+}
+
+// --- Push web ---
+
+func TestPushWebSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebSubscribe(ctx, protocol.PushWebSubscribeParams{Endpoint: "https://push.example.com/sub"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		return c.PushWebUnsubscribe(ctx, protocol.PushWebUnsubscribeParams{Endpoint: "https://push.example.com/sub"})
+	}}
+	tm.run()
+}
+
+func TestPushWebTest(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.test", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebTest(ctx, protocol.PushWebTestParams{Title: "Test", Body: "Hello"})
+		return err
+	}}
+	tm.run()
+}
+
+// --- Assistant media ---
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, nil)
+		return err
+	}}
+	tm.run()
+}
+
 // --- Misc ---
 
 func TestUpdateRun(t *testing.T) {

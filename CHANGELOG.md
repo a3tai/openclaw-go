@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2026.4.29] - 2026-05-01
+
+Sync to upstream openclaw v2026.4.29. Twelve new gateway RPC methods covering diagnostics, channel start, TTS personas, voice realtime, update status, voice wake routing, node pair removal, web push, and assistant media.
+
+### Added
+
+- `DiagnosticsStability(ctx, params) (json.RawMessage, error)` — retrieve diagnostic stability snapshot
+- `ChannelsStart(ctx, ChannelsStartParams) (json.RawMessage, error)` — start an OAuth or setup flow for a channel
+- `TTSPersonas(ctx) (json.RawMessage, error)` — retrieve TTS persona presets
+- `TalkRealtimeSession(ctx, params) (json.RawMessage, error)` — create or retrieve a realtime voice session
+- `UpdateStatus(ctx) (json.RawMessage, error)` — retrieve current update status
+- `VoiceWakeRoutingGet(ctx) (json.RawMessage, error)` — retrieve voice wake routing configuration
+- `VoiceWakeRoutingSet(ctx, VoiceWakeRoutingSetParams) error` — set voice wake routing configuration
+- `NodePairRemove(ctx, NodePairRemoveParams) error` — remove a paired node by node ID
+- `PushWebSubscribe(ctx, PushWebSubscribeParams) (json.RawMessage, error)` — register a web push subscription endpoint
+- `PushWebUnsubscribe(ctx, PushWebUnsubscribeParams) error` — remove a web push subscription by endpoint
+- `PushWebTest(ctx, PushWebTestParams) (json.RawMessage, error)` — send a test web push notification
+- `AssistantMediaGet(ctx, params) (json.RawMessage, error)` — retrieve a media attachment for the assistant
+- `ChannelsStartParams`, `NodePairRemoveParams`, `VoiceWakeRoutingSetParams`, `PushWebSubscribeParams`, `PushWebUnsubscribeParams`, `PushWebTestParams` protocol param types
+- `MethodDiagnosticsStability`, `MethodChannelsStart`, `MethodTTSPersonas`, `MethodTalkRealtimeSession`, `MethodUpdateStatus`, `MethodVoiceWakeRoutingGet`, `MethodVoiceWakeRoutingSet`, `MethodNodePairRemove`, `MethodPushWebSubscribe`, `MethodPushWebTest`, `MethodPushWebUnsubscribe`, `MethodAssistantMediaGet` method name constants
+
 ## [Unreleased]
 
 ### Breaking Changes
