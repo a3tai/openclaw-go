@@ -1251,6 +1251,14 @@ func TestWizardStatus(t *testing.T) {
 
 // --- Channels / Talk ---
 
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, map[string]string{"channel": "slack"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestChannelsStatus(t *testing.T) {
 	mg, wsURL, cleanup := startMockGateway(t)
 	defer cleanup()
@@ -1391,9 +1399,25 @@ func TestSystemPresence(t *testing.T) {
 	tm.run()
 }
 
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx, struct{}{})
+		return err
+	}}
+	tm.run()
+}
+
 func TestDoctorMemoryStatus(t *testing.T) {
 	tm := &testMethod{t: t, method: "doctor.memory.status", success: func(c *Client, ctx context.Context) error {
 		_, err := c.DoctorMemoryStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, map[string]string{"key": "media-1"})
 		return err
 	}}
 	tm.run()

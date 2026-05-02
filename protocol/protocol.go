@@ -179,10 +179,14 @@ const (
 	MethodAgentsList      MethodName = "agents.list"
 	MethodAgentsUpdate    MethodName = "agents.update"
 
+	// Assistant media retrieval.
+	MethodAssistantMediaGet MethodName = "assistant.media.get"
+
 	// Browser and channel integration.
 	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStart  MethodName = "channels.start"
 	MethodChannelsStatus MethodName = "channels.status"
 	MethodMessageAction  MethodName = "message.action"
 
@@ -221,6 +225,7 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
+	MethodDiagnosticsStability MethodName = "diagnostics.stability"
 	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
 	MethodExecApprovalGet      MethodName = "exec.approval.get"
 	MethodExecApprovalList     MethodName = "exec.approval.list"

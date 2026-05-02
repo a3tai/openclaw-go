@@ -31,3 +31,8 @@ func (c *Client) ChatAbort(ctx context.Context, params protocol.ChatAbortParams)
 func (c *Client) ChatInject(ctx context.Context, params protocol.ChatInjectParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodChatInject), params)
 }
+
+// AssistantMediaGet retrieves assistant-generated media by key.
+func (c *Client) AssistantMediaGet(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodAssistantMediaGet), params)
+}
