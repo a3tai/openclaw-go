@@ -27,6 +27,11 @@ func (c *Client) NodePairReject(ctx context.Context, params protocol.NodePairRej
 	return c.sendRPCVoid(ctx, string(protocol.MethodNodePairReject), params)
 }
 
+// NodePairRemove removes an approved node pairing.
+func (c *Client) NodePairRemove(ctx context.Context, params protocol.NodePairRemoveParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodNodePairRemove), params)
+}
+
 // NodePairVerify verifies a node pairing.
 func (c *Client) NodePairVerify(ctx context.Context, params protocol.NodePairVerifyParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodNodePairVerify), params)

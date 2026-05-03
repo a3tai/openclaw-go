@@ -21,6 +21,16 @@ func (c *Client) ChannelsLogout(ctx context.Context, params protocol.ChannelsLog
 	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsLogout), params)
 }
 
+// ChannelsStart starts a channel connection.
+func (c *Client) ChannelsStart(ctx context.Context, params protocol.ChannelsStartParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChannelsStart), params)
+}
+
+// ChannelsStop stops a channel connection.
+func (c *Client) ChannelsStop(ctx context.Context, params protocol.ChannelsStopParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChannelsStop), params)
+}
+
 // TalkConfig retrieves the talk (voice) configuration.
 func (c *Client) TalkConfig(ctx context.Context, params protocol.TalkConfigParams) (*protocol.TalkConfigResult, error) {
 	var result protocol.TalkConfigResult
@@ -42,6 +52,11 @@ func (c *Client) TalkSpeak(ctx context.Context, params protocol.TalkSpeakParams)
 		return nil, err
 	}
 	return &result, nil
+}
+
+// TalkRealtimeSession creates or retrieves a realtime voice session.
+func (c *Client) TalkRealtimeSession(ctx context.Context, params protocol.TalkRealtimeSessionParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkRealtimeSession), params)
 }
 
 // WebLoginStart starts an interactive web login flow for a channel provider.
