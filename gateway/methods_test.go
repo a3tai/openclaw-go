@@ -1788,6 +1788,156 @@ func TestExecApprovalWaitDecision(t *testing.T) {
 	tm.run()
 }
 
+// --- v2026.5.2 new methods ---
+
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestChannelsStop(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.stop", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStop(ctx, protocol.ChannelsStopParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTTSPersonas(t *testing.T) {
+	tm := &testMethod{t: t, method: "tts.personas", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSPersonas(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestUpdateStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "update.status", success: func(c *Client, ctx context.Context) error {
+		_, err := c.UpdateStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkRealtimeSession(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.realtime.session", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkRealtimeSession(ctx, protocol.TalkRealtimeSessionParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestToolsInvoke(t *testing.T) {
+	tm := &testMethod{t: t, method: "tools.invoke", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ToolsInvoke(ctx, protocol.ToolsInvokeParams{Name: "bash", SessionKey: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestArtifactsList(t *testing.T) {
+	tm := &testMethod{t: t, method: "artifacts.list", successPayload: json.RawMessage(`[]`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.ArtifactsList(ctx, protocol.ArtifactsListParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestArtifactsGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "artifacts.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ArtifactsGet(ctx, protocol.ArtifactsGetParams{ID: "a1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestArtifactsDownload(t *testing.T) {
+	tm := &testMethod{t: t, method: "artifacts.download", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ArtifactsDownload(ctx, protocol.ArtifactsDownloadParams{ID: "a1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsDescribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.describe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsDescribe(ctx, protocol.SessionsDescribeParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsCleanup(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.cleanup", success: func(c *Client, ctx context.Context) error {
+		return c.SessionsCleanup(ctx, protocol.SessionsCleanupParams{Key: "main"})
+	}}
+	tm.run()
+}
+
+func TestNodePairRemove(t *testing.T) {
+	tm := &testMethod{t: t, method: "node.pair.remove", success: func(c *Client, ctx context.Context) error {
+		return c.NodePairRemove(ctx, protocol.NodePairRemoveParams{RequestID: "r1"})
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.VoiceWakeRoutingGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingSet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.set", success: func(c *Client, ctx context.Context) error {
+		return c.VoiceWakeRoutingSet(ctx, protocol.VoiceWakeRoutingSetParams{Routing: json.RawMessage(`{}`)})
+	}}
+	tm.run()
+}
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, protocol.AssistantMediaGetParams{ID: "m1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebSubscribe(ctx, protocol.PushWebSubscribeParams{Endpoint: "https://example.com/push"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		return c.PushWebUnsubscribe(ctx, protocol.PushWebUnsubscribeParams{Endpoint: "https://example.com/push"})
+	}}
+	tm.run()
+}
+
+func TestPushWebTest(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.test", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebTest(ctx)
+		return err
+	}}
+	tm.run()
+}
+
 // --- sendRPCTyped unmarshal error ---
 
 func TestSendRPCTypedUnmarshalError(t *testing.T) {

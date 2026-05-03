@@ -13,6 +13,16 @@ func (c *Client) SessionsGet(ctx context.Context, params protocol.SessionsGetPar
 	return c.sendRPC(ctx, string(protocol.MethodSessionsGet), params)
 }
 
+// SessionsDescribe returns a detailed description of a session.
+func (c *Client) SessionsDescribe(ctx context.Context, params protocol.SessionsDescribeParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsDescribe), params)
+}
+
+// SessionsCleanup removes ephemeral session state for a completed session.
+func (c *Client) SessionsCleanup(ctx context.Context, params protocol.SessionsCleanupParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodSessionsCleanup), params)
+}
+
 // SessionsList lists sessions matching the given criteria.
 func (c *Client) SessionsList(ctx context.Context, params protocol.SessionsListParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodSessionsList), params)

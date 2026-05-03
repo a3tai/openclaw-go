@@ -18,3 +18,8 @@ func (c *Client) ToolsCatalog(ctx context.Context, params protocol.ToolsCatalogP
 func (c *Client) ToolsEffective(ctx context.Context, params protocol.ToolsEffectiveParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodToolsEffective), params)
 }
+
+// ToolsInvoke directly invokes a named tool.
+func (c *Client) ToolsInvoke(ctx context.Context, params protocol.ToolsInvokeParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodToolsInvoke), params)
+}

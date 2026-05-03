@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2026.5.2] - 2026-05-03
+
+Sync to upstream openclaw v2026.5.2. Nineteen new gateway RPC methods across artifacts, channels, diagnostics, node pairing, push notifications, sessions, talk realtime, tools, TTS, updates, voice wake routing, and assistant media.
+
+### Added
+
+- `ArtifactsList(ctx, ArtifactsListParams) (json.RawMessage, error)` — list binary artifacts, optionally filtered by session key
+- `ArtifactsGet(ctx, ArtifactsGetParams) (json.RawMessage, error)` — retrieve a single artifact by ID
+- `ArtifactsDownload(ctx, ArtifactsDownloadParams) (json.RawMessage, error)` — download the binary content of an artifact
+- `AssistantMediaGet(ctx, AssistantMediaGetParams) (json.RawMessage, error)` — retrieve assistant-uploaded media by ID
+- `ChannelsStart(ctx, ChannelsStartParams) (json.RawMessage, error)` — start a channel connection
+- `ChannelsStop(ctx, ChannelsStopParams) (json.RawMessage, error)` — stop a channel connection
+- `DiagnosticsStability(ctx) (json.RawMessage, error)` — retrieve gateway stability diagnostics
+- `NodePairRemove(ctx, NodePairRemoveParams) error` — remove an approved node pairing
+- `PushWebSubscribe(ctx, PushWebSubscribeParams) (json.RawMessage, error)` — register a Web Push subscription endpoint
+- `PushWebUnsubscribe(ctx, PushWebUnsubscribeParams) error` — remove a Web Push subscription
+- `PushWebTest(ctx) (json.RawMessage, error)` — send a test Web Push notification
+- `SessionsDescribe(ctx, SessionsDescribeParams) (json.RawMessage, error)` — get detailed session description
+- `SessionsCleanup(ctx, SessionsCleanupParams) error` — remove ephemeral state for a completed session
+- `TalkRealtimeSession(ctx, TalkRealtimeSessionParams) (json.RawMessage, error)` — create or retrieve a realtime voice session
+- `ToolsInvoke(ctx, ToolsInvokeParams) (json.RawMessage, error)` — directly invoke a named tool
+- `TTSPersonas(ctx) (json.RawMessage, error)` — retrieve TTS persona definitions
+- `UpdateStatus(ctx) (json.RawMessage, error)` — retrieve current gateway update availability status
+- `VoiceWakeRoutingGet(ctx) (json.RawMessage, error)` — retrieve voice wake routing configuration
+- `VoiceWakeRoutingSet(ctx, VoiceWakeRoutingSetParams) error` — set voice wake routing configuration
+- New protocol types: `ArtifactsListParams`, `ArtifactsGetParams`, `ArtifactsDownloadParams`, `AssistantMediaGetParams`, `ChannelsStartParams`, `ChannelsStopParams`, `NodePairRemoveParams`, `PushWebSubscribeParams`, `PushWebUnsubscribeParams`, `SessionsDescribeParams`, `SessionsCleanupParams`, `TalkRealtimeSessionParams`, `ToolsInvokeParams`, `VoiceWakeRoutingSetParams`
+- New method constants: `MethodArtifactsList`, `MethodArtifactsGet`, `MethodArtifactsDownload`, `MethodAssistantMediaGet`, `MethodChannelsStart`, `MethodChannelsStop`, `MethodDiagnosticsStability`, `MethodNodePairRemove`, `MethodPushWebSubscribe`, `MethodPushWebTest`, `MethodPushWebUnsubscribe`, `MethodSessionsDescribe`, `MethodSessionsCleanup`, `MethodTalkRealtimeSession`, `MethodToolsInvoke`, `MethodTTSPersonas`, `MethodUpdateStatus`, `MethodVoiceWakeRoutingGet`, `MethodVoiceWakeRoutingSet`
+
 ## [Unreleased]
 
 ### Breaking Changes

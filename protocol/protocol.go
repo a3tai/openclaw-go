@@ -179,10 +179,20 @@ const (
 	MethodAgentsList      MethodName = "agents.list"
 	MethodAgentsUpdate    MethodName = "agents.update"
 
+	// Artifacts (binary blobs attached to sessions/messages).
+	MethodArtifactsDownload MethodName = "artifacts.download"
+	MethodArtifactsGet      MethodName = "artifacts.get"
+	MethodArtifactsList     MethodName = "artifacts.list"
+
+	// Assistant media.
+	MethodAssistantMediaGet MethodName = "assistant.media.get"
+
 	// Browser and channel integration.
 	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStart  MethodName = "channels.start"
+	MethodChannelsStop   MethodName = "channels.stop"
 	MethodChannelsStatus MethodName = "channels.status"
 	MethodMessageAction  MethodName = "message.action"
 
@@ -221,6 +231,7 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
+	MethodDiagnosticsStability MethodName = "diagnostics.stability"
 	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
 	MethodExecApprovalGet      MethodName = "exec.approval.get"
 	MethodExecApprovalList     MethodName = "exec.approval.list"
@@ -253,6 +264,7 @@ const (
 	MethodNodePairApprove             MethodName = "node.pair.approve"
 	MethodNodePairList                MethodName = "node.pair.list"
 	MethodNodePairReject              MethodName = "node.pair.reject"
+	MethodNodePairRemove              MethodName = "node.pair.remove"
 	MethodNodePairRequest             MethodName = "node.pair.request"
 	MethodNodePairVerify              MethodName = "node.pair.verify"
 	MethodNodePendingAck              MethodName = "node.pending.ack"
@@ -261,13 +273,17 @@ const (
 	MethodNodePendingPull             MethodName = "node.pending.pull"
 	MethodNodeRename                  MethodName = "node.rename"
 
-	// Utility and secrets.
-	MethodPushTest       MethodName = "push.test"
-	MethodSecretsReload  MethodName = "secrets.reload"
-	MethodSecretsResolve MethodName = "secrets.resolve"
+	// Utility, push notifications, and secrets.
+	MethodPushTest            MethodName = "push.test"
+	MethodPushWebSubscribe    MethodName = "push.web.subscribe"
+	MethodPushWebTest         MethodName = "push.web.test"
+	MethodPushWebUnsubscribe  MethodName = "push.web.unsubscribe"
+	MethodSecretsReload       MethodName = "secrets.reload"
+	MethodSecretsResolve      MethodName = "secrets.resolve"
 
 	// Session lifecycle, messaging, and usage analytics.
 	MethodSessionsAbort               MethodName = "sessions.abort"
+	MethodSessionsCleanup             MethodName = "sessions.cleanup"
 	MethodSessionsCompact             MethodName = "sessions.compact"
 	MethodSessionsCompactionBranch    MethodName = "sessions.compaction.branch"
 	MethodSessionsCompactionGet       MethodName = "sessions.compaction.get"
@@ -275,6 +291,7 @@ const (
 	MethodSessionsCompactionRestore   MethodName = "sessions.compaction.restore"
 	MethodSessionsCreate              MethodName = "sessions.create"
 	MethodSessionsDelete              MethodName = "sessions.delete"
+	MethodSessionsDescribe            MethodName = "sessions.describe"
 	MethodSessionsGet                 MethodName = "sessions.get"
 	MethodSessionsList                MethodName = "sessions.list"
 	MethodSessionsMessagesSubscribe   MethodName = "sessions.messages.subscribe"
@@ -301,27 +318,33 @@ const (
 	MethodSkillsUpdate  MethodName = "skills.update"
 
 	// System presence/events and voice interactions.
-	MethodSystemEvent    MethodName = "system-event"
-	MethodSystemPresence MethodName = "system-presence"
-	MethodTalkConfig     MethodName = "talk.config"
-	MethodTalkMode       MethodName = "talk.mode"
-	MethodTalkSpeak      MethodName = "talk.speak"
+	MethodSystemEvent           MethodName = "system-event"
+	MethodSystemPresence        MethodName = "system-presence"
+	MethodTalkConfig            MethodName = "talk.config"
+	MethodTalkMode              MethodName = "talk.mode"
+	MethodTalkRealtimeSession   MethodName = "talk.realtime.session"
+	MethodTalkSpeak             MethodName = "talk.speak"
 
 	// Tool and TTS interfaces.
 	MethodToolsCatalog   MethodName = "tools.catalog"
 	MethodToolsEffective MethodName = "tools.effective"
+	MethodToolsInvoke    MethodName = "tools.invoke"
 	MethodTTSConvert     MethodName = "tts.convert"
 	MethodTTSDisable     MethodName = "tts.disable"
 	MethodTTSEnable      MethodName = "tts.enable"
+	MethodTTSPersonas    MethodName = "tts.personas"
 	MethodTTSProviders   MethodName = "tts.providers"
 	MethodTTSStatus      MethodName = "tts.status"
 
 	// Update, usage, and voice wake configuration.
-	MethodUpdateRun    MethodName = "update.run"
-	MethodUsageCost    MethodName = "usage.cost"
-	MethodUsageStatus  MethodName = "usage.status"
-	MethodVoiceWakeGet MethodName = "voicewake.get"
-	MethodVoiceWakeSet MethodName = "voicewake.set"
+	MethodUpdateRun          MethodName = "update.run"
+	MethodUpdateStatus       MethodName = "update.status"
+	MethodUsageCost          MethodName = "usage.cost"
+	MethodUsageStatus        MethodName = "usage.status"
+	MethodVoiceWakeGet       MethodName = "voicewake.get"
+	MethodVoiceWakeRoutingGet MethodName = "voicewake.routing.get"
+	MethodVoiceWakeRoutingSet MethodName = "voicewake.routing.set"
+	MethodVoiceWakeSet        MethodName = "voicewake.set"
 
 	// Web auth and interactive setup wizard.
 	MethodWebLoginStart MethodName = "web.login.start"
@@ -2667,4 +2690,115 @@ type SessionsCompactionRestoreResult struct {
 	SessionID  string                         `json:"sessionId"`
 	Checkpoint SessionCompactionCheckpoint    `json:"checkpoint"`
 	Entry      SessionsCompactionRestoreEntry `json:"entry"`
+}
+
+// ---------------------------------------------------------------------------
+// sessions.describe / sessions.cleanup types
+// ---------------------------------------------------------------------------
+
+// SessionsDescribeParams are the params for "sessions.describe".
+type SessionsDescribeParams struct {
+	Key string `json:"key"`
+}
+
+// SessionsCleanupParams are the params for "sessions.cleanup".
+type SessionsCleanupParams struct {
+	Key string `json:"key"`
+}
+
+// ---------------------------------------------------------------------------
+// artifacts.* types
+// ---------------------------------------------------------------------------
+
+// ArtifactsListParams are the params for "artifacts.list".
+type ArtifactsListParams struct {
+	SessionKey string `json:"sessionKey,omitempty"`
+	Limit      *int   `json:"limit,omitempty"`
+	Offset     *int   `json:"offset,omitempty"`
+}
+
+// ArtifactsGetParams are the params for "artifacts.get".
+type ArtifactsGetParams struct {
+	ID string `json:"id"`
+}
+
+// ArtifactsDownloadParams are the params for "artifacts.download".
+type ArtifactsDownloadParams struct {
+	ID string `json:"id"`
+}
+
+// ---------------------------------------------------------------------------
+// channels.start / channels.stop types
+// ---------------------------------------------------------------------------
+
+// ChannelsStartParams are the params for "channels.start".
+type ChannelsStartParams struct {
+	Channel string `json:"channel"`
+}
+
+// ChannelsStopParams are the params for "channels.stop".
+type ChannelsStopParams struct {
+	Channel string `json:"channel"`
+}
+
+// ---------------------------------------------------------------------------
+// node.pair.remove types
+// ---------------------------------------------------------------------------
+
+// NodePairRemoveParams are the params for "node.pair.remove".
+type NodePairRemoveParams struct {
+	RequestID string `json:"requestId"`
+}
+
+// ---------------------------------------------------------------------------
+// talk.realtime.session types
+// ---------------------------------------------------------------------------
+
+// TalkRealtimeSessionParams are the params for "talk.realtime.session".
+type TalkRealtimeSessionParams struct {
+	SessionKey string `json:"sessionKey,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// tools.invoke types
+// ---------------------------------------------------------------------------
+
+// ToolsInvokeParams are the params for "tools.invoke".
+type ToolsInvokeParams struct {
+	Name       string          `json:"name"`
+	Params     json.RawMessage `json:"params,omitempty"`
+	SessionKey string          `json:"sessionKey,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// assistant.media.get types
+// ---------------------------------------------------------------------------
+
+// AssistantMediaGetParams are the params for "assistant.media.get".
+type AssistantMediaGetParams struct {
+	ID string `json:"id"`
+}
+
+// ---------------------------------------------------------------------------
+// push.web.* types
+// ---------------------------------------------------------------------------
+
+// PushWebSubscribeParams are the params for "push.web.subscribe".
+type PushWebSubscribeParams struct {
+	Endpoint string          `json:"endpoint"`
+	Keys     json.RawMessage `json:"keys,omitempty"`
+}
+
+// PushWebUnsubscribeParams are the params for "push.web.unsubscribe".
+type PushWebUnsubscribeParams struct {
+	Endpoint string `json:"endpoint"`
+}
+
+// ---------------------------------------------------------------------------
+// voicewake.routing.* types
+// ---------------------------------------------------------------------------
+
+// VoiceWakeRoutingSetParams are the params for "voicewake.routing.set".
+type VoiceWakeRoutingSetParams struct {
+	Routing json.RawMessage `json:"routing"`
 }
