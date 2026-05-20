@@ -21,6 +21,21 @@ func (c *Client) ChannelsLogout(ctx context.Context, params protocol.ChannelsLog
 	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsLogout), params)
 }
 
+// ChannelsStart starts a channel connection.
+func (c *Client) ChannelsStart(ctx context.Context, params protocol.ChannelsStartParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChannelsStart), params)
+}
+
+// TalkRealtimeSession creates a real-time voice session token.
+// Added in openclaw v2026.4.24.
+func (c *Client) TalkRealtimeSession(ctx context.Context, params protocol.TalkRealtimeSessionParams) (*protocol.TalkRealtimeSessionResult, error) {
+	var result protocol.TalkRealtimeSessionResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTalkRealtimeSession), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // TalkConfig retrieves the talk (voice) configuration.
 func (c *Client) TalkConfig(ctx context.Context, params protocol.TalkConfigParams) (*protocol.TalkConfigResult, error) {
 	var result protocol.TalkConfigResult

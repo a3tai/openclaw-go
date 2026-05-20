@@ -179,10 +179,14 @@ const (
 	MethodAgentsList      MethodName = "agents.list"
 	MethodAgentsUpdate    MethodName = "agents.update"
 
+	// Assistant media.
+	MethodAssistantMediaGet MethodName = "assistant.media.get"
+
 	// Browser and channel integration.
 	// Deprecated: browser.request is not in upstream BASE_METHODS; treat as a deprecation candidate.
 	MethodBrowserRequest MethodName = "browser.request"
 	MethodChannelsLogout MethodName = "channels.logout"
+	MethodChannelsStart  MethodName = "channels.start"
 	MethodChannelsStatus MethodName = "channels.status"
 	MethodMessageAction  MethodName = "message.action"
 
@@ -221,6 +225,7 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
+	MethodDiagnosticsStability MethodName = "diagnostics.stability"
 	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
 	MethodExecApprovalGet      MethodName = "exec.approval.get"
 	MethodExecApprovalList     MethodName = "exec.approval.list"
@@ -301,11 +306,12 @@ const (
 	MethodSkillsUpdate  MethodName = "skills.update"
 
 	// System presence/events and voice interactions.
-	MethodSystemEvent    MethodName = "system-event"
-	MethodSystemPresence MethodName = "system-presence"
-	MethodTalkConfig     MethodName = "talk.config"
-	MethodTalkMode       MethodName = "talk.mode"
-	MethodTalkSpeak      MethodName = "talk.speak"
+	MethodSystemEvent           MethodName = "system-event"
+	MethodSystemPresence        MethodName = "system-presence"
+	MethodTalkConfig            MethodName = "talk.config"
+	MethodTalkMode              MethodName = "talk.mode"
+	MethodTalkRealtimeSession   MethodName = "talk.realtime.session"
+	MethodTalkSpeak             MethodName = "talk.speak"
 
 	// Tool and TTS interfaces.
 	MethodToolsCatalog   MethodName = "tools.catalog"
@@ -1678,6 +1684,24 @@ type TalkConfigResult struct {
 	Config TalkConfigData `json:"config"`
 }
 
+// TalkRealtimeSessionParams are the params for "talk.realtime.session".
+// Added in openclaw v2026.4.24.
+type TalkRealtimeSessionParams struct {
+	SessionKey string `json:"sessionKey,omitempty"`
+	Provider   string `json:"provider,omitempty"`
+	Model      string `json:"model,omitempty"`
+	Voice      string `json:"voice,omitempty"`
+}
+
+// TalkRealtimeSessionResult is the result of "talk.realtime.session".
+type TalkRealtimeSessionResult struct {
+	Provider     string   `json:"provider"`
+	ClientSecret string   `json:"clientSecret"`
+	Model        string   `json:"model,omitempty"`
+	Voice        string   `json:"voice,omitempty"`
+	ExpiresAt    *float64 `json:"expiresAt,omitempty"`
+}
+
 // TalkSpeakParams are the params for "talk.speak".
 // Added in openclaw v2026.3.22.
 type TalkSpeakParams struct {
@@ -1794,6 +1818,12 @@ type ChannelAccountSnapshot struct {
 
 // ChannelsLogoutParams are the params for "channels.logout".
 type ChannelsLogoutParams struct {
+	Channel   string `json:"channel"`
+	AccountID string `json:"accountId,omitempty"`
+}
+
+// ChannelsStartParams are the params for "channels.start".
+type ChannelsStartParams struct {
 	Channel   string `json:"channel"`
 	AccountID string `json:"accountId,omitempty"`
 }
