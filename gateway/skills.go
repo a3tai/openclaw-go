@@ -52,3 +52,26 @@ func (c *Client) SkillsDetail(ctx context.Context, params protocol.SkillsDetailP
 	}
 	return &result, nil
 }
+
+// SkillsUploadBegin begins a chunked skill upload.
+func (c *Client) SkillsUploadBegin(ctx context.Context, params protocol.SkillsUploadBeginParams) (*protocol.SkillsUploadBeginResult, error) {
+	var result protocol.SkillsUploadBeginResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsUploadBegin), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// SkillsUploadChunk uploads a chunk of skill data.
+func (c *Client) SkillsUploadChunk(ctx context.Context, params protocol.SkillsUploadChunkParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodSkillsUploadChunk), params)
+}
+
+// SkillsUploadCommit finalizes a chunked skill upload and returns an install ID.
+func (c *Client) SkillsUploadCommit(ctx context.Context, params protocol.SkillsUploadCommitParams) (*protocol.SkillsUploadCommitResult, error) {
+	var result protocol.SkillsUploadCommitResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsUploadCommit), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

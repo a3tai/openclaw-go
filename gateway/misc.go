@@ -53,3 +53,53 @@ func (c *Client) UsageCost(ctx context.Context, params any) (json.RawMessage, er
 func (c *Client) Poll(ctx context.Context, params protocol.PollParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, "poll", params)
 }
+
+// UpdateStatus retrieves the current update status.
+func (c *Client) UpdateStatus(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodUpdateStatus), struct{}{})
+}
+
+// VoiceWakeRoutingGet retrieves the voice wake routing configuration.
+func (c *Client) VoiceWakeRoutingGet(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodVoiceWakeRoutingGet), struct{}{})
+}
+
+// VoiceWakeRoutingSet sets the voice wake routing configuration.
+func (c *Client) VoiceWakeRoutingSet(ctx context.Context, params any) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodVoiceWakeRoutingSet), params)
+}
+
+// AssistantMediaGet retrieves assistant media by ID.
+func (c *Client) AssistantMediaGet(ctx context.Context, params protocol.AssistantMediaGetParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodAssistantMediaGet), params)
+}
+
+// PushWebVapidPublicKey retrieves the VAPID public key for web push.
+func (c *Client) PushWebVapidPublicKey(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodPushWebVapidPublicKey), struct{}{})
+}
+
+// PushWebSubscribe subscribes to web push notifications.
+func (c *Client) PushWebSubscribe(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodPushWebSubscribe), params)
+}
+
+// PushWebUnsubscribe unsubscribes from web push notifications.
+func (c *Client) PushWebUnsubscribe(ctx context.Context, params any) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodPushWebUnsubscribe), params)
+}
+
+// PushWebTest sends a test web push notification.
+func (c *Client) PushWebTest(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodPushWebTest), params)
+}
+
+// ConfigOpenFile opens a config file in the system editor.
+func (c *Client) ConfigOpenFile(ctx context.Context, params protocol.ConfigOpenFileParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodConfigOpenFile), params)
+}
+
+// NativeHookInvoke invokes a native hook by name.
+func (c *Client) NativeHookInvoke(ctx context.Context, params protocol.NativeHookInvokeParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodNativeHookInvoke), params)
+}

@@ -1482,6 +1482,458 @@ func TestSecretsReload(t *testing.T) {
 	tm.run()
 }
 
+// --- New in v2026.5.20 ---
+
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.dreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryBackfillDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.backfillDreamDiary", success: func(c *Client, ctx context.Context) error {
+		return c.DoctorMemoryBackfillDreamDiary(ctx)
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryResetDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.resetDreamDiary", success: func(c *Client, ctx context.Context) error {
+		return c.DoctorMemoryResetDreamDiary(ctx)
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryResetGroundedShortTerm(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.resetGroundedShortTerm", success: func(c *Client, ctx context.Context) error {
+		return c.DoctorMemoryResetGroundedShortTerm(ctx)
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryRepairDreamingArtifacts(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.repairDreamingArtifacts", success: func(c *Client, ctx context.Context) error {
+		return c.DoctorMemoryRepairDreamingArtifacts(ctx)
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryDedupeDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.dedupeDreamDiary", success: func(c *Client, ctx context.Context) error {
+		return c.DoctorMemoryDedupeDreamDiary(ctx)
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryRemHarness(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.remHarness", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryRemHarness(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		return c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+	}}
+	tm.run()
+}
+
+func TestChannelsStop(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.stop", success: func(c *Client, ctx context.Context) error {
+		return c.ChannelsStop(ctx, protocol.ChannelsStopParams{Channel: "slack"})
+	}}
+	tm.run()
+}
+
+func TestTTSPersonas(t *testing.T) {
+	tm := &testMethod{t: t, method: "tts.personas", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSPersonas(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestTTSSetPersona(t *testing.T) {
+	tm := &testMethod{t: t, method: "tts.setPersona", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSSetPersona(ctx, protocol.TTSSetPersonaParams{Persona: "default"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPluginsUIDescriptors(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugins.uiDescriptors", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginsUIDescriptors(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestPluginsSessionAction(t *testing.T) {
+	tm := &testMethod{t: t, method: "plugins.sessionAction", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PluginsSessionAction(ctx, map[string]string{"action": "test"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkCatalog(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.catalog", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkCatalog(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkClientCreate(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.client.create", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkClientCreate(ctx, map[string]string{"sessionKey": "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkClientToolCall(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.client.toolCall", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkClientToolCall(ctx, map[string]string{"clientId": "c1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionCreate(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.create", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionCreate(ctx, map[string]string{"sessionKey": "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionJoin(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.join", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionJoin(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionAppendAudio(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.appendAudio", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionAppendAudio(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionStartTurn(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.startTurn", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionStartTurn(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionEndTurn(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.endTurn", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionEndTurn(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionCancelTurn(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.cancelTurn", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionCancelTurn(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionCancelOutput(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.cancelOutput", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionCancelOutput(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionSubmitToolResult(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.submitToolResult", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionSubmitToolResult(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionClose(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.close", success: func(c *Client, ctx context.Context) error {
+		return c.TalkSessionClose(ctx, map[string]string{"sessionId": "s1"})
+	}}
+	tm.run()
+}
+
+func TestModelsAuthStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "models.authStatus", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ModelsAuthStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestModelsAuthLogout(t *testing.T) {
+	tm := &testMethod{t: t, method: "models.authLogout", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ModelsAuthLogout(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestToolsInvoke(t *testing.T) {
+	tm := &testMethod{t: t, method: "tools.invoke", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ToolsInvoke(ctx, map[string]string{"tool": "test"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTasksList(t *testing.T) {
+	tm := &testMethod{t: t, method: "tasks.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TasksList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestTasksGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "tasks.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TasksGet(ctx, protocol.TasksGetParams{TaskID: "t1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTasksCancel(t *testing.T) {
+	tm := &testMethod{t: t, method: "tasks.cancel", success: func(c *Client, ctx context.Context) error {
+		return c.TasksCancel(ctx, protocol.TasksCancelParams{TaskID: "t1"})
+	}}
+	tm.run()
+}
+
+func TestEnvironmentsList(t *testing.T) {
+	tm := &testMethod{t: t, method: "environments.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.EnvironmentsList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestEnvironmentsStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "environments.status", success: func(c *Client, ctx context.Context) error {
+		_, err := c.EnvironmentsStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestArtifactsList(t *testing.T) {
+	tm := &testMethod{t: t, method: "artifacts.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ArtifactsList(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestArtifactsGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "artifacts.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ArtifactsGet(ctx, protocol.ArtifactsGetParams{ArtifactID: "a1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestArtifactsDownload(t *testing.T) {
+	tm := &testMethod{t: t, method: "artifacts.download", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ArtifactsDownload(ctx, protocol.ArtifactsDownloadParams{ArtifactID: "a1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSkillsUploadBegin(t *testing.T) {
+	tm := &testMethod{t: t, method: "skills.upload.begin", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SkillsUploadBegin(ctx, protocol.SkillsUploadBeginParams{Size: 1024, Filename: "skill.tar.gz"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSkillsUploadChunk(t *testing.T) {
+	tm := &testMethod{t: t, method: "skills.upload.chunk", success: func(c *Client, ctx context.Context) error {
+		return c.SkillsUploadChunk(ctx, protocol.SkillsUploadChunkParams{UploadID: "u1", Seq: 0, Data: "AAAA"})
+	}}
+	tm.run()
+}
+
+func TestSkillsUploadCommit(t *testing.T) {
+	tm := &testMethod{t: t, method: "skills.upload.commit", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SkillsUploadCommit(ctx, protocol.SkillsUploadCommitParams{UploadID: "u1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestUpdateStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "update.status", success: func(c *Client, ctx context.Context) error {
+		_, err := c.UpdateStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.VoiceWakeRoutingGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingSet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.set", success: func(c *Client, ctx context.Context) error {
+		return c.VoiceWakeRoutingSet(ctx, map[string]string{"target": "main"})
+	}}
+	tm.run()
+}
+
+func TestSessionsDescribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.describe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsDescribe(ctx, protocol.SessionsDescribeParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsPluginPatch(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.pluginPatch", success: func(c *Client, ctx context.Context) error {
+		return c.SessionsPluginPatch(ctx, protocol.SessionsPluginPatchParams{Key: "main", Patch: json.RawMessage(`{}`)})
+	}}
+	tm.run()
+}
+
+func TestSessionsCleanup(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.cleanup", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsCleanup(ctx, protocol.SessionsCleanupParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestNodePairRemove(t *testing.T) {
+	tm := &testMethod{t: t, method: "node.pair.remove", success: func(c *Client, ctx context.Context) error {
+		return c.NodePairRemove(ctx, protocol.NodePairRemoveParams{NodeID: "n1"})
+	}}
+	tm.run()
+}
+
+func TestNodePluginSurfaceRefresh(t *testing.T) {
+	tm := &testMethod{t: t, method: "node.pluginSurface.refresh", success: func(c *Client, ctx context.Context) error {
+		_, err := c.NodePluginSurfaceRefresh(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestCronGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "cron.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.CronGet(ctx, protocol.CronGetParams{ID: "j1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestGatewayRestartPreflight(t *testing.T) {
+	tm := &testMethod{t: t, method: "gateway.restart.preflight", success: func(c *Client, ctx context.Context) error {
+		_, err := c.GatewayRestartPreflight(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestGatewayRestartRequest(t *testing.T) {
+	tm := &testMethod{t: t, method: "gateway.restart.request", success: func(c *Client, ctx context.Context) error {
+		_, err := c.GatewayRestartRequest(ctx, map[string]string{"note": "test"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, protocol.AssistantMediaGetParams{MediaID: "m1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebVapidPublicKey(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.vapidPublicKey", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebVapidPublicKey(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebSubscribe(ctx, map[string]string{"endpoint": "https://example.com"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		return c.PushWebUnsubscribe(ctx, map[string]string{"endpoint": "https://example.com"})
+	}}
+	tm.run()
+}
+
+func TestPushWebTest(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.test", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebTest(ctx, map[string]string{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestConfigOpenFile(t *testing.T) {
+	tm := &testMethod{t: t, method: "config.openFile", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ConfigOpenFile(ctx, protocol.ConfigOpenFileParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestNativeHookInvoke(t *testing.T) {
+	tm := &testMethod{t: t, method: "nativeHook.invoke", success: func(c *Client, ctx context.Context) error {
+		_, err := c.NativeHookInvoke(ctx, protocol.NativeHookInvokeParams{Hook: "test"})
+		return err
+	}}
+	tm.run()
+}
+
 func TestSecretsResolve(t *testing.T) {
 	tm := &testMethod{t: t, method: "secrets.resolve", success: func(c *Client, ctx context.Context) error {
 		_, err := c.SecretsResolve(ctx, protocol.SecretsResolveParams{CommandName: "send", TargetIDs: []string{"slack"}})

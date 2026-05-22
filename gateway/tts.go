@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -54,8 +55,18 @@ func (c *Client) TTSConvert(ctx context.Context, params protocol.TTSConvertParam
 // TTSSetProvider sets the active TTS provider.
 func (c *Client) TTSSetProvider(ctx context.Context, params protocol.TTSSetProviderParams) (*protocol.TTSSetProviderResult, error) {
 	var result protocol.TTSSetProviderResult
-	if err := c.sendRPCTyped(ctx, "tts.setProvider", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodTTSSetProvider), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
+}
+
+// TTSPersonas retrieves available TTS personas.
+func (c *Client) TTSPersonas(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTTSPersonas), struct{}{})
+}
+
+// TTSSetPersona sets the active TTS persona.
+func (c *Client) TTSSetPersona(ctx context.Context, params protocol.TTSSetPersonaParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTTSSetPersona), params)
 }

@@ -20,7 +20,10 @@ GO_CONST_METHOD_RE = re.compile(r'sendRPC(?:Typed|Void)?\(ctx,\s*string\(protoco
 PROTOCOL_METHOD_CONST_RE = re.compile(r'\b(Method[A-Za-z0-9]+)\s+MethodName\s*=\s*"([a-z][a-z0-9_.-]+)"')
 METHOD_LIST_BLOCK_RE = re.compile(r"const\s+BASE_METHODS\s*=\s*\[(.*?)\]\s*;", re.DOTALL)
 
-IGNORED_UPSTREAM_METHODS = {"connect"}
+# "connect" is excluded intentionally (internal handshake, not a public RPC).
+# "dynamic", "node", "object", "string" are TypeScript type annotations and scope
+# values extracted as false positives by the literal regex from method-scopes.ts.
+IGNORED_UPSTREAM_METHODS = {"connect", "dynamic", "node", "object", "string"}
 
 
 def _collect_methods_from_server_handlers(upstream_root: Path) -> tuple[set[str], dict[str, str]]:

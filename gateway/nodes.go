@@ -81,3 +81,8 @@ func (c *Client) NodeCanvasCapabilityRefresh(ctx context.Context) (*protocol.Nod
 	}
 	return &result, nil
 }
+
+// NodePluginSurfaceRefresh refreshes the plugin surface for the connected node.
+func (c *Client) NodePluginSurfaceRefresh(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodNodePluginSurfaceRefresh), struct{}{})
+}

@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -22,4 +23,54 @@ func (c *Client) DoctorMemoryStatus(ctx context.Context) (*protocol.DoctorMemory
 		return nil, err
 	}
 	return &result, nil
+}
+
+// DiagnosticsStability retrieves system stability diagnostics.
+func (c *Client) DiagnosticsStability(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodDiagnosticsStability), struct{}{})
+}
+
+// DoctorMemoryDreamDiary retrieves the dream diary for a memory agent.
+func (c *Client) DoctorMemoryDreamDiary(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodDoctorMemoryDreamDiary), struct{}{})
+}
+
+// DoctorMemoryBackfillDreamDiary backfills the dream diary.
+func (c *Client) DoctorMemoryBackfillDreamDiary(ctx context.Context) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodDoctorMemoryBackfillDreamDiary), struct{}{})
+}
+
+// DoctorMemoryResetDreamDiary resets the dream diary.
+func (c *Client) DoctorMemoryResetDreamDiary(ctx context.Context) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodDoctorMemoryResetDreamDiary), struct{}{})
+}
+
+// DoctorMemoryResetGroundedShortTerm resets the grounded short-term memory.
+func (c *Client) DoctorMemoryResetGroundedShortTerm(ctx context.Context) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodDoctorMemoryResetGroundedShortTerm), struct{}{})
+}
+
+// DoctorMemoryRepairDreamingArtifacts repairs dreaming artifacts in memory.
+func (c *Client) DoctorMemoryRepairDreamingArtifacts(ctx context.Context) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodDoctorMemoryRepairDreamingArtifacts), struct{}{})
+}
+
+// DoctorMemoryDedupeDreamDiary deduplicates entries in the dream diary.
+func (c *Client) DoctorMemoryDedupeDreamDiary(ctx context.Context) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodDoctorMemoryDedupeDreamDiary), struct{}{})
+}
+
+// DoctorMemoryRemHarness retrieves REM harness information for a memory agent.
+func (c *Client) DoctorMemoryRemHarness(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodDoctorMemoryRemHarness), struct{}{})
+}
+
+// GatewayRestartPreflight checks if a gateway restart is safe to proceed.
+func (c *Client) GatewayRestartPreflight(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodGatewayRestartPreflight), struct{}{})
+}
+
+// GatewayRestartRequest requests a gateway restart.
+func (c *Client) GatewayRestartRequest(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodGatewayRestartRequest), params)
 }

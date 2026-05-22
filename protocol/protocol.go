@@ -330,6 +330,103 @@ const (
 	MethodWizardNext    MethodName = "wizard.next"
 	MethodWizardStart   MethodName = "wizard.start"
 	MethodWizardStatus  MethodName = "wizard.status"
+
+	// Diagnostics.
+	MethodDiagnosticsStability MethodName = "diagnostics.stability"
+
+	// Doctor memory operations.
+	MethodDoctorMemoryDreamDiary              MethodName = "doctor.memory.dreamDiary"
+	MethodDoctorMemoryBackfillDreamDiary      MethodName = "doctor.memory.backfillDreamDiary"
+	MethodDoctorMemoryResetDreamDiary         MethodName = "doctor.memory.resetDreamDiary"
+	MethodDoctorMemoryResetGroundedShortTerm  MethodName = "doctor.memory.resetGroundedShortTerm"
+	MethodDoctorMemoryRepairDreamingArtifacts MethodName = "doctor.memory.repairDreamingArtifacts"
+	MethodDoctorMemoryDedupeDreamDiary        MethodName = "doctor.memory.dedupeDreamDiary"
+	MethodDoctorMemoryRemHarness              MethodName = "doctor.memory.remHarness"
+
+	// Channel start/stop.
+	MethodChannelsStart MethodName = "channels.start"
+	MethodChannelsStop  MethodName = "channels.stop"
+
+	// TTS personas and provider selection.
+	MethodTTSPersonas   MethodName = "tts.personas"
+	MethodTTSSetPersona MethodName = "tts.setPersona"
+	MethodTTSSetProvider MethodName = "tts.setProvider"
+
+	// Plugin UI descriptors and session actions.
+	MethodPluginsUIDescriptors MethodName = "plugins.uiDescriptors"
+	MethodPluginsSessionAction MethodName = "plugins.sessionAction"
+
+	// Talk catalog and real-time session management.
+	MethodTalkCatalog              MethodName = "talk.catalog"
+	MethodTalkClientCreate         MethodName = "talk.client.create"
+	MethodTalkClientToolCall       MethodName = "talk.client.toolCall"
+	MethodTalkSessionCreate        MethodName = "talk.session.create"
+	MethodTalkSessionJoin          MethodName = "talk.session.join"
+	MethodTalkSessionAppendAudio   MethodName = "talk.session.appendAudio"
+	MethodTalkSessionStartTurn     MethodName = "talk.session.startTurn"
+	MethodTalkSessionEndTurn       MethodName = "talk.session.endTurn"
+	MethodTalkSessionCancelTurn    MethodName = "talk.session.cancelTurn"
+	MethodTalkSessionCancelOutput  MethodName = "talk.session.cancelOutput"
+	MethodTalkSessionSubmitToolResult MethodName = "talk.session.submitToolResult"
+	MethodTalkSessionClose         MethodName = "talk.session.close"
+
+	// Models auth status and logout.
+	MethodModelsAuthStatus MethodName = "models.authStatus"
+	MethodModelsAuthLogout MethodName = "models.authLogout"
+
+	// Tools invoke.
+	MethodToolsInvoke MethodName = "tools.invoke"
+
+	// Tasks.
+	MethodTasksList   MethodName = "tasks.list"
+	MethodTasksGet    MethodName = "tasks.get"
+	MethodTasksCancel MethodName = "tasks.cancel"
+
+	// Environments.
+	MethodEnvironmentsList   MethodName = "environments.list"
+	MethodEnvironmentsStatus MethodName = "environments.status"
+
+	// Artifacts.
+	MethodArtifactsList     MethodName = "artifacts.list"
+	MethodArtifactsGet      MethodName = "artifacts.get"
+	MethodArtifactsDownload MethodName = "artifacts.download"
+
+	// Skills upload.
+	MethodSkillsUploadBegin  MethodName = "skills.upload.begin"
+	MethodSkillsUploadChunk  MethodName = "skills.upload.chunk"
+	MethodSkillsUploadCommit MethodName = "skills.upload.commit"
+
+	// Update status.
+	MethodUpdateStatus MethodName = "update.status"
+
+	// Voice wake routing.
+	MethodVoiceWakeRoutingGet MethodName = "voicewake.routing.get"
+	MethodVoiceWakeRoutingSet MethodName = "voicewake.routing.set"
+
+	// Session describe, plugin patch, and cleanup.
+	MethodSessionsDescribe    MethodName = "sessions.describe"
+	MethodSessionsPluginPatch MethodName = "sessions.pluginPatch"
+	MethodSessionsCleanup     MethodName = "sessions.cleanup"
+
+	// Node pair remove and plugin surface refresh.
+	MethodNodePairRemove            MethodName = "node.pair.remove"
+	MethodNodePluginSurfaceRefresh  MethodName = "node.pluginSurface.refresh"
+
+	// Cron get.
+	MethodCronGet MethodName = "cron.get"
+
+	// Gateway restart.
+	MethodGatewayRestartPreflight MethodName = "gateway.restart.preflight"
+	MethodGatewayRestartRequest   MethodName = "gateway.restart.request"
+
+	// Assistant media, push web, config open file, native hook.
+	MethodAssistantMediaGet    MethodName = "assistant.media.get"
+	MethodPushWebVapidPublicKey MethodName = "push.web.vapidPublicKey"
+	MethodPushWebSubscribe     MethodName = "push.web.subscribe"
+	MethodPushWebUnsubscribe   MethodName = "push.web.unsubscribe"
+	MethodPushWebTest          MethodName = "push.web.test"
+	MethodConfigOpenFile       MethodName = "config.openFile"
+	MethodNativeHookInvoke     MethodName = "nativeHook.invoke"
 )
 
 // ---------------------------------------------------------------------------
@@ -2667,4 +2764,123 @@ type SessionsCompactionRestoreResult struct {
 	SessionID  string                         `json:"sessionId"`
 	Checkpoint SessionCompactionCheckpoint    `json:"checkpoint"`
 	Entry      SessionsCompactionRestoreEntry `json:"entry"`
+}
+
+// ---------------------------------------------------------------------------
+// New in v2026.5.20
+// ---------------------------------------------------------------------------
+
+// NodePairRemoveParams are the params for "node.pair.remove".
+type NodePairRemoveParams struct {
+	NodeID string `json:"nodeId"`
+}
+
+// ChannelsStartParams are the params for "channels.start".
+type ChannelsStartParams struct {
+	Channel   string `json:"channel"`
+	AccountID string `json:"accountId,omitempty"`
+}
+
+// ChannelsStopParams are the params for "channels.stop".
+type ChannelsStopParams struct {
+	Channel   string `json:"channel"`
+	AccountID string `json:"accountId,omitempty"`
+}
+
+// TTSSetPersonaParams are the params for "tts.setPersona".
+type TTSSetPersonaParams struct {
+	Persona string `json:"persona"`
+}
+
+// CronGetParams are the params for "cron.get".
+type CronGetParams struct {
+	ID    string `json:"id,omitempty"`
+	JobID string `json:"jobId,omitempty"`
+}
+
+// TasksGetParams are the params for "tasks.get".
+type TasksGetParams struct {
+	TaskID string `json:"taskId"`
+}
+
+// TasksCancelParams are the params for "tasks.cancel".
+type TasksCancelParams struct {
+	TaskID string `json:"taskId"`
+}
+
+// ArtifactsGetParams are the params for "artifacts.get".
+type ArtifactsGetParams struct {
+	ArtifactID string `json:"artifactId"`
+}
+
+// ArtifactsDownloadParams are the params for "artifacts.download".
+type ArtifactsDownloadParams struct {
+	ArtifactID string `json:"artifactId"`
+}
+
+// SessionsDescribeParams are the params for "sessions.describe".
+type SessionsDescribeParams struct {
+	Key string `json:"key"`
+}
+
+// SessionsPluginPatchParams are the params for "sessions.pluginPatch".
+type SessionsPluginPatchParams struct {
+	Key   string          `json:"key"`
+	Patch json.RawMessage `json:"patch"`
+}
+
+// SessionsCleanupParams are the params for "sessions.cleanup".
+type SessionsCleanupParams struct {
+	Key string `json:"key,omitempty"`
+}
+
+// SkillsUploadBeginParams are the params for "skills.upload.begin".
+type SkillsUploadBeginParams struct {
+	Size     int    `json:"size"`
+	Filename string `json:"filename,omitempty"`
+}
+
+// SkillsUploadBeginResult is the result of "skills.upload.begin".
+type SkillsUploadBeginResult struct {
+	UploadID string `json:"uploadId"`
+}
+
+// SkillsUploadChunkParams are the params for "skills.upload.chunk".
+type SkillsUploadChunkParams struct {
+	UploadID string `json:"uploadId"`
+	Seq      int    `json:"seq"`
+	Data     string `json:"data"` // base64-encoded chunk
+}
+
+// SkillsUploadCommitParams are the params for "skills.upload.commit".
+type SkillsUploadCommitParams struct {
+	UploadID string `json:"uploadId"`
+}
+
+// SkillsUploadCommitResult is the result of "skills.upload.commit".
+type SkillsUploadCommitResult struct {
+	InstallID string `json:"installId"`
+}
+
+// AssistantMediaGetParams are the params for "assistant.media.get".
+type AssistantMediaGetParams struct {
+	MediaID string `json:"mediaId"`
+}
+
+// ConfigOpenFileParams are the params for "config.openFile".
+type ConfigOpenFileParams struct {
+	Path string `json:"path,omitempty"`
+}
+
+// NativeHookInvokeParams are the params for "nativeHook.invoke".
+type NativeHookInvokeParams struct {
+	Hook   string `json:"hook"`
+	Params any    `json:"params,omitempty"`
+}
+
+// ModelsAuthStatusResult is the result of "models.authStatus".
+type ModelsAuthStatusResult struct {
+	Authenticated bool   `json:"authenticated"`
+	Provider      string `json:"provider,omitempty"`
+	Model         string `json:"model,omitempty"`
 }

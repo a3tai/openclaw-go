@@ -53,3 +53,73 @@ func (c *Client) WebLoginStart(ctx context.Context, params protocol.WebLoginStar
 func (c *Client) WebLoginWait(ctx context.Context, params protocol.WebLoginWaitParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodWebLoginWait), params)
 }
+
+// ChannelsStart starts a channel account.
+func (c *Client) ChannelsStart(ctx context.Context, params protocol.ChannelsStartParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsStart), params)
+}
+
+// ChannelsStop stops a channel account.
+func (c *Client) ChannelsStop(ctx context.Context, params protocol.ChannelsStopParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodChannelsStop), params)
+}
+
+// TalkCatalog retrieves the talk catalog.
+func (c *Client) TalkCatalog(ctx context.Context) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkCatalog), struct{}{})
+}
+
+// TalkClientCreate creates a talk client.
+func (c *Client) TalkClientCreate(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkClientCreate), params)
+}
+
+// TalkClientToolCall submits a tool call result from a talk client.
+func (c *Client) TalkClientToolCall(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkClientToolCall), params)
+}
+
+// TalkSessionCreate creates a real-time talk session.
+func (c *Client) TalkSessionCreate(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionCreate), params)
+}
+
+// TalkSessionJoin joins an existing talk session.
+func (c *Client) TalkSessionJoin(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionJoin), params)
+}
+
+// TalkSessionAppendAudio appends audio to a talk session.
+func (c *Client) TalkSessionAppendAudio(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionAppendAudio), params)
+}
+
+// TalkSessionStartTurn starts a turn in a talk session.
+func (c *Client) TalkSessionStartTurn(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionStartTurn), params)
+}
+
+// TalkSessionEndTurn ends the current turn in a talk session.
+func (c *Client) TalkSessionEndTurn(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionEndTurn), params)
+}
+
+// TalkSessionCancelTurn cancels the current turn in a talk session.
+func (c *Client) TalkSessionCancelTurn(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionCancelTurn), params)
+}
+
+// TalkSessionCancelOutput cancels queued output in a talk session.
+func (c *Client) TalkSessionCancelOutput(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionCancelOutput), params)
+}
+
+// TalkSessionSubmitToolResult submits a tool result into a talk session.
+func (c *Client) TalkSessionSubmitToolResult(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionSubmitToolResult), params)
+}
+
+// TalkSessionClose closes a talk session.
+func (c *Client) TalkSessionClose(ctx context.Context, params any) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodTalkSessionClose), params)
+}

@@ -49,3 +49,8 @@ func (c *Client) CronRuns(ctx context.Context, params protocol.CronRunsParams) (
 	}
 	return &result, nil
 }
+
+// CronGet retrieves a single cron job by ID.
+func (c *Client) CronGet(ctx context.Context, params protocol.CronGetParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodCronGet), params)
+}

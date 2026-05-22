@@ -138,3 +138,18 @@ func (c *Client) SessionsCompactionRestore(ctx context.Context, params protocol.
 	}
 	return &result, nil
 }
+
+// SessionsDescribe returns a detailed description of a session.
+func (c *Client) SessionsDescribe(ctx context.Context, params protocol.SessionsDescribeParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsDescribe), params)
+}
+
+// SessionsPluginPatch applies a plugin-owned patch to a session.
+func (c *Client) SessionsPluginPatch(ctx context.Context, params protocol.SessionsPluginPatchParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodSessionsPluginPatch), params)
+}
+
+// SessionsCleanup removes stale/orphaned session state.
+func (c *Client) SessionsCleanup(ctx context.Context, params protocol.SessionsCleanupParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsCleanup), params)
+}
