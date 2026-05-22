@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2026.4.25] - 2026-04-27
+
+Sync to upstream openclaw v2026.4.25. Fourteen new gateway RPC methods across diagnostics, doctor memory, channels, TTS personas, models auth, talk realtime, and voice wake routing.
+
+### Added
+
+- `DiagnosticsStability(ctx) (*DiagnosticsStabilityResult, error)` — retrieve gateway stability diagnostics
+- `DoctorMemoryDreamDiary(ctx) (*DoctorMemoryDreamDiaryResult, error)` — retrieve dream diary memory entries
+- `DoctorMemoryBackfillDreamDiary(ctx) (json.RawMessage, error)` — backfill dream diary from session history
+- `DoctorMemoryResetDreamDiary(ctx) (json.RawMessage, error)` — reset dream diary memory
+- `DoctorMemoryResetGroundedShortTerm(ctx) (json.RawMessage, error)` — reset grounded short-term memory
+- `DoctorMemoryRepairDreamingArtifacts(ctx) (json.RawMessage, error)` — repair dreaming artifacts in memory
+- `DoctorMemoryDedupeDreamDiary(ctx) (json.RawMessage, error)` — deduplicate dream diary entries
+- `ChannelsStart(ctx, ChannelsStartParams) (json.RawMessage, error)` — start a channel provider authentication flow
+- `TTSPersonas(ctx) (*TTSPersonasResult, error)` — list available TTS personas
+- `TTSSetPersona(ctx, TTSSetPersonaParams) (*TTSSetPersonaResult, error)` — set the active TTS persona
+- `ModelsAuthStatus(ctx) (*ModelsAuthStatusResult, error)` — retrieve auth status for model providers
+- `TalkRealtimeSession(ctx, TalkRealtimeSessionParams) (*TalkRealtimeSessionResult, error)` — create or retrieve a realtime talk session token
+- `VoiceWakeRoutingGet(ctx) (*VoiceWakeRoutingGetResult, error)` — retrieve voice wake routing configuration
+- `VoiceWakeRoutingSet(ctx, VoiceWakeRoutingSetParams) error` — set voice wake routing configuration
+- `DiagnosticsStabilityResult`, `DoctorMemoryDreamDiaryResult`, `DoctorMemoryOperationResult` protocol types
+- `ChannelsStartParams`, `ModelsAuthStatusResult` protocol types
+- `TTSPersonaInfo`, `TTSPersonasResult`, `TTSSetPersonaParams`, `TTSSetPersonaResult` protocol types
+- `TalkRealtimeSessionParams`, `TalkRealtimeSessionResult` protocol types
+- `VoiceWakeRoutingGetResult`, `VoiceWakeRoutingSetParams` protocol types
+- `MethodDiagnosticsStability`, `MethodDoctorMemoryDreamDiary`, `MethodDoctorMemoryBackfillDreamDiary`, `MethodDoctorMemoryResetDreamDiary`, `MethodDoctorMemoryResetGroundedShortTerm`, `MethodDoctorMemoryRepairDreamingArtifacts`, `MethodDoctorMemoryDedupeDreamDiary` method name constants
+- `MethodChannelsStart`, `MethodTTSPersonas`, `MethodTTSSetPersona`, `MethodModelsAuthStatus` method name constants
+- `MethodTalkRealtimeSession`, `MethodVoiceWakeRoutingGet`, `MethodVoiceWakeRoutingSet` method name constants
+- `MethodExecApprovalWaitDecision` constant (previously implemented with string literal)
+- `AssistantMediaGet(ctx, params) (json.RawMessage, error)` — retrieve an assistant media resource
+- `PushWebSubscribe(ctx, PushWebSubscribeParams) (*PushWebSubscribeResult, error)` — register a web push subscription
+- `PushWebUnsubscribe(ctx, PushWebUnsubscribeParams) (*PushWebUnsubscribeResult, error)` — remove a web push subscription by endpoint
+- `PushWebTest(ctx, PushWebTestParams) (*PushWebTestResult, error)` — send a test web push notification
+- `PushWebSubscribeParams`, `PushWebSubscribeResult`, `PushWebUnsubscribeParams`, `PushWebUnsubscribeResult`, `PushWebTestParams`, `PushWebTestResult` protocol types
+- `MethodAssistantMediaGet`, `MethodPushWebSubscribe`, `MethodPushWebUnsubscribe`, `MethodPushWebTest` method name constants
+
 ## [Unreleased]
 
 ### Breaking Changes

@@ -49,7 +49,7 @@ func (c *Client) ExecApprovalRequest(ctx context.Context, params protocol.ExecAp
 // Requires the operator.approvals scope.
 func (c *Client) ExecApprovalWaitDecision(ctx context.Context, params protocol.ExecApprovalWaitDecisionParams) (*protocol.ExecApprovalWaitDecisionResult, error) {
 	var result protocol.ExecApprovalWaitDecisionResult
-	if err := c.sendRPCTyped(ctx, "exec.approval.waitDecision", params, &result); err != nil {
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodExecApprovalWaitDecision), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil

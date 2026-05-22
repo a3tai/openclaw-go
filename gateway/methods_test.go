@@ -1816,3 +1816,148 @@ func TestSendRPCTypedUnmarshalError(t *testing.T) {
 		t.Errorf("error = %q, want to contain 'unmarshal'", err.Error())
 	}
 }
+
+// --- v2026.4.25 new methods ---
+
+func TestDiagnosticsStability(t *testing.T) {
+	tm := &testMethod{t: t, method: "diagnostics.stability", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DiagnosticsStability(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.dreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryBackfillDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.backfillDreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryBackfillDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryResetDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.resetDreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryResetDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryResetGroundedShortTerm(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.resetGroundedShortTerm", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryResetGroundedShortTerm(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryRepairDreamingArtifacts(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.repairDreamingArtifacts", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryRepairDreamingArtifacts(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestDoctorMemoryDedupeDreamDiary(t *testing.T) {
+	tm := &testMethod{t: t, method: "doctor.memory.dedupeDreamDiary", success: func(c *Client, ctx context.Context) error {
+		_, err := c.DoctorMemoryDedupeDreamDiary(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestChannelsStart(t *testing.T) {
+	tm := &testMethod{t: t, method: "channels.start", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChannelsStart(ctx, protocol.ChannelsStartParams{Channel: "slack"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTTSPersonas(t *testing.T) {
+	tm := &testMethod{t: t, method: "tts.personas", successPayload: json.RawMessage(`{"personas":[],"active":""}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSPersonas(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestTTSSetPersona(t *testing.T) {
+	tm := &testMethod{t: t, method: "tts.setPersona", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TTSSetPersona(ctx, protocol.TTSSetPersonaParams{Persona: "aria"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestModelsAuthStatus(t *testing.T) {
+	tm := &testMethod{t: t, method: "models.authStatus", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ModelsAuthStatus(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkRealtimeSession(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.realtime.session", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkRealtimeSession(ctx, protocol.TalkRealtimeSessionParams{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.VoiceWakeRoutingGet(ctx)
+		return err
+	}}
+	tm.run()
+}
+
+func TestVoiceWakeRoutingSet(t *testing.T) {
+	tm := &testMethod{t: t, method: "voicewake.routing.set", success: func(c *Client, ctx context.Context) error {
+		return c.VoiceWakeRoutingSet(ctx, protocol.VoiceWakeRoutingSetParams{Routing: json.RawMessage(`{}`)})
+	}}
+	tm.run()
+}
+
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, map[string]string{})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebSubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.subscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebSubscribe(ctx, protocol.PushWebSubscribeParams{Endpoint: "https://example.com/push", Keys: json.RawMessage(`{}`)})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebUnsubscribe(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.unsubscribe", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebUnsubscribe(ctx, protocol.PushWebUnsubscribeParams{Endpoint: "https://example.com/push"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestPushWebTest(t *testing.T) {
+	tm := &testMethod{t: t, method: "push.web.test", success: func(c *Client, ctx context.Context) error {
+		_, err := c.PushWebTest(ctx, protocol.PushWebTestParams{Title: "test"})
+		return err
+	}}
+	tm.run()
+}
