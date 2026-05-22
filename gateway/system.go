@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/a3tai/openclaw-go/protocol"
 )
@@ -22,4 +23,9 @@ func (c *Client) DoctorMemoryStatus(ctx context.Context) (*protocol.DoctorMemory
 		return nil, err
 	}
 	return &result, nil
+}
+
+// DiagnosticsStability retrieves gateway stability diagnostics.
+func (c *Client) DiagnosticsStability(ctx context.Context, params protocol.DiagnosticsStabilityParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodDiagnosticsStability), params)
 }
