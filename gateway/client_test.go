@@ -263,6 +263,38 @@ func TestConnectWithPassword(t *testing.T) {
 	}
 }
 
+func TestConnectWithBootstrapToken(t *testing.T) {
+	var gotParams protocol.ConnectParams
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+
+	mg.onConnect = func(p protocol.ConnectParams) {
+		gotParams = p
+	}
+
+	client := NewClient(
+		WithBootstrapToken("setup-code-bootstrap"),
+		WithDevice(protocol.DeviceIdentity{ID: "dev-1", PublicKey: "pk", Signature: "sig", SignedAt: 1}),
+		WithConnectTimeout(5*time.Second),
+	)
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	if gotParams.Auth.BootstrapToken != "setup-code-bootstrap" {
+		t.Errorf("auth.bootstrapToken = %q, want 'setup-code-bootstrap'", gotParams.Auth.BootstrapToken)
+	}
+	// A shared token may ride alongside the bootstrap token, but here none
+	// was set, so it must stay empty rather than be clobbered.
+	if gotParams.Auth.Token != "" {
+		t.Errorf("auth.token = %q, want empty", gotParams.Auth.Token)
+	}
+}
+
 // --- Connect with device identity ---
 
 func TestConnectWithDevice(t *testing.T) {

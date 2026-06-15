@@ -14,8 +14,9 @@ type Option func(*options)
 
 type options struct {
 	// Auth
-	token    string
-	password string
+	token          string
+	password       string
+	bootstrapToken string
 
 	// Client identity
 	clientInfo   protocol.ClientInfo
@@ -74,6 +75,15 @@ func WithToken(token string) Option {
 // WithPassword sets the password for authentication.
 func WithPassword(password string) Option {
 	return func(o *options) { o.password = password }
+}
+
+// WithBootstrapToken sets a short-lived setup-code bootstrap token (from
+// `openclaw qr`) presented in the connect auth alongside a device identity.
+// The gateway redeems it to establish and approve the device on first
+// connect, then issues a durable device token in hello-ok. A device
+// identity (WithIdentity) is required for the gateway to accept it.
+func WithBootstrapToken(token string) Option {
+	return func(o *options) { o.bootstrapToken = token }
 }
 
 // WithClientInfo overrides the default client identity.

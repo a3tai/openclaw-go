@@ -239,11 +239,16 @@ func (c *Client) buildConnectParams(challenge *protocol.ConnectChallenge) protoc
 		UserAgent:   c.opts.userAgent,
 	}
 
-	// Auth: token or password.
+	// Auth: token or password, plus an optional bootstrap token. The
+	// bootstrap token rides alongside the device identity on first connect
+	// and may be presented with or without a shared token/password.
 	if c.opts.token != "" {
-		params.Auth = protocol.AuthParams{Token: c.opts.token}
+		params.Auth.Token = c.opts.token
 	} else if c.opts.password != "" {
-		params.Auth = protocol.AuthParams{Password: c.opts.password}
+		params.Auth.Password = c.opts.password
+	}
+	if c.opts.bootstrapToken != "" {
+		params.Auth.BootstrapToken = c.opts.bootstrapToken
 	}
 
 	// Device identity (includes challenge nonce for signing).
@@ -258,12 +263,19 @@ func (c *Client) buildConnectParams(challenge *protocol.ConnectChallenge) protoc
 		for i, s := range c.opts.scopes {
 			scopeStrs[i] = string(s)
 		}
+		// The gateway verifies the signature against the token it resolves
+		// from the connect auth (token, then bootstrapToken). When only a
+		// bootstrap token is presented, sign over it so the signature matches.
+		signatureToken := c.opts.token
+		if signatureToken == "" {
+			signatureToken = c.opts.bootstrapToken
+		}
 		sp := identity.SigningParams{
 			ClientID:   c.opts.clientInfo.ID,
 			ClientMode: c.opts.clientInfo.Mode,
 			Role:       string(c.opts.role),
 			Scopes:     scopeStrs,
-			Token:      c.opts.token,
+			Token:      signatureToken,
 			Nonce:      nonce,
 		}
 		params.Device = c.opts.deviceSigner(sp)
@@ -282,36 +294,47 @@ func (c *Client) readHelloOK(ctx context.Context, reqID string) error {
 	_ = c.conn.SetReadDeadline(time.Now().Add(c.opts.connectTimeout))
 	defer func() { _ = c.conn.SetReadDeadline(time.Time{}) }()
 
-	_, msg, err := c.conn.ReadMessage()
-	if err != nil {
-		return err
-	}
-	var resp protocol.Response
-	if err := json.Unmarshal(msg, &resp); err != nil {
-		return fmt.Errorf("unmarshal response: %w", err)
-	}
-	if resp.ID != reqID {
-		return fmt.Errorf("response id mismatch: got %q, want %q", resp.ID, reqID)
-	}
-	if !resp.OK {
-		if resp.Error != nil {
-			return fmt.Errorf("connect rejected: %s: %s", resp.Error.Code, resp.Error.Message)
+	// The connect response is the frame whose id matches our request. Some
+	// connect flows (notably node-role connects) interleave event frames
+	// before hello-ok; events carry no response id, so skip any frame that
+	// is not the matching response rather than mistaking it for the reply.
+	for {
+		_, msg, err := c.conn.ReadMessage()
+		if err != nil {
+			return err
 		}
-		return errors.New("connect rejected (no error details)")
-	}
+		var resp protocol.Response
+		if err := json.Unmarshal(msg, &resp); err != nil {
+			return fmt.Errorf("unmarshal response: %w", err)
+		}
+		if resp.Type != protocol.FrameTypeResponse {
+			// Interstitial event or other non-response frame (some node-role
+			// connects emit one before hello-ok) — keep reading.
+			continue
+		}
+		if resp.ID != reqID {
+			return fmt.Errorf("response id mismatch: got %q, want %q", resp.ID, reqID)
+		}
+		if !resp.OK {
+			if resp.Error != nil {
+				return fmt.Errorf("connect rejected: %s: %s", resp.Error.Code, resp.Error.Message)
+			}
+			return errors.New("connect rejected (no error details)")
+		}
 
-	var hello protocol.HelloOK
-	if err := json.Unmarshal(resp.Payload, &hello); err != nil {
-		return fmt.Errorf("unmarshal hello-ok: %w", err)
-	}
-	c.hello = &hello
+		var hello protocol.HelloOK
+		if err := json.Unmarshal(resp.Payload, &hello); err != nil {
+			return fmt.Errorf("unmarshal hello-ok: %w", err)
+		}
+		c.hello = &hello
 
-	// Apply server-provided tick interval.
-	if hello.Policy.TickIntervalMs > 0 {
-		c.opts.tickInterval = time.Duration(hello.Policy.TickIntervalMs) * time.Millisecond
-	}
+		// Apply server-provided tick interval.
+		if hello.Policy.TickIntervalMs > 0 {
+			c.opts.tickInterval = time.Duration(hello.Policy.TickIntervalMs) * time.Millisecond
+		}
 
-	return nil
+		return nil
+	}
 }
 
 func (c *Client) readLoop() {
