@@ -224,8 +224,11 @@ func TestConnect(t *testing.T) {
 	if hello.Protocol != protocol.ProtocolVersion {
 		t.Errorf("protocol = %d, want %d", hello.Protocol, protocol.ProtocolVersion)
 	}
-	if gotParams.MinProtocol != protocol.ProtocolVersion {
-		t.Errorf("minProtocol = %d, want %d", gotParams.MinProtocol, protocol.ProtocolVersion)
+	if gotParams.MinProtocol != protocol.MinProtocolVersion {
+		t.Errorf("minProtocol = %d, want %d", gotParams.MinProtocol, protocol.MinProtocolVersion)
+	}
+	if gotParams.MaxProtocol != protocol.ProtocolVersion {
+		t.Errorf("maxProtocol = %d, want %d", gotParams.MaxProtocol, protocol.ProtocolVersion)
 	}
 	if gotParams.Role != protocol.RoleOperator {
 		t.Errorf("role = %q, want %q", gotParams.Role, protocol.RoleOperator)

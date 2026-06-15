@@ -643,8 +643,14 @@ func TestErrorPayloadFull(t *testing.T) {
 }
 
 func TestProtocolVersionConst(t *testing.T) {
-	if ProtocolVersion != 3 {
-		t.Errorf("ProtocolVersion = %d, want 3", ProtocolVersion)
+	if ProtocolVersion != 4 {
+		t.Errorf("ProtocolVersion = %d, want 4", ProtocolVersion)
+	}
+	if MinProtocolVersion != 3 {
+		t.Errorf("MinProtocolVersion = %d, want 3", MinProtocolVersion)
+	}
+	if MinProtocolVersion > ProtocolVersion {
+		t.Errorf("MinProtocolVersion %d must not exceed ProtocolVersion %d", MinProtocolVersion, ProtocolVersion)
 	}
 }
 
