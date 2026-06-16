@@ -283,7 +283,8 @@ func TestConnectWithBootstrapToken(t *testing.T) {
 	defer cancel()
 
 	if err := client.Connect(ctx, wsURL); err != nil {
-		t.Fatalf("Connect: %v", err)
+		t.Errorf("Connect: %v", err)
+		return
 	}
 	if gotParams.Auth.BootstrapToken != "setup-code-bootstrap" {
 		t.Errorf("auth.bootstrapToken = %q, want 'setup-code-bootstrap'", gotParams.Auth.BootstrapToken)
