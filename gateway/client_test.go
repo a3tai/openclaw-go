@@ -2,7 +2,9 @@ package gateway
 
 import (
 	"context"
+	"crypto/ed25519"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/a3tai/openclaw-go/identity"
 	"github.com/a3tai/openclaw-go/protocol"
 	"github.com/gorilla/websocket"
 )
@@ -49,6 +52,10 @@ type mockGateway struct {
 
 	// sendMismatchedID causes the response to have a wrong ID.
 	sendMismatchedID bool
+
+	// sendInterstitialEvent emits an event frame just before hello-ok, as some
+	// node-role connect flows do.
+	sendInterstitialEvent bool
 }
 
 // waitReady blocks until the mock has entered its read loop.
@@ -154,6 +161,12 @@ func (m *mockGateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		raw := fmt.Sprintf(`{"type":"res","id":%q,"ok":true,"payload":"not an object"}`, req.ID)
 		conn.WriteMessage(websocket.TextMessage, []byte(raw))
 		return
+	}
+
+	// Optional interstitial event before hello-ok (node-role connect flows).
+	if m.sendInterstitialEvent {
+		evData, _ := protocol.MarshalEvent("node.interstitial", map[string]string{"k": "v"})
+		conn.WriteMessage(websocket.TextMessage, evData)
 	}
 
 	// 3. Send hello-ok response.
@@ -293,6 +306,92 @@ func TestConnectWithBootstrapToken(t *testing.T) {
 	// was set, so it must stay empty rather than be clobbered.
 	if gotParams.Auth.Token != "" {
 		t.Errorf("auth.token = %q, want empty", gotParams.Auth.Token)
+	}
+}
+
+// TestConnectBootstrapTokenSignedIntoDevice verifies that when only a bootstrap
+// token is presented (no shared/device token), the device identity signature is
+// computed over the bootstrap token — matching what the gateway resolves from
+// auth.bootstrapToken.
+func TestConnectBootstrapTokenSignedIntoDevice(t *testing.T) {
+	id, err := identity.NewIdentityFromSeed(make([]byte, ed25519.SeedSize))
+	if err != nil {
+		t.Errorf("NewIdentityFromSeed: %v", err)
+		return
+	}
+
+	var gotParams protocol.ConnectParams
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+	mg.onConnect = func(p protocol.ConnectParams) { gotParams = p }
+
+	const bootTok = "boot-tok"
+	clientInfo := protocol.ClientInfo{ID: protocol.ClientIDNodeHost, Version: "0.1.0", Platform: "go", Mode: protocol.ClientModeNode}
+	client := NewClient(
+		WithClientInfo(clientInfo),
+		WithRole(protocol.RoleNode),
+		WithScopes(protocol.ScopeOperatorRead),
+		WithBootstrapToken(bootTok),
+		WithIdentity(id, ""), // no device token: the bootstrap token must be signed over
+		WithConnectTimeout(5*time.Second),
+	)
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Errorf("Connect: %v", err)
+		return
+	}
+
+	dev := gotParams.Device
+	if dev == nil {
+		t.Error("device identity was not signed")
+		return
+	}
+	if gotParams.Auth.BootstrapToken != bootTok {
+		t.Errorf("auth.bootstrapToken = %q, want %q", gotParams.Auth.BootstrapToken, bootTok)
+	}
+
+	// The signature must verify over a v2 payload whose token field is the
+	// bootstrap token — proving the client signed over it, not an empty token.
+	payload := fmt.Sprintf("v2|%s|%s|%s|%s|%s|%d|%s|%s",
+		dev.ID, clientInfo.ID, clientInfo.Mode, string(protocol.RoleNode),
+		"operator.read", dev.SignedAt, bootTok, dev.Nonce)
+	pub, err := base64.RawURLEncoding.DecodeString(dev.PublicKey)
+	if err != nil {
+		t.Errorf("decode public key: %v", err)
+		return
+	}
+	sig, err := base64.RawURLEncoding.DecodeString(dev.Signature)
+	if err != nil {
+		t.Errorf("decode signature: %v", err)
+		return
+	}
+	if !ed25519.Verify(ed25519.PublicKey(pub), []byte(payload), sig) {
+		t.Error("signature does not verify over a payload containing the bootstrap token")
+	}
+}
+
+// TestConnectSkipsInterstitialEvent verifies the handshake skips an event frame
+// sent before hello-ok (as node-role connects do) instead of mistaking it for
+// the connect response.
+func TestConnectSkipsInterstitialEvent(t *testing.T) {
+	mg, wsURL, cleanup := startMockGateway(t)
+	defer cleanup()
+	mg.sendInterstitialEvent = true
+
+	client := NewClient(WithToken("tok"), WithConnectTimeout(5*time.Second))
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Connect(ctx, wsURL); err != nil {
+		t.Errorf("Connect with interstitial event: %v", err)
+		return
+	}
+	if client.Hello() == nil {
+		t.Error("hello is nil after skipping interstitial event")
 	}
 }
 
