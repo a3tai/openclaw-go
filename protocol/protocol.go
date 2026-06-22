@@ -192,9 +192,6 @@ const (
 	MethodChatInject  MethodName = "chat.inject"
 	MethodChatSend    MethodName = "chat.send"
 
-	// Command discovery.
-	MethodCommandsList MethodName = "commands.list"
-
 	// Configuration and schema operations.
 	MethodConfigApply        MethodName = "config.apply"
 	MethodConfigGet          MethodName = "config.get"
@@ -202,6 +199,9 @@ const (
 	MethodConfigSchema       MethodName = "config.schema"
 	MethodConfigSchemaLookup MethodName = "config.schema.lookup"
 	MethodConfigSet          MethodName = "config.set"
+
+	// Command catalog.
+	MethodCommandsList MethodName = "commands.list"
 
 	// Cron management and execution history.
 	MethodCronAdd    MethodName = "cron.add"
@@ -221,19 +221,16 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
-	MethodDoctorMemoryBackfillDreamDiary     MethodName = "doctor.memory.backfillDreamDiary"
-	MethodDoctorMemoryDreamDiary             MethodName = "doctor.memory.dreamDiary"
-	MethodDoctorMemoryResetDreamDiary        MethodName = "doctor.memory.resetDreamDiary"
-	MethodDoctorMemoryResetGroundedShortTerm MethodName = "doctor.memory.resetGroundedShortTerm"
-	MethodDoctorMemoryStatus                 MethodName = "doctor.memory.status"
-	MethodExecApprovalGet                    MethodName = "exec.approval.get"
-	MethodExecApprovalList                   MethodName = "exec.approval.list"
-	MethodExecApprovalRequest                MethodName = "exec.approval.request"
-	MethodExecApprovalResolve                MethodName = "exec.approval.resolve"
-	MethodExecApprovalsGet                   MethodName = "exec.approvals.get"
-	MethodExecApprovalsNodeGet               MethodName = "exec.approvals.node.get"
-	MethodExecApprovalsNodeSet               MethodName = "exec.approvals.node.set"
-	MethodExecApprovalsSet                   MethodName = "exec.approvals.set"
+	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
+	MethodDoctorMemoryStatus     MethodName = "doctor.memory.status"
+	MethodExecApprovalGet        MethodName = "exec.approval.get"
+	MethodExecApprovalList       MethodName = "exec.approval.list"
+	MethodExecApprovalRequest    MethodName = "exec.approval.request"
+	MethodExecApprovalResolve    MethodName = "exec.approval.resolve"
+	MethodExecApprovalsGet       MethodName = "exec.approvals.get"
+	MethodExecApprovalsNodeGet   MethodName = "exec.approvals.node.get"
+	MethodExecApprovalsNodeSet   MethodName = "exec.approvals.node.set"
+	MethodExecApprovalsSet       MethodName = "exec.approvals.set"
 
 	// Plugin approvals.
 	MethodPluginApprovalList         MethodName = "plugin.approval.list"
@@ -334,6 +331,12 @@ const (
 	MethodWizardNext    MethodName = "wizard.next"
 	MethodWizardStart   MethodName = "wizard.start"
 	MethodWizardStatus  MethodName = "wizard.status"
+)
+
+const (
+	MethodDoctorMemoryBackfillDreamDiary     MethodName = "doctor.memory.backfillDreamDiary"
+	MethodDoctorMemoryResetDreamDiary        MethodName = "doctor.memory.resetDreamDiary"
+	MethodDoctorMemoryResetGroundedShortTerm MethodName = "doctor.memory.resetGroundedShortTerm"
 )
 
 // ---------------------------------------------------------------------------
