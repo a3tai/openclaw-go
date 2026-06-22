@@ -14,3 +14,12 @@ func (c *Client) ModelsList(ctx context.Context) (*protocol.ModelsListResult, er
 	}
 	return &result, nil
 }
+
+// ModelsAuthStatus returns the authentication health status for all configured model providers.
+func (c *Client) ModelsAuthStatus(ctx context.Context) (*protocol.ModelsAuthStatusResult, error) {
+	var result protocol.ModelsAuthStatusResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodModelsAuthStatus), struct{}{}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
