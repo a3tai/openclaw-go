@@ -333,6 +333,12 @@ const (
 	MethodWizardStatus  MethodName = "wizard.status"
 )
 
+const (
+	MethodDoctorMemoryBackfillDreamDiary     MethodName = "doctor.memory.backfillDreamDiary"
+	MethodDoctorMemoryResetDreamDiary        MethodName = "doctor.memory.resetDreamDiary"
+	MethodDoctorMemoryResetGroundedShortTerm MethodName = "doctor.memory.resetGroundedShortTerm"
+)
+
 // ---------------------------------------------------------------------------
 // Framing
 // ---------------------------------------------------------------------------
@@ -2558,6 +2564,11 @@ type DoctorMemoryDreamDiaryResult struct {
 	Path        string  `json:"path"`
 	Content     *string `json:"content,omitempty"`
 	UpdatedAtMs *int64  `json:"updatedAtMs,omitempty"`
+}
+
+// PluginApprovalListResult is the result of "plugin.approval.list".
+type PluginApprovalListResult struct {
+	Approvals []PluginApprovalRequestedEvent `json:"approvals"`
 }
 
 // ---------------------------------------------------------------------------
