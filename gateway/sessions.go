@@ -88,21 +88,6 @@ func (c *Client) SessionsCompact(ctx context.Context, params protocol.SessionsCo
 	return c.sendRPCVoid(ctx, string(protocol.MethodSessionsCompact), params)
 }
 
-// SessionsUsage retrieves usage data for a session.
-func (c *Client) SessionsUsage(ctx context.Context, params protocol.SessionsUsageParams) (json.RawMessage, error) {
-	return c.sendRPC(ctx, string(protocol.MethodSessionsUsage), params)
-}
-
-// SessionsUsageTimeseries retrieves a token/cost timeline for one session.
-func (c *Client) SessionsUsageTimeseries(ctx context.Context, params protocol.SessionsUsageTimeseriesParams) (json.RawMessage, error) {
-	return c.sendRPC(ctx, string(protocol.MethodSessionsUsageTimeseries), params)
-}
-
-// SessionsUsageLogs retrieves usage log entries for one session.
-func (c *Client) SessionsUsageLogs(ctx context.Context, params protocol.SessionsUsageLogsParams) (json.RawMessage, error) {
-	return c.sendRPC(ctx, string(protocol.MethodSessionsUsageLogs), params)
-}
-
 // SessionsCompactionList lists compaction checkpoints for a session.
 func (c *Client) SessionsCompactionList(ctx context.Context, params protocol.SessionsCompactionListParams) (*protocol.SessionsCompactionListResult, error) {
 	var result protocol.SessionsCompactionListResult
@@ -112,7 +97,7 @@ func (c *Client) SessionsCompactionList(ctx context.Context, params protocol.Ses
 	return &result, nil
 }
 
-// SessionsCompactionGet retrieves a specific compaction checkpoint by ID.
+// SessionsCompactionGet retrieves a specific compaction checkpoint.
 func (c *Client) SessionsCompactionGet(ctx context.Context, params protocol.SessionsCompactionGetParams) (*protocol.SessionsCompactionGetResult, error) {
 	var result protocol.SessionsCompactionGetResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodSessionsCompactionGet), params, &result); err != nil {
@@ -130,11 +115,26 @@ func (c *Client) SessionsCompactionBranch(ctx context.Context, params protocol.S
 	return &result, nil
 }
 
-// SessionsCompactionRestore restores a session to the state at a compaction checkpoint.
+// SessionsCompactionRestore restores a session to a compaction checkpoint.
 func (c *Client) SessionsCompactionRestore(ctx context.Context, params protocol.SessionsCompactionRestoreParams) (*protocol.SessionsCompactionRestoreResult, error) {
 	var result protocol.SessionsCompactionRestoreResult
 	if err := c.sendRPCTyped(ctx, string(protocol.MethodSessionsCompactionRestore), params, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
+}
+
+// SessionsUsage retrieves usage data for a session.
+func (c *Client) SessionsUsage(ctx context.Context, params protocol.SessionsUsageParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsUsage), params)
+}
+
+// SessionsUsageTimeseries retrieves a token/cost timeline for one session.
+func (c *Client) SessionsUsageTimeseries(ctx context.Context, params protocol.SessionsUsageTimeseriesParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsUsageTimeseries), params)
+}
+
+// SessionsUsageLogs retrieves usage log entries for one session.
+func (c *Client) SessionsUsageLogs(ctx context.Context, params protocol.SessionsUsageLogsParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsUsageLogs), params)
 }

@@ -39,6 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.10] - 2026-04-11
+
+Sync to upstream openclaw v2026.4.10. No net new SDK surface beyond methods already accumulated on main; this release documents `commands.list` alongside the approval list and session compaction APIs.
+
+### Added
+
+- `CommandsList(ctx, CommandsListParams) (*CommandsListResult, error)` and related command catalog protocol types
+
 ## [v2026.4.9] - 2026-04-11
 
 Sync to upstream openclaw v2026.4.9. No new upstream methods in this release; this entry covers six methods that were present in the upstream `BASE_METHODS` list but missing from openclaw-go.
