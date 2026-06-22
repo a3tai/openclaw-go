@@ -203,9 +203,9 @@ jobs:
             --upstream-root /tmp/openclaw \
             --go-root . \
             --output /tmp/drift.json
-          MISSING=$(python3 -c "import json; d=json.load(open('/tmp/drift.json')); print(len(d['missing_in_go']))")
+          MISSING=$(python3 -c "import json; d=json.load(open('/tmp/drift.json')); print(len(d.get('missing_in_go_rpc', d['missing_in_go'])))")
           if [ "$MISSING" -gt 0 ]; then
-            echo "::error::Sync is incomplete — $MISSING methods still missing. Claude Code did not finish."
+            echo "::error::Sync is incomplete — $MISSING RPC methods still missing. Claude Code did not finish."
             exit 1
           fi
           echo "Drift check passed — no missing methods."
