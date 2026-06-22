@@ -38,6 +38,7 @@ jobs:
             const labels = ['release-sync'];
 
             const missing = report.missing_in_go || [];
+            const missingRpc = report.missing_in_go_rpc || missing;
             const extra = report.extra_in_go || [];
             const missingDetails = report.missing_details || [];
             const extraDetails = report.extra_details || [];
@@ -50,14 +51,15 @@ jobs:
               '',
               `- Upstream methods: **${report.upstream_method_count}**`,
               `- openclaw-go methods: **${report.go_method_count}**`,
-              `- Missing in openclaw-go: **${missing.length}**`,
+              `- Missing RPC methods in openclaw-go: **${missingRpc.length}**`,
+              `- Missing total including scope-only endpoints: **${missing.length}**`,
               `- Extra in openclaw-go: **${extra.length}**`,
               `- Upstream methods not in BASE_METHODS (compat/internal): **${listOnly.length + scopeOnly.length}**`,
               `- openclaw-go methods in upstream compat/internal set: **${goNotInBase.length}**`,
               '',
               '### Missing methods',
               ...(missingDetails.length
-                ? missingDetails.map((item) => `- \`${item.method}\` (upstream: \`${item.upstream_source}\`)`)
+                ? missingDetails.map((item) => `- \`${item.method}\` (upstream: \`${item.upstream_source}\`${item.scope_only ? ', scope-only' : ''})`)
                 : ['- none']),
               '',
               '### Extra methods',
