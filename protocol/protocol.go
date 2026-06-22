@@ -221,15 +221,16 @@ const (
 	MethodDeviceTokenRotate MethodName = "device.token.rotate"
 
 	// Diagnostics and execution approvals.
-	MethodDoctorMemoryStatus   MethodName = "doctor.memory.status"
-	MethodExecApprovalGet      MethodName = "exec.approval.get"
-	MethodExecApprovalList     MethodName = "exec.approval.list"
-	MethodExecApprovalRequest  MethodName = "exec.approval.request"
-	MethodExecApprovalResolve  MethodName = "exec.approval.resolve"
-	MethodExecApprovalsGet     MethodName = "exec.approvals.get"
-	MethodExecApprovalsNodeGet MethodName = "exec.approvals.node.get"
-	MethodExecApprovalsNodeSet MethodName = "exec.approvals.node.set"
-	MethodExecApprovalsSet     MethodName = "exec.approvals.set"
+	MethodDoctorMemoryDreamDiary MethodName = "doctor.memory.dreamDiary"
+	MethodDoctorMemoryStatus     MethodName = "doctor.memory.status"
+	MethodExecApprovalGet        MethodName = "exec.approval.get"
+	MethodExecApprovalList       MethodName = "exec.approval.list"
+	MethodExecApprovalRequest    MethodName = "exec.approval.request"
+	MethodExecApprovalResolve    MethodName = "exec.approval.resolve"
+	MethodExecApprovalsGet       MethodName = "exec.approvals.get"
+	MethodExecApprovalsNodeGet   MethodName = "exec.approvals.node.get"
+	MethodExecApprovalsNodeSet   MethodName = "exec.approvals.node.set"
+	MethodExecApprovalsSet       MethodName = "exec.approvals.set"
 
 	// Plugin approvals.
 	MethodPluginApprovalList         MethodName = "plugin.approval.list"
@@ -2542,6 +2543,21 @@ type PluginApprovalResolvedEvent struct {
 	ResolvedBy *string                      `json:"resolvedBy,omitempty"`
 	Ts         int64                        `json:"ts"`
 	Request    *PluginApprovalRequestParams `json:"request,omitempty"`
+}
+
+// ---------------------------------------------------------------------------
+// doctor.memory.dreamDiary types
+// ---------------------------------------------------------------------------
+
+// DoctorMemoryDreamDiaryResult is the result for "doctor.memory.dreamDiary".
+// Found indicates whether a dream diary file was located in the agent workspace.
+// Content is only set when Found is true.
+type DoctorMemoryDreamDiaryResult struct {
+	AgentID     string  `json:"agentId"`
+	Found       bool    `json:"found"`
+	Path        string  `json:"path"`
+	Content     *string `json:"content,omitempty"`
+	UpdatedAtMs *int64  `json:"updatedAtMs,omitempty"`
 }
 
 // ---------------------------------------------------------------------------

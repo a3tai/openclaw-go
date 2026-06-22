@@ -39,6 +39,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.9] - 2026-04-11
+
+Sync to upstream openclaw v2026.4.9. No new upstream methods in this release; this entry covers six methods that were present in the upstream `BASE_METHODS` list but missing from openclaw-go.
+
+### Added
+
+- `ExecApprovalList(ctx) ([]ExecApprovalListItem, error)` — lists all pending exec approval requests
+- `PluginApprovalList(ctx) ([]PluginApprovalListItem, error)` — lists all pending plugin approval requests
+- `SessionsCompactionList(ctx, SessionsCompactionListParams) (*SessionsCompactionListResult, error)` — lists compaction checkpoints for a session
+- `SessionsCompactionGet(ctx, SessionsCompactionGetParams) (*SessionsCompactionGetResult, error)` — retrieves a specific compaction checkpoint
+- `SessionsCompactionBranch(ctx, SessionsCompactionBranchParams) (*SessionsCompactionBranchResult, error)` — creates a new session branched from a checkpoint
+- `SessionsCompactionRestore(ctx, SessionsCompactionRestoreParams) (*SessionsCompactionRestoreResult, error)` — restores a session to a prior checkpoint
+- `ExecApprovalListItem`, `PluginApprovalListItem` protocol types for list responses
+- `SessionCompactionTranscriptReference`, `SessionCompactionCheckpoint` protocol types
+- `SessionsCompactionListParams/Result`, `SessionsCompactionGetParams/Result`, `SessionsCompactionBranchParams/Result`, `SessionsCompactionRestoreParams/Result` protocol types
+- `MethodExecApprovalList`, `MethodPluginApprovalList`, `MethodSessionsCompactionList`, `MethodSessionsCompactionGet`, `MethodSessionsCompactionBranch`, `MethodSessionsCompactionRestore` method name constants
+
 ## [v2026.4.8] - 2026-04-11
 
 Sync to upstream openclaw v2026.4.8. Six new gateway RPC methods for approval listing and session compaction checkpoints.
