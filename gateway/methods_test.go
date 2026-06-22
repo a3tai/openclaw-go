@@ -1532,6 +1532,14 @@ func TestMessageAction(t *testing.T) {
 	tm.run()
 }
 
+func TestAssistantMediaGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "assistant.media.get", successPayload: json.RawMessage(`{"available":true,"path":"/tmp/media.png"}`), success: func(c *Client, ctx context.Context) error {
+		_, err := c.AssistantMediaGet(ctx, protocol.AssistantMediaGetParams{Source: "latest"})
+		return err
+	}}
+	tm.run()
+}
+
 // --- Exec approval list ---
 
 func TestUpdateRun(t *testing.T) {

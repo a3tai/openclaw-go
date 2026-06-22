@@ -43,6 +43,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.20] - 2026-04-22
+
+Sync to upstream openclaw v2026.4.20. Adds scoped assistant media retrieval; `channels.start` is already present on current `main`.
+
+### Added
+
+- `AssistantMediaGet(ctx, AssistantMediaGetParams) (*AssistantMediaGetResult, error)` — retrieve assistant media availability and metadata (`assistant.media.get` RPC)
+- `AssistantMediaGetParams`, `AssistantMediaGetResult` protocol types
+- `MethodAssistantMediaGet` method name constant
+
 ## [v2026.4.15] - 2026-04-16
 
 Sync to upstream openclaw v2026.4.15. Adds dream diary maintenance operations and model auth status.
