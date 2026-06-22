@@ -52,3 +52,66 @@ func (c *Client) SkillsDetail(ctx context.Context, params protocol.SkillsDetailP
 	}
 	return &result, nil
 }
+
+// SkillsUploadBegin begins a chunked skill upload.
+func (c *Client) SkillsUploadBegin(ctx context.Context, params protocol.SkillsUploadBeginParams) (*protocol.SkillsUploadBeginResult, error) {
+	var result protocol.SkillsUploadBeginResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsUploadBegin), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// SkillsUploadChunk uploads a chunk of skill data.
+func (c *Client) SkillsUploadChunk(ctx context.Context, params protocol.SkillsUploadChunkParams) error {
+	return c.sendRPCVoid(ctx, string(protocol.MethodSkillsUploadChunk), params)
+}
+
+// SkillsUploadCommit finalizes a chunked skill upload and returns an install ID.
+func (c *Client) SkillsUploadCommit(ctx context.Context, params protocol.SkillsUploadCommitParams) (*protocol.SkillsUploadCommitResult, error) {
+	var result protocol.SkillsUploadCommitResult
+	if err := c.sendRPCTyped(ctx, string(protocol.MethodSkillsUploadCommit), params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// SkillsProposalsList lists skill proposals.
+func (c *Client) SkillsProposalsList(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsList), params)
+}
+
+// SkillsProposalsCreate creates a skill proposal.
+func (c *Client) SkillsProposalsCreate(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsCreate), params)
+}
+
+// SkillsProposalsInspect inspects a skill proposal.
+func (c *Client) SkillsProposalsInspect(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsInspect), params)
+}
+
+// SkillsProposalsApply applies a skill proposal.
+func (c *Client) SkillsProposalsApply(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsApply), params)
+}
+
+// SkillsProposalsReject rejects a skill proposal.
+func (c *Client) SkillsProposalsReject(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsReject), params)
+}
+
+// SkillsProposalsRevise revises a skill proposal.
+func (c *Client) SkillsProposalsRevise(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsRevise), params)
+}
+
+// SkillsProposalsUpdate updates a skill proposal.
+func (c *Client) SkillsProposalsUpdate(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsUpdate), params)
+}
+
+// SkillsProposalsQuarantine quarantines a skill proposal.
+func (c *Client) SkillsProposalsQuarantine(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsQuarantine), params)
+}

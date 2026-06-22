@@ -19,8 +19,12 @@ GO_LITERAL_METHOD_RE = re.compile(r'sendRPC(?:Typed|Void)?\(ctx,\s*"([a-z][a-z0-
 GO_CONST_METHOD_RE = re.compile(r'sendRPC(?:Typed|Void)?\(ctx,\s*string\(protocol\.(Method[A-Za-z0-9]+)\)')
 PROTOCOL_METHOD_CONST_RE = re.compile(r'\b(Method[A-Za-z0-9]+)\s+MethodName\s*=\s*"([a-z][a-z0-9_.-]+)"')
 METHOD_LIST_BLOCK_RE = re.compile(r"const\s+BASE_METHODS\s*=\s*\[(.*?)\]\s*;", re.DOTALL)
+CORE_DESCRIPTOR_METHOD_RE = re.compile(r'\bname:\s*"([a-z][a-z0-9_.-]+)"')
 
-IGNORED_UPSTREAM_METHODS = {"connect"}
+# "connect" is excluded intentionally (internal handshake, not a public RPC).
+# "dynamic", "node", "object", "string" are TypeScript type annotations and scope
+# values extracted as false positives by the literal regex from method-scopes.ts.
+IGNORED_UPSTREAM_METHODS = {"connect", "dynamic", "node", "object", "string"}
 
 
 def _collect_methods_from_server_handlers(upstream_root: Path) -> tuple[set[str], dict[str, str]]:
@@ -72,16 +76,31 @@ def _collect_methods_from_scopes(upstream_root: Path) -> tuple[set[str], dict[st
     return methods, {m: source for m in methods}
 
 
+def _collect_methods_from_core_descriptors(upstream_root: Path) -> tuple[set[str], dict[str, str]]:
+    path = upstream_root / "src" / "gateway" / "methods" / "core-descriptors.ts"
+    if not path.exists():
+        return set(), {}
+
+    content = path.read_text(encoding="utf-8")
+    methods = set(CORE_DESCRIPTOR_METHOD_RE.findall(content))
+    methods -= IGNORED_UPSTREAM_METHODS
+    source = str(path.relative_to(upstream_root))
+    return methods, {m: source for m in methods}
+
+
 def collect_upstream_methods(upstream_root: Path) -> tuple[set[str], dict[str, str], set[str], set[str]]:
     handler_methods, handler_sources = _collect_methods_from_server_handlers(upstream_root)
     listed_methods, listed_sources = _collect_methods_from_base_list(upstream_root)
     scoped_methods, scoped_sources = _collect_methods_from_scopes(upstream_root)
+    descriptor_methods, descriptor_sources = _collect_methods_from_core_descriptors(upstream_root)
 
-    methods = handler_methods | listed_methods | scoped_methods
+    methods = handler_methods | listed_methods | scoped_methods | descriptor_methods
     sources: dict[str, str] = {}
     for method in sorted(methods):
         if method in listed_sources:
             sources[method] = listed_sources[method]
+        elif method in descriptor_sources:
+            sources[method] = descriptor_sources[method]
         elif method in scoped_sources:
             sources[method] = scoped_sources[method]
         else:

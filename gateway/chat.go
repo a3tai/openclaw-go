@@ -31,3 +31,18 @@ func (c *Client) ChatAbort(ctx context.Context, params protocol.ChatAbortParams)
 func (c *Client) ChatInject(ctx context.Context, params protocol.ChatInjectParams) error {
 	return c.sendRPCVoid(ctx, string(protocol.MethodChatInject), params)
 }
+
+// ChatMessageGet retrieves a single chat message.
+func (c *Client) ChatMessageGet(ctx context.Context, params protocol.ChatMessageGetParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChatMessageGet), params)
+}
+
+// ChatMetadata retrieves chat metadata.
+func (c *Client) ChatMetadata(ctx context.Context, params protocol.ChatMetadataParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChatMetadata), params)
+}
+
+// ChatStartup retrieves chat startup state.
+func (c *Client) ChatStartup(ctx context.Context, params protocol.ChatStartupParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodChatStartup), params)
+}

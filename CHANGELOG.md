@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2026.5.20] - 2026-05-22
+
+Sync to upstream openclaw v2026.5.20. Adds 59 new gateway RPC methods across diagnostics, doctor memory, channels, TTS, plugins, talk sessions, models, tools, tasks, environments, artifacts, skills upload, sessions, nodes, cron, gateway restart, and push/web integrations.
+
+### Added
+
+- `DiagnosticsStability(ctx)` — `diagnostics.stability`: retrieve system stability diagnostics
+- `DoctorMemoryDreamDiary(ctx)` — `doctor.memory.dreamDiary`: retrieve the dream diary
+- `DoctorMemoryBackfillDreamDiary(ctx)` — `doctor.memory.backfillDreamDiary`: backfill the dream diary
+- `DoctorMemoryResetDreamDiary(ctx)` — `doctor.memory.resetDreamDiary`: reset the dream diary
+- `DoctorMemoryResetGroundedShortTerm(ctx)` — `doctor.memory.resetGroundedShortTerm`: reset grounded short-term memory
+- `DoctorMemoryRepairDreamingArtifacts(ctx)` — `doctor.memory.repairDreamingArtifacts`: repair dreaming artifacts
+- `DoctorMemoryDedupeDreamDiary(ctx)` — `doctor.memory.dedupeDreamDiary`: deduplicate dream diary entries
+- `DoctorMemoryRemHarness(ctx)` — `doctor.memory.remHarness`: retrieve REM harness info
+- `ChannelsStart(ctx, ChannelsStartParams)` — `channels.start`: start a channel account
+- `ChannelsStop(ctx, ChannelsStopParams)` — `channels.stop`: stop a channel account
+- `TTSPersonas(ctx)` — `tts.personas`: list available TTS personas
+- `TTSSetPersona(ctx, TTSSetPersonaParams)` — `tts.setPersona`: set the active TTS persona
+- `PluginsUIDescriptors(ctx)` — `plugins.uiDescriptors`: retrieve plugin UI descriptors
+- `PluginsSessionAction(ctx, params)` — `plugins.sessionAction`: invoke a plugin session action
+- `TalkCatalog(ctx)` — `talk.catalog`: retrieve the talk catalog
+- `TalkClientCreate(ctx, params)` — `talk.client.create`: create a talk client
+- `TalkClientToolCall(ctx, params)` — `talk.client.toolCall`: submit a tool call from a talk client
+- `TalkSessionCreate(ctx, params)` — `talk.session.create`: create a real-time talk session
+- `TalkSessionJoin(ctx, params)` — `talk.session.join`: join an existing talk session
+- `TalkSessionAppendAudio(ctx, params)` — `talk.session.appendAudio`: append audio to a talk session
+- `TalkSessionStartTurn(ctx, params)` — `talk.session.startTurn`: start a turn in a talk session
+- `TalkSessionEndTurn(ctx, params)` — `talk.session.endTurn`: end the current turn
+- `TalkSessionCancelTurn(ctx, params)` — `talk.session.cancelTurn`: cancel the current turn
+- `TalkSessionCancelOutput(ctx, params)` — `talk.session.cancelOutput`: cancel queued output
+- `TalkSessionSubmitToolResult(ctx, params)` — `talk.session.submitToolResult`: submit a tool result
+- `TalkSessionClose(ctx, params)` — `talk.session.close`: close a talk session
+- `ModelsAuthStatus(ctx)` — `models.authStatus`: retrieve model provider auth status
+- `ModelsAuthLogout(ctx)` — `models.authLogout`: log out from the model provider
+- `ToolsInvoke(ctx, params)` — `tools.invoke`: invoke a tool by name
+- `TasksList(ctx)` — `tasks.list`: list background tasks
+- `TasksGet(ctx, TasksGetParams)` — `tasks.get`: get a single background task
+- `TasksCancel(ctx, TasksCancelParams)` — `tasks.cancel`: cancel a background task
+- `EnvironmentsList(ctx)` — `environments.list`: list execution environments
+- `EnvironmentsStatus(ctx)` — `environments.status`: get environment status
+- `ArtifactsList(ctx)` — `artifacts.list`: list artifacts
+- `ArtifactsGet(ctx, ArtifactsGetParams)` — `artifacts.get`: get an artifact by ID
+- `ArtifactsDownload(ctx, ArtifactsDownloadParams)` — `artifacts.download`: download an artifact
+- `SkillsUploadBegin(ctx, SkillsUploadBeginParams)` — `skills.upload.begin`: begin a chunked skill upload
+- `SkillsUploadChunk(ctx, SkillsUploadChunkParams)` — `skills.upload.chunk`: upload a skill chunk
+- `SkillsUploadCommit(ctx, SkillsUploadCommitParams)` — `skills.upload.commit`: finalize a skill upload
+- `UpdateStatus(ctx)` — `update.status`: retrieve update status
+- `VoiceWakeRoutingGet(ctx)` — `voicewake.routing.get`: get voice wake routing config
+- `VoiceWakeRoutingSet(ctx, params)` — `voicewake.routing.set`: set voice wake routing config
+- `SessionsDescribe(ctx, SessionsDescribeParams)` — `sessions.describe`: get a session description
+- `SessionsPluginPatch(ctx, SessionsPluginPatchParams)` — `sessions.pluginPatch`: apply a plugin-owned patch
+- `SessionsCleanup(ctx, SessionsCleanupParams)` — `sessions.cleanup`: clean up stale session state
+- `NodePairRemove(ctx, NodePairRemoveParams)` — `node.pair.remove`: remove a paired node
+- `NodePluginSurfaceRefresh(ctx)` — `node.pluginSurface.refresh`: refresh the node plugin surface
+- `CronGet(ctx, CronGetParams)` — `cron.get`: get a single cron job by ID
+- `GatewayRestartPreflight(ctx)` — `gateway.restart.preflight`: check restart safety
+- `GatewayRestartRequest(ctx, params)` — `gateway.restart.request`: request a gateway restart
+- `AssistantMediaGet(ctx, AssistantMediaGetParams)` — `assistant.media.get`: get assistant media
+- `PushWebVapidPublicKey(ctx)` — `push.web.vapidPublicKey`: get VAPID public key
+- `PushWebSubscribe(ctx, params)` — `push.web.subscribe`: subscribe to web push
+- `PushWebUnsubscribe(ctx, params)` — `push.web.unsubscribe`: unsubscribe from web push
+- `PushWebTest(ctx, params)` — `push.web.test`: send a test web push
+- `ConfigOpenFile(ctx, ConfigOpenFileParams)` — `config.openFile`: open a config file in editor
+- `NativeHookInvoke(ctx, NativeHookInvokeParams)` — `nativeHook.invoke`: invoke a native hook
+- New protocol types: `NodePairRemoveParams`, `ChannelsStartParams`, `ChannelsStopParams`, `TTSSetPersonaParams`, `CronGetParams`, `TasksGetParams`, `TasksCancelParams`, `ArtifactsGetParams`, `ArtifactsDownloadParams`, `SessionsDescribeParams`, `SessionsPluginPatchParams`, `SessionsCleanupParams`, `SkillsUploadBeginParams`, `SkillsUploadBeginResult`, `SkillsUploadChunkParams`, `SkillsUploadCommitParams`, `SkillsUploadCommitResult`, `AssistantMediaGetParams`, `ConfigOpenFileParams`, `NativeHookInvokeParams`, `ModelsAuthStatusResult`
+- Fixed `TTSSetProvider` to use `MethodTTSSetProvider` constant instead of inline string
+
 ## [Unreleased]
 
 ### Breaking Changes
