@@ -59,6 +59,15 @@ Sync to upstream openclaw v2026.4.15. Adds dream diary maintenance operations an
 - `ModelsAuthStatusResult`, `ModelsAuthStatusProvider`, `ModelsAuthStatusProfile`, `ModelsAuthExpiry` protocol types
 - `MethodDoctorMemoryRepairDreamingArtifacts`, `MethodDoctorMemoryDedupeDreamDiary`, `MethodModelsAuthStatus` method name constants
 
+## [v2026.4.14] - 2026-04-15
+
+Sync to upstream openclaw v2026.4.14. No net new SDK surface is required on current `main`; the current gateway/protocol surface already covers the upstream RPC set for this tag.
+
+### Changed
+
+- Added the v2026.4.14 release-sync specification and validation record.
+- Confirmed current typed gateway surfaces cover the v2026.4.14 upstream RPC set.
+
 ## [v2026.4.12] - 2026-04-14
 
 Sync to upstream openclaw v2026.4.12. No net new SDK surface is required on current `main`; methods introduced or tracked around this upstream release are already covered by accumulated release-train work.
