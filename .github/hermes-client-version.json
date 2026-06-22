@@ -1,0 +1,8 @@
+{
+  "repository": "NousResearch/hermes-agent",
+  "tag": "v2026.6.19",
+  "release_name": "Hermes Agent v0.17.0 (v2026.6.19)",
+  "release_url": "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.6.19",
+  "published_at": "2026-06-19T19:39:06Z",
+  "notes": "Tracked by the Hermes Client Update workflow. This file is the baseline used to open update PRs when a newer stable Hermes Agent release is published."
+}
