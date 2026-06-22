@@ -135,12 +135,18 @@ jobs:
               ]
               version = next((v for v in map(find_version, candidates) if v), "")
 
-          if not version and event.get("ref") == "refs/heads/main":
+          if not version:
               subprocess.run(["git", "fetch", "--tags", "--force"], check=True)
-              version = subprocess.check_output(
-                  ["git", "describe", "--tags", "--abbrev=0", "--match", "v*", "--always"],
+              tags = subprocess.check_output(
+                  ["git", "tag", "--list", "v*"],
                   text=True,
-              ).strip()
+              ).splitlines()
+
+              def tag_key(tag):
+                  match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)(?:-(\d+))?", tag)
+                  return tuple(int(part or 0) for part in match.groups()) if match else (-1, -1, -1, -1)
+
+              version = max(tags, key=tag_key, default="")
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
               out.write(f"version={version}\n")
