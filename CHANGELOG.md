@@ -43,6 +43,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CronListParams.IncludeDisabled` — use `Enabled` field instead (`"all"`, `"enabled"`, `"disabled"`)
 
+## [v2026.4.21] - 2026-04-22
+
+Sync to upstream openclaw v2026.4.21. No net new SDK surface is required on current `main`; the current gateway/protocol surface already covers the upstream RPC set for this tag.
+
+### Changed
+
+- Added the v2026.4.21 release-sync specification and validation record.
+- Confirmed current typed gateway surfaces cover the v2026.4.21 upstream RPC set.
+
 ## [v2026.4.20] - 2026-04-22
 
 Sync to upstream openclaw v2026.4.20. Adds scoped assistant media retrieval; `channels.start` is already present on current `main`.
