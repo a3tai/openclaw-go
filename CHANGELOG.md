@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `CommandsList(ctx, CommandsListParams) (*CommandsListResult, error)` and `MessageAction(ctx, MessageActionParams) (json.RawMessage, error)` gateway methods
 - `ChannelsStart(ctx, ChannelsStartParams) (*ChannelsStartResult, error)` — starts a channel account (`channels.start`)
 - `ChannelsStartParams`, `ChannelsStartResult` protocol types
 - `MethodChannelsStart` method name constant
