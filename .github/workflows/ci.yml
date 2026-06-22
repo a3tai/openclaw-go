@@ -108,11 +108,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect relevant changes
+        id: changes
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch origin "$BASE_REF" --depth=1
+          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          echo "$changed"
+
+          if echo "$changed" | grep -Eq "^(gateway/|protocol/|scripts/(upstream_|validate_release_sync)|docs/specs/|\.github/workflows/ci\.yml)"; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "No gateway, protocol, upstream-sync, release spec, or CI changes detected; skipping upstream API parity."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Clone upstream openclaw
+        if: steps.changes.outputs.skip != 'true'
         run: git clone --depth 1 https://github.com/openclaw/openclaw /tmp/openclaw
 
       - name: Assert no missing upstream RPC methods
+        if: steps.changes.outputs.skip != 'true'
         run: |
           python3 scripts/upstream_drift_report.py \
             --upstream-root /tmp/openclaw \

@@ -1,0 +1,139 @@
+name: Hermes Client Update
+
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: hermes-client-update
+  cancel-in-progress: true
+
+jobs:
+  update-hermes-client:
+    name: Check latest Hermes client release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: main
+
+      - name: Resolve latest stable Hermes release
+        id: hermes
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require("fs");
+
+            const manifestPath = ".github/hermes-client-version.json";
+            const current = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+            const [owner, repo] = current.repository.split("/");
+
+            const releases = await github.paginate(
+              github.rest.repos.listReleases,
+              {
+                owner,
+                repo,
+                per_page: 100,
+              },
+            );
+
+            const latest = releases.find((release) => !release.draft && !release.prerelease);
+            if (!latest) {
+              core.setFailed(`No stable releases found for ${current.repository}`);
+              return;
+            }
+
+            core.setOutput("repository", current.repository);
+            core.setOutput("current_tag", current.tag);
+            core.setOutput("latest_tag", latest.tag_name);
+            core.setOutput("release_name", latest.name || latest.tag_name);
+            core.setOutput("release_url", latest.html_url);
+            core.setOutput("published_at", latest.published_at || "");
+            core.setOutput("has_update", String(latest.tag_name !== current.tag));
+
+      - name: Update Hermes client manifest
+        if: steps.hermes.outputs.has_update == 'true'
+        env:
+          HERMES_REPOSITORY: ${{ steps.hermes.outputs.repository }}
+          HERMES_TAG: ${{ steps.hermes.outputs.latest_tag }}
+          HERMES_RELEASE_NAME: ${{ steps.hermes.outputs.release_name }}
+          HERMES_RELEASE_URL: ${{ steps.hermes.outputs.release_url }}
+          HERMES_PUBLISHED_AT: ${{ steps.hermes.outputs.published_at }}
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+
+          const manifestPath = ".github/hermes-client-version.json";
+          const manifest = {
+            repository: process.env.HERMES_REPOSITORY,
+            tag: process.env.HERMES_TAG,
+            release_name: process.env.HERMES_RELEASE_NAME,
+            release_url: process.env.HERMES_RELEASE_URL,
+            published_at: process.env.HERMES_PUBLISHED_AT,
+            notes: "Tracked by the Hermes Client Update workflow. This file is the baseline used to open update PRs when a newer stable Hermes Agent release is published.",
+          };
+
+          fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+          NODE
+
+      - name: Push update branch and open PR
+        if: steps.hermes.outputs.has_update == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_TAG: ${{ steps.hermes.outputs.current_tag }}
+          LATEST_TAG: ${{ steps.hermes.outputs.latest_tag }}
+          RELEASE_NAME: ${{ steps.hermes.outputs.release_name }}
+          RELEASE_URL: ${{ steps.hermes.outputs.release_url }}
+        run: |
+          set -euo pipefail
+
+          branch="automation/hermes-client-${LATEST_TAG}"
+
+          git config user.email "steve@a3t.ai"
+          git config user.name "Agent Arlet"
+          git checkout -B "$branch"
+          git add .github/hermes-client-version.json
+          git commit -s -m "chore(hermes): track ${LATEST_TAG}"
+          git push --force-with-lease origin "$branch"
+
+          cat >/tmp/hermes-client-pr-body.md <<EOF
+          ## Summary
+
+          Updates the tracked Hermes client baseline from \`${CURRENT_TAG}\` to \`${LATEST_TAG}\`.
+
+          ## Release
+
+          - Release: ${RELEASE_NAME}
+          - URL: ${RELEASE_URL}
+
+          ## Validation
+
+          - [ ] Review Hermes release notes for gateway/protocol compatibility changes
+          - [ ] Run \`go test ./... -race\` if client-facing API updates are needed
+          EOF
+
+          existing_pr=$(gh pr list --head "$branch" --json url --jq '.[0].url // empty')
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" \
+              --title "chore(hermes): update client baseline to ${LATEST_TAG}" \
+              --body-file /tmp/hermes-client-pr-body.md
+            echo "Updated existing PR: $existing_pr"
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "chore(hermes): update client baseline to ${LATEST_TAG}" \
+            --body-file /tmp/hermes-client-pr-body.md
+
+      - name: No update found
+        if: steps.hermes.outputs.has_update != 'true'
+        run: |
+          echo "Hermes client baseline is current: ${{ steps.hermes.outputs.current_tag }}"
