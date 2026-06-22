@@ -74,6 +74,11 @@ func (c *Client) TalkClientCreate(ctx context.Context, params any) (json.RawMess
 	return c.sendRPC(ctx, string(protocol.MethodTalkClientCreate), params)
 }
 
+// TalkClientSteer steers a talk client.
+func (c *Client) TalkClientSteer(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkClientSteer), params)
+}
+
 // TalkClientToolCall submits a tool call result from a talk client.
 func (c *Client) TalkClientToolCall(ctx context.Context, params any) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodTalkClientToolCall), params)
@@ -82,6 +87,11 @@ func (c *Client) TalkClientToolCall(ctx context.Context, params any) (json.RawMe
 // TalkSessionCreate creates a real-time talk session.
 func (c *Client) TalkSessionCreate(ctx context.Context, params any) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodTalkSessionCreate), params)
+}
+
+// TalkSessionSteer steers a talk session.
+func (c *Client) TalkSessionSteer(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodTalkSessionSteer), params)
 }
 
 // TalkSessionJoin joins an existing talk session.

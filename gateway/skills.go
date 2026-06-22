@@ -75,3 +75,43 @@ func (c *Client) SkillsUploadCommit(ctx context.Context, params protocol.SkillsU
 	}
 	return &result, nil
 }
+
+// SkillsProposalsList lists skill proposals.
+func (c *Client) SkillsProposalsList(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsList), params)
+}
+
+// SkillsProposalsCreate creates a skill proposal.
+func (c *Client) SkillsProposalsCreate(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsCreate), params)
+}
+
+// SkillsProposalsInspect inspects a skill proposal.
+func (c *Client) SkillsProposalsInspect(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsInspect), params)
+}
+
+// SkillsProposalsApply applies a skill proposal.
+func (c *Client) SkillsProposalsApply(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsApply), params)
+}
+
+// SkillsProposalsReject rejects a skill proposal.
+func (c *Client) SkillsProposalsReject(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsReject), params)
+}
+
+// SkillsProposalsRevise revises a skill proposal.
+func (c *Client) SkillsProposalsRevise(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsRevise), params)
+}
+
+// SkillsProposalsUpdate updates a skill proposal.
+func (c *Client) SkillsProposalsUpdate(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsUpdate), params)
+}
+
+// SkillsProposalsQuarantine quarantines a skill proposal.
+func (c *Client) SkillsProposalsQuarantine(ctx context.Context, params any) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSkillsProposalsQuarantine), params)
+}

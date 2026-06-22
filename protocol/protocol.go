@@ -187,10 +187,13 @@ const (
 	MethodMessageAction  MethodName = "message.action"
 
 	// Chat request/stream controls.
-	MethodChatAbort   MethodName = "chat.abort"
-	MethodChatHistory MethodName = "chat.history"
-	MethodChatInject  MethodName = "chat.inject"
-	MethodChatSend    MethodName = "chat.send"
+	MethodChatAbort      MethodName = "chat.abort"
+	MethodChatHistory    MethodName = "chat.history"
+	MethodChatInject     MethodName = "chat.inject"
+	MethodChatMessageGet MethodName = "chat.message.get"
+	MethodChatMetadata   MethodName = "chat.metadata"
+	MethodChatSend       MethodName = "chat.send"
+	MethodChatStartup    MethodName = "chat.startup"
 
 	// Configuration and schema operations.
 	MethodConfigApply        MethodName = "config.apply"
@@ -275,6 +278,8 @@ const (
 	MethodSessionsCompactionRestore   MethodName = "sessions.compaction.restore"
 	MethodSessionsCreate              MethodName = "sessions.create"
 	MethodSessionsDelete              MethodName = "sessions.delete"
+	MethodSessionsFilesGet            MethodName = "sessions.files.get"
+	MethodSessionsFilesList           MethodName = "sessions.files.list"
 	MethodSessionsGet                 MethodName = "sessions.get"
 	MethodSessionsList                MethodName = "sessions.list"
 	MethodSessionsMessagesSubscribe   MethodName = "sessions.messages.subscribe"
@@ -292,13 +297,21 @@ const (
 	MethodSessionsUsageTimeseries     MethodName = "sessions.usage.timeseries"
 
 	// Runtime controls and skills.
-	MethodSetHeartbeats MethodName = "set-heartbeats"
-	MethodSkillsBins    MethodName = "skills.bins"
-	MethodSkillsDetail  MethodName = "skills.detail"
-	MethodSkillsInstall MethodName = "skills.install"
-	MethodSkillsSearch  MethodName = "skills.search"
-	MethodSkillsStatus  MethodName = "skills.status"
-	MethodSkillsUpdate  MethodName = "skills.update"
+	MethodSetHeartbeats             MethodName = "set-heartbeats"
+	MethodSkillsBins                MethodName = "skills.bins"
+	MethodSkillsDetail              MethodName = "skills.detail"
+	MethodSkillsInstall             MethodName = "skills.install"
+	MethodSkillsProposalsApply      MethodName = "skills.proposals.apply"
+	MethodSkillsProposalsCreate     MethodName = "skills.proposals.create"
+	MethodSkillsProposalsInspect    MethodName = "skills.proposals.inspect"
+	MethodSkillsProposalsList       MethodName = "skills.proposals.list"
+	MethodSkillsProposalsQuarantine MethodName = "skills.proposals.quarantine"
+	MethodSkillsProposalsReject     MethodName = "skills.proposals.reject"
+	MethodSkillsProposalsRevise     MethodName = "skills.proposals.revise"
+	MethodSkillsProposalsUpdate     MethodName = "skills.proposals.update"
+	MethodSkillsSearch              MethodName = "skills.search"
+	MethodSkillsStatus              MethodName = "skills.status"
+	MethodSkillsUpdate              MethodName = "skills.update"
 
 	// System presence/events and voice interactions.
 	MethodSystemEvent    MethodName = "system-event"
@@ -348,8 +361,8 @@ const (
 	MethodChannelsStop  MethodName = "channels.stop"
 
 	// TTS personas and provider selection.
-	MethodTTSPersonas   MethodName = "tts.personas"
-	MethodTTSSetPersona MethodName = "tts.setPersona"
+	MethodTTSPersonas    MethodName = "tts.personas"
+	MethodTTSSetPersona  MethodName = "tts.setPersona"
 	MethodTTSSetProvider MethodName = "tts.setProvider"
 
 	// Plugin UI descriptors and session actions.
@@ -357,18 +370,20 @@ const (
 	MethodPluginsSessionAction MethodName = "plugins.sessionAction"
 
 	// Talk catalog and real-time session management.
-	MethodTalkCatalog              MethodName = "talk.catalog"
-	MethodTalkClientCreate         MethodName = "talk.client.create"
-	MethodTalkClientToolCall       MethodName = "talk.client.toolCall"
-	MethodTalkSessionCreate        MethodName = "talk.session.create"
-	MethodTalkSessionJoin          MethodName = "talk.session.join"
-	MethodTalkSessionAppendAudio   MethodName = "talk.session.appendAudio"
-	MethodTalkSessionStartTurn     MethodName = "talk.session.startTurn"
-	MethodTalkSessionEndTurn       MethodName = "talk.session.endTurn"
-	MethodTalkSessionCancelTurn    MethodName = "talk.session.cancelTurn"
-	MethodTalkSessionCancelOutput  MethodName = "talk.session.cancelOutput"
+	MethodTalkCatalog                 MethodName = "talk.catalog"
+	MethodTalkClientCreate            MethodName = "talk.client.create"
+	MethodTalkClientSteer             MethodName = "talk.client.steer"
+	MethodTalkClientToolCall          MethodName = "talk.client.toolCall"
+	MethodTalkSessionCreate           MethodName = "talk.session.create"
+	MethodTalkSessionSteer            MethodName = "talk.session.steer"
+	MethodTalkSessionJoin             MethodName = "talk.session.join"
+	MethodTalkSessionAppendAudio      MethodName = "talk.session.appendAudio"
+	MethodTalkSessionStartTurn        MethodName = "talk.session.startTurn"
+	MethodTalkSessionEndTurn          MethodName = "talk.session.endTurn"
+	MethodTalkSessionCancelTurn       MethodName = "talk.session.cancelTurn"
+	MethodTalkSessionCancelOutput     MethodName = "talk.session.cancelOutput"
 	MethodTalkSessionSubmitToolResult MethodName = "talk.session.submitToolResult"
-	MethodTalkSessionClose         MethodName = "talk.session.close"
+	MethodTalkSessionClose            MethodName = "talk.session.close"
 
 	// Models auth status and logout.
 	MethodModelsAuthStatus MethodName = "models.authStatus"
@@ -409,8 +424,8 @@ const (
 	MethodSessionsCleanup     MethodName = "sessions.cleanup"
 
 	// Node pair remove and plugin surface refresh.
-	MethodNodePairRemove            MethodName = "node.pair.remove"
-	MethodNodePluginSurfaceRefresh  MethodName = "node.pluginSurface.refresh"
+	MethodNodePairRemove           MethodName = "node.pair.remove"
+	MethodNodePluginSurfaceRefresh MethodName = "node.pluginSurface.refresh"
 
 	// Cron get.
 	MethodCronGet MethodName = "cron.get"
@@ -420,13 +435,13 @@ const (
 	MethodGatewayRestartRequest   MethodName = "gateway.restart.request"
 
 	// Assistant media, push web, config open file, native hook.
-	MethodAssistantMediaGet    MethodName = "assistant.media.get"
+	MethodAssistantMediaGet     MethodName = "assistant.media.get"
 	MethodPushWebVapidPublicKey MethodName = "push.web.vapidPublicKey"
-	MethodPushWebSubscribe     MethodName = "push.web.subscribe"
-	MethodPushWebUnsubscribe   MethodName = "push.web.unsubscribe"
-	MethodPushWebTest          MethodName = "push.web.test"
-	MethodConfigOpenFile       MethodName = "config.openFile"
-	MethodNativeHookInvoke     MethodName = "nativeHook.invoke"
+	MethodPushWebSubscribe      MethodName = "push.web.subscribe"
+	MethodPushWebUnsubscribe    MethodName = "push.web.unsubscribe"
+	MethodPushWebTest           MethodName = "push.web.test"
+	MethodConfigOpenFile        MethodName = "config.openFile"
+	MethodNativeHookInvoke      MethodName = "nativeHook.invoke"
 )
 
 // ---------------------------------------------------------------------------
@@ -854,6 +869,22 @@ type ChatHistoryParams struct {
 	MaxChars   *int   `json:"maxChars,omitempty"`
 }
 
+// ChatMessageGetParams are the params for "chat.message.get".
+type ChatMessageGetParams struct {
+	MessageID  string `json:"messageId,omitempty"`
+	SessionKey string `json:"sessionKey,omitempty"`
+}
+
+// ChatMetadataParams are the params for "chat.metadata".
+type ChatMetadataParams struct {
+	SessionKey string `json:"sessionKey,omitempty"`
+}
+
+// ChatStartupParams are the params for "chat.startup".
+type ChatStartupParams struct {
+	SessionKey string `json:"sessionKey,omitempty"`
+}
+
 // ChatAbortParams are the params for "chat.abort".
 type ChatAbortParams struct {
 	SessionKey string `json:"sessionKey"`
@@ -1073,6 +1104,20 @@ type SessionsGetParams struct {
 	Key        string `json:"key,omitempty"`
 	SessionKey string `json:"sessionKey,omitempty"`
 	Limit      *int   `json:"limit,omitempty"` // max messages to return (default 200, server-clamped)
+}
+
+// SessionsFilesListParams are the params for "sessions.files.list".
+type SessionsFilesListParams struct {
+	Key        string `json:"key,omitempty"`
+	SessionKey string `json:"sessionKey,omitempty"`
+}
+
+// SessionsFilesGetParams are the params for "sessions.files.get".
+type SessionsFilesGetParams struct {
+	Key        string `json:"key,omitempty"`
+	SessionKey string `json:"sessionKey,omitempty"`
+	Path       string `json:"path,omitempty"`
+	Name       string `json:"name,omitempty"`
 }
 
 // SessionsUsageParams are the params for "sessions.usage".

@@ -2268,3 +2268,103 @@ func TestSendRPCTypedUnmarshalError(t *testing.T) {
 		t.Errorf("error = %q, want to contain 'unmarshal'", err.Error())
 	}
 }
+
+func TestChatMessageGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "chat.message.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChatMessageGet(ctx, protocol.ChatMessageGetParams{MessageID: "m1", SessionKey: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestChatMetadata(t *testing.T) {
+	tm := &testMethod{t: t, method: "chat.metadata", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChatMetadata(ctx, protocol.ChatMetadataParams{SessionKey: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestChatStartup(t *testing.T) {
+	tm := &testMethod{t: t, method: "chat.startup", success: func(c *Client, ctx context.Context) error {
+		_, err := c.ChatStartup(ctx, protocol.ChatStartupParams{SessionKey: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsFilesList(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.files.list", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsFilesList(ctx, protocol.SessionsFilesListParams{Key: "main"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSessionsFilesGet(t *testing.T) {
+	tm := &testMethod{t: t, method: "sessions.files.get", success: func(c *Client, ctx context.Context) error {
+		_, err := c.SessionsFilesGet(ctx, protocol.SessionsFilesGetParams{Key: "main", Path: "file.txt"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestSkillsProposals(t *testing.T) {
+	tests := []struct {
+		method string
+		call   func(*Client, context.Context) error
+	}{
+		{"skills.proposals.list", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsList(ctx, map[string]string{"status": "pending"})
+			return err
+		}},
+		{"skills.proposals.create", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsCreate(ctx, map[string]string{"slug": "demo"})
+			return err
+		}},
+		{"skills.proposals.inspect", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsInspect(ctx, map[string]string{"id": "p1"})
+			return err
+		}},
+		{"skills.proposals.apply", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsApply(ctx, map[string]string{"id": "p1"})
+			return err
+		}},
+		{"skills.proposals.reject", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsReject(ctx, map[string]string{"id": "p1"})
+			return err
+		}},
+		{"skills.proposals.revise", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsRevise(ctx, map[string]string{"id": "p1"})
+			return err
+		}},
+		{"skills.proposals.update", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsUpdate(ctx, map[string]string{"id": "p1"})
+			return err
+		}},
+		{"skills.proposals.quarantine", func(c *Client, ctx context.Context) error {
+			_, err := c.SkillsProposalsQuarantine(ctx, map[string]string{"id": "p1"})
+			return err
+		}},
+	}
+	for _, tc := range tests {
+		tm := &testMethod{t: t, method: tc.method, success: tc.call}
+		tm.run()
+	}
+}
+
+func TestTalkClientSteer(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.client.steer", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkClientSteer(ctx, map[string]string{"clientId": "c1"})
+		return err
+	}}
+	tm.run()
+}
+
+func TestTalkSessionSteer(t *testing.T) {
+	tm := &testMethod{t: t, method: "talk.session.steer", success: func(c *Client, ctx context.Context) error {
+		_, err := c.TalkSessionSteer(ctx, map[string]string{"sessionId": "s1"})
+		return err
+	}}
+	tm.run()
+}

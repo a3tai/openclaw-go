@@ -13,6 +13,16 @@ func (c *Client) SessionsGet(ctx context.Context, params protocol.SessionsGetPar
 	return c.sendRPC(ctx, string(protocol.MethodSessionsGet), params)
 }
 
+// SessionsFilesList lists files attached to a session.
+func (c *Client) SessionsFilesList(ctx context.Context, params protocol.SessionsFilesListParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsFilesList), params)
+}
+
+// SessionsFilesGet retrieves a file attached to a session.
+func (c *Client) SessionsFilesGet(ctx context.Context, params protocol.SessionsFilesGetParams) (json.RawMessage, error) {
+	return c.sendRPC(ctx, string(protocol.MethodSessionsFilesGet), params)
+}
+
 // SessionsList lists sessions matching the given criteria.
 func (c *Client) SessionsList(ctx context.Context, params protocol.SessionsListParams) (json.RawMessage, error) {
 	return c.sendRPC(ctx, string(protocol.MethodSessionsList), params)
