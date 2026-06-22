@@ -25,7 +25,9 @@ jobs:
         (
           contains(github.event.pull_request.labels.*.name, 'release-sync') ||
           contains(github.event.pull_request.labels.*.name, 'upstream-release') ||
-          startsWith(github.event.pull_request.title, 'chore: sync upstream openclaw v')
+          startsWith(github.event.pull_request.title, 'chore(release): sync v') ||
+          startsWith(github.event.pull_request.title, 'chore: sync upstream openclaw v') ||
+          startsWith(github.event.pull_request.head.ref, 'release-sync/')
         )
       )
     runs-on: ubuntu-latest
