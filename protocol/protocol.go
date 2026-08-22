@@ -176,6 +176,9 @@ type MethodName string
 
 // Known RPC method name constants.
 const (
+	// Assistant media.
+	MethodAssistantMediaGet MethodName = "assistant.media.get"
+
 	// Agent identity and lifecycle.
 	MethodAgentIdentityGet MethodName = "agent.identity.get"
 	MethodAgentWait        MethodName = "agent.wait"
@@ -2487,6 +2490,12 @@ type SecretsResolveResult struct {
 	Assignments      []SecretsResolveAssignment `json:"assignments,omitempty"`
 	Diagnostics      []string                   `json:"diagnostics,omitempty"`
 	InactiveRefPaths []string                   `json:"inactiveRefPaths,omitempty"`
+}
+
+// AssistantMediaGetResult is the result of assistant.media.get.
+type AssistantMediaGetResult struct {
+	MediaURL  string   `json:"mediaUrl,omitempty"`
+	MediaURLs []string `json:"mediaUrls,omitempty"`
 }
 
 // GatewayIdentityResult is the result for "gateway.identity.get".
