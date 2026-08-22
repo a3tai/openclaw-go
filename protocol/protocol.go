@@ -476,6 +476,11 @@ type DeviceIdentity struct {
 type AuthParams struct {
 	Token    string `json:"token,omitempty"`
 	Password string `json:"password,omitempty"`
+	// BootstrapToken is a short-lived setup-code credential (from
+	// `openclaw qr`) presented alongside a device identity at connect. The
+	// gateway redeems it to establish and approve the device with the
+	// bootstrap scope profile, without a manual pairing approval.
+	BootstrapToken string `json:"bootstrapToken,omitempty"`
 }
 
 // ConnectParams is the params payload for a "connect" request.
@@ -537,6 +542,19 @@ type HelloAuth struct {
 	DeviceToken string   `json:"deviceToken"`
 	Role        string   `json:"role"`
 	Scopes      []string `json:"scopes"`
+	IssuedAtMs  *int64   `json:"issuedAtMs,omitempty"`
+	// DeviceTokens carries additional per-role device tokens minted during a
+	// setup-code bootstrap handoff — e.g. when connecting as a node, the
+	// bounded operator token is delivered here so the client can reconnect as
+	// an operator. Empty for ordinary connects.
+	DeviceTokens []HelloDeviceToken `json:"deviceTokens,omitempty"`
+}
+
+// HelloDeviceToken is a single per-role device token from a bootstrap handoff.
+type HelloDeviceToken struct {
+	DeviceToken string   `json:"deviceToken"`
+	Role        string   `json:"role"`
+	Scopes      []string `json:"scopes,omitempty"`
 	IssuedAtMs  *int64   `json:"issuedAtMs,omitempty"`
 }
 
