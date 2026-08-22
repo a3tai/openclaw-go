@@ -227,7 +227,7 @@ func (c *Client) readChallenge(ctx context.Context) (*protocol.ConnectChallenge,
 
 func (c *Client) buildConnectParams(challenge *protocol.ConnectChallenge) protocol.ConnectParams {
 	params := protocol.ConnectParams{
-		MinProtocol: protocol.ProtocolVersion,
+		MinProtocol: protocol.MinProtocolVersion,
 		MaxProtocol: protocol.ProtocolVersion,
 		Client:      c.opts.clientInfo,
 		Role:        c.opts.role,

@@ -5,8 +5,18 @@ package protocol
 
 import "encoding/json"
 
-// ProtocolVersion is the current protocol version.
-const ProtocolVersion = 3
+// ProtocolVersion is the current/preferred protocol version emitted by
+// this client. The gateway negotiates the highest version both sides
+// support that falls within the advertised [MinProtocolVersion,
+// ProtocolVersion] range.
+const ProtocolVersion = 4
+
+// MinProtocolVersion is the oldest gateway protocol this client still
+// understands. Connect advertises minProtocol=MinProtocolVersion and
+// maxProtocol=ProtocolVersion so a single build pairs with both legacy
+// (v3) and current (v4) gateways. Gateways accept a client whose range
+// straddles their PROTOCOL_VERSION (minProtocol <= server <= maxProtocol).
+const MinProtocolVersion = 3
 
 // ---------------------------------------------------------------------------
 // Server Constants
